@@ -48,8 +48,8 @@ void ThumbItem::setThumbImage(const QImage& image)
 
 QRectF ThumbItem::boundingRect() const
 {
-	return thumb.rect().adjusted(-(Config::thumbMargin + Config::thumbBorder) , -(Config::thumbBorder + Config::thumbMargin)
-					, Config::thumbBorder + Config::thumbMargin, Config::thumbBorder + Config::thumbMargin);
+	return thumb.rect().adjusted(0, 0//-(Config::thumbMargin + Config::thumbBorder) , -(Config::thumbBorder + Config::thumbMargin)
+					, 2*(Config::thumbBorder + Config::thumbMargin), 2*(Config::thumbBorder + Config::thumbMargin));
 }
 
 void ThumbItem::showGlow()
@@ -57,11 +57,12 @@ void ThumbItem::showGlow()
 	if (!mGlow) {
 		qDebug("%s %s %d", __FILE__, __FUNCTION__, __LINE__);
 		mGlow = new OutlineGlowItem(this);
+		mGlow->setZValue(zValue() + 1);
 		QSizeF s = boundingRect().size();
 		mGlow->setSize(QSize((int)s.width(), (int)s.height()));
-		mGlow->setGlowWidth(Config::thumbMargin + Config::thumbBorder);
+		mGlow->setGlowWidth(Config::thumbMargin);// + Config::thumbBorder);
 		QPainterPath image_shape;
-		image_shape.addRect(-Config::thumbBorder, -Config::thumbBorder
+		image_shape.addRect(Config::thumbMargin, Config::thumbMargin//-Config::thumbBorder, -Config::thumbBorder
 					, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
 		mGlow->setShape(image_shape);
 		mGlow->render();
@@ -82,11 +83,11 @@ void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 	//bool wasSmoothPixmapTransform = painter->testRenderHint(QPainter::SmoothPixmapTransform);
 	painter->save();
 	painter->setPen(Qt::black);
-	//painter->drawRect(Config::thumbMargin, Config::thumbMargin, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
-	painter->drawRect(-Config::thumbBorder, -Config::thumbBorder, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
+	painter->drawRect(Config::thumbMargin, Config::thumbMargin, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
+	//painter->drawRect(-Config::thumbBorder, -Config::thumbBorder, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
 	painter->restore();
-	//painter->drawImage(Config::thumbBorder + Config::thumbMargin, Config::thumbBorder + Config::thumbMargin, thumb);
-	painter->drawImage(0, 0, thumb);
+	painter->drawImage(Config::thumbBorder + Config::thumbMargin, Config::thumbBorder + Config::thumbMargin, thumb);
+	//painter->drawImage(0, 0, thumb);
 }
 
 void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
