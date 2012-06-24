@@ -22,11 +22,11 @@
 
 #include <QGraphicsBlurEffect>
 #include <QPainter>
-#include <QtGui/QLinearGradient>
+
 BEGIN_NAMESPACE_PHOTOKIT
 
 OutlineGlowItem::OutlineGlowItem(QGraphicsItem *parent)
-	:QGraphicsPixmapItem(parent),mGlowWidth(22),mColor(Qt::blue)
+	:QGraphicsPixmapItem(parent),mGlowWidth(22),mColor(QColor(Qt::blue).lighter(123))
 {
 	QGraphicsBlurEffect *blur = new QGraphicsBlurEffect;
 	blur->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
@@ -48,18 +48,15 @@ void OutlineGlowItem::render()
 	qDebug("%s %s %d", __FILE__, __FUNCTION__, __LINE__);
 	QPainterPathStroker pps;
 	pps.setCapStyle(Qt::RoundCap);
+	pps.setJoinStyle(Qt::RoundJoin);
 	pps.setWidth(mGlowWidth);
-	mOutline = pps.createStroke(mShape);//.united(mShape).simplified();
+	mOutline = pps.createStroke(mShape).simplified();//.united(mShape).simplified();
 	mPixmap = QPixmap(mSize);
 	mPixmap.fill(Qt::transparent);
 	QPainter painter(&mPixmap);
-	QLinearGradient g;
-	g.setColorAt(0, mColor);
-	g.setColorAt(1, mColor.lighter(168));
-	g.setCoordinateMode(QGradient::ObjectBoundingMode);
-	QBrush brush(g);
+	QBrush brush(mColor);
 	painter.fillPath(mOutline, brush);
-	//painter.setPen(mColor.lighter(88));
+	//painter.setPen(mColor.lighter(123));
 	//painter.drawPath(mOutline);
 	setPixmap(mPixmap);
 }
@@ -67,7 +64,7 @@ void OutlineGlowItem::render()
 void OutlineGlowItem::setColor(const QColor& color)
 {
 	mColor = color;
-	mColor.setAlpha(88);
+	//mColor.setAlpha(88);
 }
 
 void OutlineGlowItem::setGlowWidth(qreal glowWidth)
