@@ -1,5 +1,5 @@
 /******************************************************************************
-	PhotoKitView.h: description
+	ItemAnimation.h: description
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,52 +18,30 @@
 ******************************************************************************/
 
 
-#ifndef PHOTOKITVIEW_H
-#define PHOTOKITVIEW_H
+#ifndef ITEMANIMATION_H
+#define ITEMANIMATION_H
+
+#include <QtCore/QObject>
 
 #include "PhotoKit_Global.h"
 
-//#include <QtCore/QTime>
-#include <QGraphicsView>
+class QGraphicsItem;
+class QMatrix;
 
 namespace PhotoKit {
-class TransformMachine;
-class PhotoKitScene;
-class PhotoKitView : public QGraphicsView
+
+//We can use QGraphicsItemAnimation instead. but zValue can't be animated;
+class ItemAnimation : public QObject
 {
 	Q_OBJECT
 public:
-	enum ZoomAction { ZoomIn, ZoomOut};
-	explicit PhotoKitView(QWidget *parent = 0);
-	
-signals:
-	
+	ItemAnimation(QGraphicsItem *item, QObject *parent = 0);
 public slots:
-	void scaleView(ZoomAction zoom);
-
-protected:
-	void scaleWithAnimation(ZoomAction zoom);
-	void moveWithAnimation(qreal dx, qreal dy);
-	//TODO: multiTouch
-	virtual void wheelEvent(QWheelEvent *event);
-	virtual void mousePressEvent(QMouseEvent *event);
-	virtual void mouseMoveEvent(QMouseEvent *event); //TODO:test rotate
-	virtual void mouseReleaseEvent(QMouseEvent *event);
-
-private slots:
-	void doTransform(const QMatrix& m);
+	void setMatrix(const QMatrix& m);
+	void setZValue(qreal z);
 private:
-	void setRenderingSystem();
-
-	bool mPressed;
-	PhotoKitScene *mScene;
-	qreal mScale;
-	QPoint mMousePos;
-	//QTime mPressTime; //not required. use movement distance is enough
-
-	TransformMachine *mMachine;
+	QGraphicsItem* mItem;
 };
 
-} //namespace PhotoKit
-
-#endif // PHOTOKITVIEW_H
+}//namespace PhotoKit
+#endif // ITEMANIMATION_H

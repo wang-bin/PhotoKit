@@ -24,7 +24,9 @@ SOURCES += src/main.cpp \
     src/ButtonItem.cpp \
     src/WebGet.cpp \
     src/Updater.cpp \
-    src/OutlineGlowItem.cpp
+    src/OutlineGlowItem.cpp \
+    src/TransformMachine.cpp \
+    src/ItemAnimation.cpp
 
 HEADERS  += \
 	src/ThumbTask.h \
@@ -39,7 +41,9 @@ HEADERS  += \
     src/ButtonItem.h \
     src/WebGet.h \
     src/Updater.h \
-    src/OutlineGlowItem.h
+    src/OutlineGlowItem.h \
+    src/TransformMachine.h \
+    src/ItemAnimation.h
 
 CONFIG += mobility
 MOBILITY = 

@@ -24,15 +24,18 @@
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include "ItemAnimation.h"
 #include "OutlineGlowItem.h"
+#include "TransformMachine.h"
 #include "Config.h"
 
 BEGIN_NAMESPACE_PHOTOKIT
 
-static const qreal zoom_max = 2.0;
+//TODO: calculate to fit screen
+static const qreal zoom_max = 1.618;
 
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
-	QGraphicsItem(parent),mGlow(0),mAnimation(0)
+	QGraphicsItem(parent),mGlow(0),mAnimation(0),mItemAnimation(0)
 {
 	setAcceptHoverEvents(true); //default: false
 	thumb = QImage(Config::thumbItemWidth, Config::thumbItemHeight, QImage::Format_ARGB32_Premultiplied);
@@ -100,8 +103,12 @@ void ThumbItem::hideGlow()
 void ThumbItem::zoom(ZoomAction action)
 {
 	if (!mAnimation) {
-		mAnimation = new QGraphicsItemAnimation;
-		mAnimation->setItem(this);
+		mAnimation = new TransformMachine;//QGraphicsItemAnimation;
+		mItemAnimation = new ItemAnimation(this);
+		QObject::connect(mAnimation, SIGNAL(matrixChanged(QMatrix)), mItemAnimation, SLOT(setMatrix(QMatrix)));
+		QObject::connect(mAnimation, SIGNAL(zValueChanged(qreal)), mItemAnimation, SLOT(setZValue(qreal)));
+
+		//mAnimation->setItem(this);
 		QTimeLine *timer = new QTimeLine(1000);
 		timer->setEasingCurve(QEasingCurve::OutQuad);
 		timer->setFrameRange(0, 100);
@@ -111,6 +118,7 @@ void ThumbItem::zoom(ZoomAction action)
 	qreal hs = 1.0;
 	qreal tx = 0;
 	qreal ty = 0;
+	qreal z = 0;
 	/*!
 		translate then zoom. so if keep the center, the translation t satisfies
 		t_dst * s = 0.5 * (w - w0, h - h0) = 0.5 * (s - 1) * (w0, h0)
@@ -124,6 +132,7 @@ void ThumbItem::zoom(ZoomAction action)
 		hs = mAnimation->horizontalScaleAt(step);
 		tx = mAnimation->xTranslationAt(step);
 		ty = mAnimation->yTranslationAt(step);
+		z = mAnimation->zValueAt(step);
 		mAnimation->timeLine()->stop();
 	} else {
 		if (action == ZoomOut) {
@@ -131,14 +140,21 @@ void ThumbItem::zoom(ZoomAction action)
 			hs = zoom_max;
 			tx = tx_dst;
 			ty = ty_dst;
+			z = 2.0;
 		}
 	}
+	//mAnimation->setStartMatrix(matrix());
+	//setTransformOriginPoint(transform().mapRect(boundingRect()).center());
 	if (action == ZoomIn) {
+		mAnimation->setZValueAt(0.0, z);
+		mAnimation->setZValueAt(1.0, 2.0);
 		mAnimation->setTranslationAt(0.0, tx, ty);
 		mAnimation->setTranslationAt(1.0, tx_dst, ty_dst);
 		mAnimation->setScaleAt(0.0, hs, vs);
 		mAnimation->setScaleAt(1.0, zoom_max, zoom_max);
 	} else {
+		mAnimation->setZValueAt(0.0, z);
+		mAnimation->setZValueAt(1.0, 0);
 		mAnimation->setTranslationAt(0.0, tx, ty);
 		mAnimation->setTranslationAt(1.0, 0.0, 0.0);
 		mAnimation->setScaleAt(0.0, hs, vs);
@@ -167,20 +183,21 @@ void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 	//scene()->views().at(0)->centerOn(this);
 	//scene()->views().at(0)->ensureVisible(this);
 	//setTransform(QTransform().scale(2.0, 2.0));
-	qDebug("z=%f", zValue()); //keep in animation
+	//qDebug("z=%f", zValue()); //keep in animation
 	setZValue(zValue() + 1.0);
 	zoom(ZoomIn);
 	showGlow();
+	QGraphicsItem::hoverEnterEvent(event);
 }
 
 void ThumbItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
 	//scene()->views().at(0)->ensureVisible(this);
 	//setTransform(QTransform().scale(1.0, 1.0));
-	qDebug("z=%f", zValue());
 	setZValue(zValue() - 1);
 	zoom(ZoomOut);
 	hideGlow();
+	QGraphicsItem::hoverLeaveEvent(event);
 }
 
 void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)

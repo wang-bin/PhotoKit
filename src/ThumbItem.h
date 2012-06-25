@@ -18,15 +18,16 @@
 ******************************************************************************/
 
 
-#ifndef THUMBITEM_H
-#define THUMBITEM_H
+#ifndef PHOTOKIT_THUMBITEM_H
+#define PHOTOKIT_THUMBITEM_H
 
 #include "PhotoKit_Global.h"
 #include <QGraphicsItem>
 
 class QGraphicsItemAnimation;
-BEGIN_NAMESPACE_PHOTOKIT
-
+namespace PhotoKit {
+class TransformMachine;
+class ItemAnimation;
 class OutlineGlowItem;
 class ThumbItem : public QGraphicsItem
 {
@@ -56,10 +57,11 @@ private:
 	QString origin_image_path;
 	QImage thumb;
 	OutlineGlowItem *mGlow;
-	QGraphicsItemAnimation *mAnimation;
+	TransformMachine *mAnimation;
+	ItemAnimation *mItemAnimation;
 	//ProgressItem
 	//TextItem *name
 };
 
-END_NAMESPACE_PHOTOKIT
-#endif // THUMBITEM_H
+} //namespace PhotoKit
+#endif // PHOTOKIT_THUMBITEM_H
