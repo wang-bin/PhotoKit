@@ -19,26 +19,38 @@
 
 
 #include "ThumbItem.h"
+#include <QtCore/QTimeLine>
+#include <QGraphicsItemAnimation>
 #include <QPainter>
-
+#include <QGraphicsScene>
+#include <QGraphicsView>
 #include "OutlineGlowItem.h"
 #include "Config.h"
 
 BEGIN_NAMESPACE_PHOTOKIT
 
+static const qreal zoom_max = 2.0;
+
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
-	QGraphicsItem(parent),mGlow(0)
+	QGraphicsItem(parent),mGlow(0),mAnimation(0)
 {
 	setAcceptHoverEvents(true); //default: false
 	thumb = QImage(Config::thumbItemWidth, Config::thumbItemHeight, QImage::Format_ARGB32_Premultiplied);
 }
 
 ThumbItem::ThumbItem(const QImage& image, QGraphicsItem *parent) :
-	QGraphicsItem(parent),thumb(image),mGlow(0)
+	QGraphicsItem(parent),thumb(image),mGlow(0),mAnimation(0)
 {
 	setAcceptHoverEvents(true); //default: false
 }
 
+ThumbItem::~ThumbItem()
+{
+	if (mAnimation) {
+		delete mAnimation;
+		mAnimation = 0;
+	}
+}
 
 void ThumbItem::setThumbImage(const QImage& image)
 {
@@ -52,12 +64,22 @@ QRectF ThumbItem::boundingRect() const
 					, 2*(Config::thumbBorder + Config::thumbMargin), 2*(Config::thumbBorder + Config::thumbMargin));
 }
 
+qreal ThumbItem::boundingWidth() const
+{
+	return boundingRect().size().width();
+}
+
+qreal ThumbItem::boundingHeight() const
+{
+	return boundingRect().size().height();
+}
+
 void ThumbItem::showGlow()
 {
 	if (!mGlow) {
 		qDebug("%s %s %d", __FILE__, __FUNCTION__, __LINE__);
 		mGlow = new OutlineGlowItem(this);
-		mGlow->setZValue(zValue() + 1);
+		//mGlow->setZValue(zValue() + 1);
 		QSizeF s = boundingRect().size();
 		mGlow->setSize(QSize((int)s.width(), (int)s.height()));
 		mGlow->setGlowWidth(Config::thumbMargin);// + Config::thumbBorder);
@@ -73,6 +95,56 @@ void ThumbItem::showGlow()
 void ThumbItem::hideGlow()
 {
 	mGlow->setVisible(false);
+}
+//TODO:matrix
+void ThumbItem::zoom(ZoomAction action)
+{
+	if (!mAnimation) {
+		mAnimation = new QGraphicsItemAnimation;
+		mAnimation->setItem(this);
+		QTimeLine *timer = new QTimeLine(1000);
+		timer->setEasingCurve(QEasingCurve::OutQuad);
+		timer->setFrameRange(0, 100);
+		mAnimation->setTimeLine(timer);
+	}
+	qreal vs = 1.0;
+	qreal hs = 1.0;
+	qreal tx = 0;
+	qreal ty = 0;
+	/*!
+		translate then zoom. so if keep the center, the translation t satisfies
+		t_dst * s = 0.5 * (w - w0, h - h0) = 0.5 * (s - 1) * (w0, h0)
+	*/
+	qreal tx_dst = -boundingWidth()*0.5*(zoom_max - 1.0)/zoom_max;
+	qreal ty_dst = -boundingHeight()*0.5*(zoom_max - 1.0)/zoom_max;
+	if (mAnimation->timeLine()->state() == QTimeLine::Running) {
+		mAnimation->timeLine()->setPaused(true);
+		qreal step = mAnimation->timeLine()->currentValue();
+		vs = mAnimation->verticalScaleAt(step);
+		hs = mAnimation->horizontalScaleAt(step);
+		tx = mAnimation->xTranslationAt(step);
+		ty = mAnimation->yTranslationAt(step);
+		mAnimation->timeLine()->stop();
+	} else {
+		if (action == ZoomOut) {
+			vs = zoom_max;
+			hs = zoom_max;
+			tx = tx_dst;
+			ty = ty_dst;
+		}
+	}
+	if (action == ZoomIn) {
+		mAnimation->setTranslationAt(0.0, tx, ty);
+		mAnimation->setTranslationAt(1.0, tx_dst, ty_dst);
+		mAnimation->setScaleAt(0.0, hs, vs);
+		mAnimation->setScaleAt(1.0, zoom_max, zoom_max);
+	} else {
+		mAnimation->setTranslationAt(0.0, tx, ty);
+		mAnimation->setTranslationAt(1.0, 0.0, 0.0);
+		mAnimation->setScaleAt(0.0, hs, vs);
+		mAnimation->setScaleAt(1.0, 1.0, 1.0);
+	}
+	mAnimation->timeLine()->start();//start(QAbstractAnimation::KeepWhenStopped);
 }
 
 void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -92,11 +164,22 @@ void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
+	//scene()->views().at(0)->centerOn(this);
+	//scene()->views().at(0)->ensureVisible(this);
+	//setTransform(QTransform().scale(2.0, 2.0));
+	qDebug("z=%f", zValue()); //keep in animation
+	setZValue(zValue() + 1.0);
+	zoom(ZoomIn);
 	showGlow();
 }
 
 void ThumbItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
+	//scene()->views().at(0)->ensureVisible(this);
+	//setTransform(QTransform().scale(1.0, 1.0));
+	qDebug("z=%f", zValue());
+	setZValue(zValue() - 1);
+	zoom(ZoomOut);
 	hideGlow();
 }
 

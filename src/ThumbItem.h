@@ -24,18 +24,24 @@
 #include "PhotoKit_Global.h"
 #include <QGraphicsItem>
 
+class QGraphicsItemAnimation;
 BEGIN_NAMESPACE_PHOTOKIT
 
 class OutlineGlowItem;
 class ThumbItem : public QGraphicsItem
 {
 public:
+	enum ZoomAction { ZoomIn, ZoomOut};
 	explicit ThumbItem(QGraphicsItem *parent = 0);
 	explicit ThumbItem(const QImage& image, QGraphicsItem *parent = 0);
+	~ThumbItem();
 	void setThumbImage(const QImage& image);
 	virtual QRectF boundingRect() const; // overridden
 	void showGlow();
 	void hideGlow();
+	void zoom(ZoomAction action);
+	qreal boundingWidth() const;
+	qreal boundingHeight() const;
 
 protected:
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option = 0, QWidget *widget = 0);
@@ -50,6 +56,9 @@ private:
 	QString origin_image_path;
 	QImage thumb;
 	OutlineGlowItem *mGlow;
+	QGraphicsItemAnimation *mAnimation;
+	//ProgressItem
+	//TextItem *name
 };
 
 END_NAMESPACE_PHOTOKIT
