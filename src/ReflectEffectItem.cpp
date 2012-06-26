@@ -19,10 +19,6 @@ ReflectEffectItem::~ReflectEffectItem()
         delete mReflect;
         mReflect = 0;
     }
-    if (mBlurEffect) {
-        delete mBlurEffect;
-        mBlurEffect = 0;
-    }
 }
 
 int ReflectEffectItem::mirrorDistance() const
@@ -125,12 +121,7 @@ void ReflectEffectItem::drawReflect()
        mBlurEffect->setBlurRadius(1.3);
         mBlurEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
         setGraphicsEffect(mBlurEffect);
-    } else {
-        if (mBlurEffect) {
-            delete mBlurEffect; //? safe?
-            mBlurEffect = 0;
-        }
-    }
+    } //TODO: how to remove effect? can not delete
 }
 
 } //namespace PhotoKit
