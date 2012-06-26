@@ -9,7 +9,8 @@ namespace PhotoKit {
 ReflectEffectItem::ReflectEffectItem(ThumbItem* target, MirrorDirection direction)
     :QGraphicsItem(target),mBlur(true),mGradient(true),mBlurEffect(0),mTarget(target),mDirection(direction),mMirrorDistance(2),mReflect(0)
 {
-    setFlag(QGraphicsItem::ItemStacksBehindParent);
+	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
+	setFlag(QGraphicsItem::ItemStacksBehindParent);
     setOpacity(0.618);
 }
 

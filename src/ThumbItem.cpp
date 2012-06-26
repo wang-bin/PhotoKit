@@ -19,7 +19,9 @@
 
 
 #include "ThumbItem.h"
+#include <QtCore/QEvent>
 #include <QtCore/QTimeLine>
+#include <QTouchEvent>
 #include <QGraphicsItemAnimation>
 #include <QPainter>
 #include <QGraphicsScene>
@@ -29,7 +31,7 @@
 #include "TransformMachine.h"
 #include "Config.h"
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 //TODO: calculate to fit screen
 static const qreal zoom_max = 2.2;
@@ -37,7 +39,9 @@ static const qreal zoom_max = 2.2;
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
 	QGraphicsItem(parent),mGlow(0),mAnimation(0),mItemAnimation(0)
 {
+	//setAcceptTouchEvents(true);
 	setAcceptHoverEvents(true); //default: false
+	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
 	thumb = QImage(Config::thumbItemWidth, Config::thumbItemHeight, QImage::Format_ARGB32_Premultiplied);
 }
 
@@ -222,11 +226,39 @@ void ThumbItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 
 void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+	QGraphicsItem::mousePressEvent(event);
 }
 
 void ThumbItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-
+	QGraphicsItem::mouseDoubleClickEvent(event);
 }
+/*
+bool ThumbItem::sceneEvent(QEvent *event)
+{
+	switch (event->type()) {
+	case QEvent::TouchBegin:
+	case QEvent::TouchUpdate:
+	case QEvent::TouchEnd:
+	{
+		QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+		if (touchEvent->touchPoints().count() == 2) {
+			//select/unselect the item and show/hide an selected icon. show option bar at the same time
+			//conflict with scene.event? or scene 3 touch event to do these options
+			const QTouchEvent::TouchPoint &touchPoint1 = touchEvent->touchPoints().first();
+			const QTouchEvent::TouchPoint &touchPoint2 = touchEvent->touchPoints().last();
 
-END_NAMESPACE_PHOTOKIT
+			QLineF line1(touchPoint1.lastScenePos(), touchPoint2.lastScenePos());
+			QLineF line2(touchPoint1.scenePos(), touchPoint2.scenePos());
+
+			rotate(line2.angleTo(line1));
+		}
+		break;
+	}
+	default:
+		return QGraphicsItem::sceneEvent(event);
+	}
+	return true;
+}*/
+
+} //namespace PhotoKit
