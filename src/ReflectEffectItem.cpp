@@ -100,13 +100,15 @@ void ReflectEffectItem::drawReflect()
         mPos.setY(- mTarget->boundingHeight() + mTarget->marginWidth() + mTarget->borderWidth() - 2*mMirrorDistance);
     } else if (mDirection == MirrorLeft) {
         mReflect = new QImage(mTarget->thumbImage().mirrored(true, false));
-        g.setColorAt(0, Qt::black);
+		g.setFinalStop(QPointF(mReflect->width(), 0));
+		g.setColorAt(0, Qt::black);
         g.setColorAt(1, Qt::transparent);
         mPos.setX(-mTarget->boundingWidth() - 2*mMirrorDistance + mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->marginWidth() + mTarget->borderWidth());
     } else {
         mReflect = new QImage(mTarget->thumbImage().mirrored(true, false));
-        g.setColorAt(1, Qt::black);
+		g.setFinalStop(QPointF(mReflect->width(), 0));
+		g.setColorAt(1, Qt::black);
         g.setColorAt(0, Qt::transparent);
         mPos.setX(mTarget->boundingWidth() + 2*mMirrorDistance + mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->marginWidth() + mTarget->borderWidth());

@@ -9,8 +9,10 @@ class ThumbItem;
 class ReflectEffectItem : public QGraphicsItem
 {
 public:
+	//TODO: MirrorLeft and MirrorTop
+	/*MirrorBottom and MirrorRight can be directly installed to an item without special settings*/
     enum MirrorDirection { MirrorLeft, MirrorTop, MirrorRight, MirrorBottom};
-    ReflectEffectItem(ThumbItem* target, MirrorDirection direction = MirrorBottom);
+	ReflectEffectItem(ThumbItem* target, MirrorDirection direction = MirrorBottom);
     ~ReflectEffectItem();
 
     MirrorDirection mirrorDirection() const;
