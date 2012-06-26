@@ -37,6 +37,8 @@ public:
 	explicit ThumbItem(const QImage& image, QGraphicsItem *parent = 0);
 	~ThumbItem();
 
+    void setOriginImage(const QString& path);
+
     qreal borderWidth() const;
     qreal marginWidth() const;
     QImage thumbImage() const;
@@ -60,6 +62,7 @@ protected:
 private:
 	QString origin_image_path;
 	QImage thumb;
+    QImage origin;
 	OutlineGlowItem *mGlow;
 	TransformMachine *mAnimation;
 	ItemAnimation *mItemAnimation;

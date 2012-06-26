@@ -55,6 +55,11 @@ ThumbItem::~ThumbItem()
 	}
 }
 
+void ThumbItem::setOriginImage(const QString& path)
+{
+    origin_image_path = path;
+}
+
 qreal ThumbItem::borderWidth() const
 {
     return Config::thumbBorder;

@@ -150,4 +150,9 @@ QImage ThumbTask::thumbAt(int index)
 	return mThumbsWatcher->resultAt(index).thumb;
 }
 
+ThumbInfo ThumbTask::thumbInfoAt(int index)
+{
+    return mThumbsWatcher->resultAt(index);
+}
+
 END_NAMESPACE_PHOTOKIT

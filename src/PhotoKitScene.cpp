@@ -55,7 +55,9 @@ void PhotoKitScene::updateThumbItemAt(int index)
 	int col = index / Config::thumbRows;
 	int row = index % Config::thumbRows;
 
-	ThumbItem *item = new ThumbItem(ThumbTask::thumbAt(index));
+    ThumbInfo info(ThumbTask::thumbInfoAt(index));
+    ThumbItem *item = new ThumbItem(info.thumb);
+    item->setOriginImage(info.path);
     item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
 				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemWidth - item->boundingRect().width())/2
                  , row * (Config::thumbItemHeight + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)

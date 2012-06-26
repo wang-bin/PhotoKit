@@ -58,6 +58,7 @@ public:
 	void createThumbsFromDir(const QString& dir);
 
 	static QImage thumbAt(int index);
+    static ThumbInfo thumbInfoAt(int index);
 private:
 	ThumbRecorder *mThumbRecorder;
 #ifdef QT_NO_CONCURRENT
