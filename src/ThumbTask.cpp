@@ -59,7 +59,7 @@ static ThumbInfo createThumb(const QString& path)
 	qreal q = qreal(Config::thumbItemWidth)/qreal(Config::thumbItemHeight);
 	if (k > q) {
 		image = image.scaledToWidth(Config::thumbItemWidth);
-	} else if (k < q) {
+    } else {
 		image = image.scaledToHeight(Config::thumbItemHeight);
 	}
 
