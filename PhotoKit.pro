@@ -26,7 +26,8 @@ SOURCES += src/main.cpp \
     src/Updater.cpp \
     src/OutlineGlowItem.cpp \
     src/TransformMachine.cpp \
-    src/ItemAnimation.cpp
+    src/ItemAnimation.cpp \
+    src/ReflectEffectItem.cpp
 
 HEADERS  += \
 	src/ThumbTask.h \
@@ -43,7 +44,8 @@ HEADERS  += \
     src/Updater.h \
     src/OutlineGlowItem.h \
     src/TransformMachine.h \
-    src/ItemAnimation.h
+    src/ItemAnimation.h \
+    src/ReflectEffectItem.h
 
 CONFIG += mobility
 MOBILITY = 

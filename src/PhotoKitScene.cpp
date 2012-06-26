@@ -22,6 +22,7 @@
 
 #include <stdexcept>
 #include <QGraphicsPixmapItem>
+#include "ReflectEffectItem.h"
 #include "ThumbItem.h"
 #include "ThumbTask.h"
 #include "Config.h"
@@ -60,6 +61,9 @@ void PhotoKitScene::updateThumbItemAt(int index)
                  , row * (Config::thumbItemHeight + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
 				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemHeight - item->boundingRect().height())/2);
 	addItem(item);
+    if (row == Config::thumbRows - 1) {
+        new ReflectEffectItem(item);
+    }
 	setSceneRect(itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 }
 

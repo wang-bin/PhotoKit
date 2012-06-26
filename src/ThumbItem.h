@@ -36,6 +36,10 @@ public:
 	explicit ThumbItem(QGraphicsItem *parent = 0);
 	explicit ThumbItem(const QImage& image, QGraphicsItem *parent = 0);
 	~ThumbItem();
+
+    qreal borderWidth() const;
+    qreal marginWidth() const;
+    QImage thumbImage() const;
 	void setThumbImage(const QImage& image);
 	virtual QRectF boundingRect() const; // overridden
 	void showGlow();

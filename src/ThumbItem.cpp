@@ -32,7 +32,7 @@
 BEGIN_NAMESPACE_PHOTOKIT
 
 //TODO: calculate to fit screen
-static const qreal zoom_max = 1.618;
+static const qreal zoom_max = 2.2;
 
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
 	QGraphicsItem(parent),mGlow(0),mAnimation(0),mItemAnimation(0)
@@ -55,12 +55,27 @@ ThumbItem::~ThumbItem()
 	}
 }
 
+qreal ThumbItem::borderWidth() const
+{
+    return Config::thumbBorder;
+}
+
+qreal ThumbItem::marginWidth() const
+{
+    return Config::thumbMargin;
+}
+
+QImage ThumbItem::thumbImage() const
+{
+    return thumb;
+}
+
 void ThumbItem::setThumbImage(const QImage& image)
 {
 	thumb = image;
 	update(boundingRect());
 }
-
+//add mirror rect?
 QRectF ThumbItem::boundingRect() const
 {
 	return thumb.rect().adjusted(0, 0//-(Config::thumbMargin + Config::thumbBorder) , -(Config::thumbBorder + Config::thumbMargin)
