@@ -56,7 +56,7 @@ int Config::contentStartY = 22;
 int Config::contentHeight = 510;
 
 // Properties:
-bool Config::openGlRendering = false;
+bool Config::openGlRendering = true;
 bool Config::softwareRendering = false;
 bool Config::openGlAvailable = true;
 bool Config::xRenderPresent = true;
@@ -94,13 +94,16 @@ QColor Config::color0=QColor(102, 175, 54, 200);
 QColor Config::color1=QColor(102, 175, 54, 60);
 QString Config::xml_config_path="xml/config.ini";
 
+int Config::contentHMargin = 666;
+int Config::contentVMargin = 222;
+
 QString Config::thumbRecordFile = QDir::homePath() + "/PhotoKit/thumbs.qds";
 int Config::thumbRows = 3; //TODO: 2 for mobile
 int Config::thumbSpacing = 16;
-int Config::thumbMargin = 3;
+int Config::thumbMargin = 8;
 int Config::thumbBorder = 1;
-int Config::thumbItemWidth = 288;
-int Config::thumbItemHeight = 266;
+int Config::thumbItemWidth = 160;
+int Config::thumbItemHeight = 120;
 QString Config::thumbDir = QDir::homePath() + "/PhotoKit/.thumb";
 
 bool Config::read(const QString& xml)

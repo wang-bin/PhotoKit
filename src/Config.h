@@ -106,6 +106,8 @@ public:
 	static QColor color0, color1;
 	static QString xml_config_path;
 
+	static int contentHMargin;
+	static int contentVMargin;
 	static QString thumbRecordFile;
 	static int thumbRows;
 	static int thumbSpacing;
