@@ -55,12 +55,12 @@ void PhotoKitScene::updateThumbItemAt(int index)
 	int row = index % Config::thumbRows;
 
 	ThumbItem *item = new ThumbItem(ThumbTask::thumbAt(index));
-	item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
+    item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
 				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemWidth - item->boundingRect().width())/2
-				 , row * (Config::thumbItemHeight + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
+                 , row * (Config::thumbItemHeight + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
 				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemHeight - item->boundingRect().height())/2);
 	addItem(item);
-	setSceneRect(itemsBoundingRect());
+	setSceneRect(itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 }
 
 void PhotoKitScene::MakeInstance()
