@@ -95,12 +95,12 @@ QColor Config::color1=QColor(102, 175, 54, 60);
 QString Config::xml_config_path="xml/config.ini";
 
 int Config::contentHMargin = 666;
-int Config::contentVMargin = 222;
+int Config::contentVMargin = 88;
 
 QString Config::thumbRecordFile = QDir::homePath() + "/PhotoKit/thumbs.qds";
 int Config::thumbRows = 3; //TODO: 2 for mobile
-int Config::thumbSpacing = 16;
-int Config::thumbMargin = 8;
+int Config::thumbSpacing = 4;
+int Config::thumbMargin = 4;
 int Config::thumbBorder = 1;
 int Config::thumbItemWidth = 160;
 int Config::thumbItemHeight = 120;

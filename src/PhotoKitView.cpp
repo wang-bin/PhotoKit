@@ -32,10 +32,11 @@
 #include "TransformMachine.h"
 #include "PhotoKitScene.h"
 #include "Config.h"
-BEGIN_NAMESPACE_PHOTOKIT
+
+namespace PhotoKit {
 
 static const qreal zoom_max = 1.618;
-static const qreal zoom_min = 0.314;
+static const qreal zoom_min = 0.618;
 PhotoKitView::PhotoKitView(QWidget *parent) :
 	QGraphicsView(parent),mPressed(false),mScale(1.0),mMachine(0)
 {
@@ -150,10 +151,10 @@ void PhotoKitView::moveWithAnimation(qreal dx, qreal dy)
 
 void PhotoKitView::doTransform(const QMatrix& m)
 {
-	setMatrix(m);
+	setTransform(QTransform(m));//, true); //combine?
 }
 
-//TODO: Easing. QVariantAnimation
+//TODO: delta.y() to rotate around XAix and translate y. delta.x() rotate around YAix and translate x;
 void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 {
 	QPoint delta = e->pos() - mMousePos;
@@ -180,6 +181,24 @@ void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
 {
 	mPressed = false;
 	mMousePos = e->pos();
+}
+
+void PhotoKitView::keyPressEvent(QKeyEvent *e)
+{qDebug("key %d", e->key());
+	switch(e->key()) {
+	case Qt::Key_Right:
+		qDebug("key right");
+		setTransform(QTransform().rotate(1, Qt::YAxis).translate(-66,0), true);
+		break;
+	case Qt::Key_Left:
+		qDebug("key left");
+		setTransform(QTransform().rotate(-1, Qt::YAxis).translate(66, 0), true);
+
+		break;
+	default:
+		break;
+	}
+	e->accept();
 }
 
 void PhotoKitView::wheelEvent(QWheelEvent *event)
@@ -222,4 +241,4 @@ void PhotoKitView::setRenderingSystem()
 	setViewport(viewport);
 }
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit
