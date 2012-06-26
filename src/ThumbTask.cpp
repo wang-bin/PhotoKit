@@ -21,12 +21,12 @@
 #include "ThumbTask.h"
 
 #include <QApplication>
+#include <QtCore/QCryptographicHash>
 #include <QtCore/QDataStream>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 
 #include <QtCore/QtConcurrentMap>
-#include <QtCore/QUuid>
 #include <QtGui/QImageReader>
 
 #include "Config.h"
@@ -43,15 +43,29 @@ QFutureWatcher<ThumbInfo> *ThumbTask::mThumbsWatcher = 0;
 static ThumbInfo createThumb(const QString& path)
 {
 	qDebug(qPrintable(path));
+	QCryptographicHash md5sum(QCryptographicHash::Md5);
+	QFile f(path);
+	if (!f.open(QIODevice::ReadOnly)) {
+		qWarning("open file [%s] error:", qPrintable(path), qPrintable(f.errorString()));
+	}
+	while (!f.atEnd()) {
+		md5sum.addData(f.read(8192));
+	}
+	QString md5(md5sum.result().toHex());
+	bool ok = false;
 	if (ThumbRecorder::thumbHash()->contains(path)) {
-		ThumbInfo thumb;
-		thumb.thumb = QImage(ThumbRecorder::thumbHash()->value(path));
-		thumb.path = path;
-		if (thumb.thumb.isNull()) {
-			ThumbRecorder::thumbHash()->remove(path);
-		} else {
-			return thumb;
+		QString thumb_path = ThumbRecorder::thumbHash()->value(path);
+		if (thumb_path.endsWith(md5)) {
+			ThumbInfo thumb;
+			thumb.thumb = QImage(thumb_path);
+			thumb.path = path;
+			if (!thumb.thumb.isNull()) {
+				return thumb;
+			}
 		}
+		qDebug("existing thumb file not match");
+		ThumbRecorder::thumbHash()->remove(path);
+		QFile::remove(thumb_path);
 	}
 	QImage image(path);
 	QSize s = image.size();
@@ -64,7 +78,7 @@ static ThumbInfo createThumb(const QString& path)
 	}
 
 	//save thumb to file. use imagewriter and setKey() update hash with
-	QString thumbPath = Config::thumbDir + "/" + QUuid::createUuid().toString() + ".png"; //md5?
+	QString thumbPath = Config::thumbDir + "/" + md5;
 	ThumbRecorder::thumbHash()->insert(path, thumbPath);
 	image.save(thumbPath, "PNG");
 	ThumbInfo thumb;
