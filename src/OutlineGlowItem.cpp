@@ -26,10 +26,12 @@
 BEGIN_NAMESPACE_PHOTOKIT
 
 OutlineGlowItem::OutlineGlowItem(QGraphicsItem *parent)
-	:QGraphicsPixmapItem(parent),mGlowWidth(22),mColor(QColor(Qt::blue).lighter(123))
+    :QGraphicsPixmapItem(parent),mGlowWidth(7),mColor(QColor(Qt::blue).lighter(123))
 {
+    setFlag(QGraphicsItem::ItemStacksBehindParent);
 	QGraphicsBlurEffect *blur = new QGraphicsBlurEffect;
 	blur->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
+    blur->setBlurRadius(22);
 	setGraphicsEffect(blur);
 }
 
