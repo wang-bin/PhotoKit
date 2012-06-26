@@ -40,8 +40,7 @@ static const qreal zoom_min = 0.618;
 PhotoKitView::PhotoKitView(QWidget *parent) :
 	QGraphicsView(parent),mPressed(false),mScale(1.0),mMachine(0)
 {
-	//setViewportMargins(66, 44, 66, 33);
-	setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+	setTransformationAnchor(QGraphicsView::AnchorUnderMouse); //AnchorViewCenter
 	setResizeAnchor(QGraphicsView::AnchorUnderMouse);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	//setBackgroundBrush(QBrush(Qt::gray));
@@ -239,6 +238,41 @@ void PhotoKitView::setRenderingSystem()
 	}
 
 	setViewport(viewport);
+}
+
+bool PhotoKitView::viewportEvent(QEvent *event)
+{
+	switch (event->type()) {
+	case QEvent::TouchBegin:
+	case QEvent::TouchUpdate:
+	case QEvent::TouchEnd:
+	{
+		//only do these in picture wall mode
+		QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
+		QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
+		if (touchPoints.count() == 2) {
+			// determine scale factor
+			const QTouchEvent::TouchPoint &touchPoint0 = touchPoints.first();
+			const QTouchEvent::TouchPoint &touchPoint1 = touchPoints.last();
+			qreal currentScaleFactor =
+					QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
+					/ QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
+			if (touchEvent->touchPointStates() & Qt::TouchPointReleased) {
+				// if one of the fingers is released, remember the current scale
+				// factor so that adding another finger later will continue zooming
+				// by adding new scale factor to the existing remembered value.
+				//totalScaleFactor *= currentScaleFactor;
+				//currentScaleFactor = 1;
+			}
+			//setTransform(QTransform().scale(totalScaleFactor * currentScaleFactor,
+			//								totalScaleFactor * currentScaleFactor));
+		}
+		return true;
+	}
+	default:
+		break;
+	}
+	return QGraphicsView::viewportEvent(event);
 }
 
 } //namespace PhotoKit

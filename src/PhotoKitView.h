@@ -50,6 +50,7 @@ protected:
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseMoveEvent(QMouseEvent *event); //TODO:test rotate
 	virtual void mouseReleaseEvent(QMouseEvent *event);
+	virtual bool viewportEvent(QEvent *event);
 
 private slots:
 	void doTransform(const QMatrix& m);
