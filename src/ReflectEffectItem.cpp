@@ -1,14 +1,16 @@
 #include "ReflectEffectItem.h"
 
+#include <QGraphicsBlurEffect>
 #include <QPainter>
 
 #include "ThumbItem.h"
 namespace PhotoKit {
 
 ReflectEffectItem::ReflectEffectItem(ThumbItem* target, MirrorDirection direction)
-    :QGraphicsItem(target),mBlur(false),mGradient(true),mTarget(target),mDirection(direction),mMirrorDistance(2),mReflect(0)
+    :QGraphicsItem(target),mBlur(true),mGradient(true),mBlurEffect(0),mTarget(target),mDirection(direction),mMirrorDistance(2),mReflect(0)
 {
     setFlag(QGraphicsItem::ItemStacksBehindParent);
+    setOpacity(0.618);
 }
 
 ReflectEffectItem::~ReflectEffectItem()
@@ -16,6 +18,10 @@ ReflectEffectItem::~ReflectEffectItem()
     if (mReflect) {
         delete mReflect;
         mReflect = 0;
+    }
+    if (mBlurEffect) {
+        delete mBlurEffect;
+        mBlurEffect = 0;
     }
 }
 
@@ -111,6 +117,20 @@ void ReflectEffectItem::drawReflect()
     }
     QPainter painter(mReflect);
     painter.fillRect(0, 0, mReflect->width(), mReflect->height(), g);
+
+    if (mBlur) {
+        if (mBlurEffect)
+            return;
+        mBlurEffect = new QGraphicsBlurEffect;
+       mBlurEffect->setBlurRadius(1.3);
+        mBlurEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
+        setGraphicsEffect(mBlurEffect);
+    } else {
+        if (mBlurEffect) {
+            delete mBlurEffect; //? safe?
+            mBlurEffect = 0;
+        }
+    }
 }
 
 } //namespace PhotoKit

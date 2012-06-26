@@ -2,7 +2,7 @@
 #define REFLECTEFFECTITEM_H
 
 #include <QGraphicsItem>
-
+class QGraphicsBlurEffect;
 namespace PhotoKit {
 
 class ThumbItem;
@@ -33,6 +33,7 @@ protected:
 
 private:
     bool mBlur, mGradient;
+    QGraphicsBlurEffect *mBlurEffect;
     ThumbItem *mTarget;
     MirrorDirection mDirection;
     int mMirrorDistance;
