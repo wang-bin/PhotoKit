@@ -88,33 +88,33 @@ void ReflectEffectItem::drawReflect()
     QLinearGradient g(QPointF(), QPointF(0, mReflect->height()));
     if (mDirection == MirrorBottom) {
         mReflect = new QImage(mTarget->thumbImage().mirrored(false, true));
-        g.setColorAt(0, QColor(0, 0, 0, 111));
-        g.setColorAt(0.618, QColor(0, 0, 0, 222));
-        g.setColorAt(1, Qt::black);
+        g.setColorAt(0, QColor(0, 0, 0, 100));
+        g.setColorAt(1, Qt::transparent);
         mPos.setX(mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->boundingHeight() + mTarget->marginWidth() + mTarget->borderWidth() + 2*mMirrorDistance);
     } else if (mDirection == MirrorTop) {
         mReflect = new QImage(mTarget->thumbImage().mirrored(false, true));
-        g.setColorAt(0, Qt::black);
-        g.setColorAt(1, Qt::transparent);
+        g.setColorAt(1, QColor(0, 0, 0, 100));
+        g.setColorAt(0, Qt::transparent);
         mPos.setX(mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(- mTarget->boundingHeight() + mTarget->marginWidth() + mTarget->borderWidth() - 2*mMirrorDistance);
     } else if (mDirection == MirrorLeft) {
         mReflect = new QImage(mTarget->thumbImage().mirrored(true, false));
 		g.setFinalStop(QPointF(mReflect->width(), 0));
-		g.setColorAt(0, Qt::black);
-        g.setColorAt(1, Qt::transparent);
+        g.setColorAt(1, QColor(0, 0, 0, 100));
+        g.setColorAt(0, Qt::transparent);
         mPos.setX(-mTarget->boundingWidth() - 2*mMirrorDistance + mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->marginWidth() + mTarget->borderWidth());
     } else {
         mReflect = new QImage(mTarget->thumbImage().mirrored(true, false));
 		g.setFinalStop(QPointF(mReflect->width(), 0));
-		g.setColorAt(1, Qt::black);
-        g.setColorAt(0, Qt::transparent);
+        g.setColorAt(1, QColor(0, 0, 0, 100));
+        g.setColorAt(1, Qt::transparent);
         mPos.setX(mTarget->boundingWidth() + 2*mMirrorDistance + mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->marginWidth() + mTarget->borderWidth());
     }
     QPainter painter(mReflect);
+    painter.setCompositionMode(QPainter::CompositionMode_DestinationIn);
     painter.fillRect(0, 0, mReflect->width(), mReflect->height(), g);
 
     if (mBlur) {
