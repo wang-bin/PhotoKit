@@ -66,7 +66,7 @@ private:
 	QImage thumb;
     QImage origin;
 	OutlineGlowItem *mGlow;
-	TransformMachine *mAnimation;
+	TransformMachine *mMachine;
 	ItemAnimation *mItemAnimation;
 	//ProgressItem
 	//TextItem *name

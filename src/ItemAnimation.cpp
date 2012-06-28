@@ -30,11 +30,9 @@ ItemAnimation::ItemAnimation(QGraphicsItem *item, QObject *parent) :
 {
 }
 
-void ItemAnimation::setMatrix(const QMatrix &m)
+void ItemAnimation::setTransform(const QTransform &m)
 {
-	mItem->setMatrix(m);
-	//if (mItem->scene()->views().at(0)->matrix().m11() < 1.3)
-		//mItem->scene()->views().at(0)->setMatrix(QMatrix().scale(qMin(m.m11(), 1.3), qMin(m.m22(), 1.3)));
+	mItem->setTransform(m);
 }
 
 void ItemAnimation::setZValue(qreal z)

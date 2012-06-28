@@ -24,7 +24,7 @@
 
 #include <QtCore/qobject.h>
 
-class QMatrix;
+class QTransform;
 class QPointF;
 class QTimeLine;
 
@@ -47,12 +47,22 @@ public:
 	QList<QPair<qreal, QPointF> > posList() const;
 	void setPosAt(qreal step, const QPointF &pos);
 
-	QMatrix matrixAt(qreal step) const;
-	void setStartMatrix(const QMatrix& m);
+	QTransform transformAt(qreal step) const;
+	void setStartTransform(const QTransform& m);
 
-	qreal rotationAt(qreal step) const;
-	QList<QPair<qreal, qreal> > rotationList() const;
-	void setRotationAt(qreal step, qreal angle);
+	qreal xRotationAt(qreal step) const;
+	QList<QPair<qreal, qreal> > xRotationList() const;
+	void setXRotationAt(qreal step, qreal angle);
+
+	qreal yRotationAt(qreal step) const;
+	QList<QPair<qreal, qreal> > yRotationList() const;
+	void setYRotationAt(qreal step, qreal angle);
+
+	qreal zRotationAt(qreal step) const;
+	QList<QPair<qreal, qreal> > zRotationList() const;
+	void setZRotationAt(qreal step, qreal angle);
+
+	void setRotationAt(qreal step, qreal xrot, qreal yrot, qreal zrot);
 
 	qreal xTranslationAt(qreal step) const;
 	qreal yTranslationAt(qreal step) const;
@@ -76,7 +86,7 @@ public:
 	void clear();
 
 Q_SIGNALS:
-	void matrixChanged(const QMatrix& matrix);
+	void transformChanged(const QTransform& transform);
 	void zValueChanged(qreal value);
 
 public Q_SLOTS:

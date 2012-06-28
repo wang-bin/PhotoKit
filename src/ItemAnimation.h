@@ -26,7 +26,7 @@
 #include "PhotoKit_Global.h"
 
 class QGraphicsItem;
-class QMatrix;
+class QTransform;
 
 namespace PhotoKit {
 
@@ -37,7 +37,7 @@ class ItemAnimation : public QObject
 public:
 	ItemAnimation(QGraphicsItem *item, QObject *parent = 0);
 public slots:
-	void setMatrix(const QMatrix& m);
+	void setTransform(const QTransform& m);
 	void setZValue(qreal z);
 private:
 	QGraphicsItem* mItem;

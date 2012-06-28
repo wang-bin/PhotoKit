@@ -44,10 +44,14 @@
 
 namespace PhotoKit {
 
-static const qreal zoom_max = 1.618;
-static const qreal zoom_min = 0.618;
+static const qreal scale_max = 1.618;
+static const qreal scale_min = 0.618;
+static const qreal yrot_max = 45;
+static const qreal yrot_min = -45;
+static const qreal xrot_max = 8;
+static const qreal xrot_min = -8;
 PhotoKitView::PhotoKitView(QWidget *parent) :
-	QGraphicsView(parent),mPressed(false),mScale(1.0),mMachine(0)
+	QGraphicsView(parent),mPressed(false),mScale(1.0),mX(0),mY(0),mMachine(0)
 {
 	QGraphicsView::setDragMode(QGraphicsView::NoDrag);
     //setAlignment(Qt::AlignBottom);
@@ -63,14 +67,15 @@ PhotoKitView::PhotoKitView(QWidget *parent) :
 	setScene(mScene);
 
 	mMachine = new TransformMachine;//QGraphicsItemAnimation;
-	connect(mMachine, SIGNAL(matrixChanged(QMatrix)), SLOT(doTransform(QMatrix)));
+	connect(mMachine, SIGNAL(transformChanged(QTransform)), SLOT(doTransform(QTransform)));
 
-	QTimeLine *timer = new QTimeLine(1000);
+	QTimeLine *timer = new QTimeLine(1234);
 	timer->setEasingCurve(QEasingCurve::OutQuad);
 	timer->setFrameRange(0, 100);
 	mMachine->setTimeLine(timer);
 }
 
+//http://stackoverflow.com/questions/1355446/get-visible-rectangle-of-qgraphicsview
 QRectF PhotoKitView::visibleSceneRect() const
 {
     QPointF A = mapToScene(QPoint(0,0));
@@ -79,96 +84,38 @@ QRectF PhotoKitView::visibleSceneRect() const
     return QRectF(A, B);
 }
 
-void PhotoKitView::scaleView(ZoomAction zoom)
+//params x, y and scale are the final value. final rotation and shear params are the values in animation, final values are 0
+void PhotoKitView::smoothTransform(qreal x, qreal y, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
 {
-	//QPointF c = mapToScene(rect().center());
-	//qDebug("c: %f %f", c.x(), c.y());
-	if (zoom == ZoomIn) {
-		mScale += 0.2;
-		mScale = qMin(mScale, zoom_max);
-	} else {
-		mScale -= 0.2;
-		mScale = qMax(mScale, zoom_min);
-	}
-	setTransform(QTransform()//.translate(contentsRect().width(), contentsRect().height())
-			.scale(mScale , mScale)
-			//.translate(-contentsRect().width(), -contentsRect().height())
-		);
-	//centerOn(c);
-}
-
-void PhotoKitView::scaleWithAnimation(ZoomAction action)
-{
-
-	qreal vs = mScale;
-	qreal hs = mScale;
-	//qreal tx = 0;
-	//qreal ty = 0;
-	if (action == ZoomIn) {
-		mScale += 0.2;
-		mScale = qMin(mScale, zoom_max);
-	} else {
-		mScale -= 0.2;
-		mScale = qMax(mScale, zoom_min);
-	}
-    //qDebug("scale: %f", mScale);
-	/*!
-		translate then zoom. so if keep the center, the translation t satisfies
-		t_dst * s = 0.5 * (w - w0, h - h0) = 0.5 * (s - 1) * (w0, h0)
-	*/
-	//qreal tx_dst = -boundingWidth()*0.5*(zoom_max - 1.0)/zoom_max;
-	//qreal ty_dst = -boundingHeight()*0.5*(zoom_max - 1.0)/zoom_max;
+	qreal x0 = mX, y0 = mY;
+	qreal s0 = mScale;
+	qreal xr0 = 0, yr0 = 0;
+	qreal hs0 = 0, vs0 = 0;
 	if (mMachine->timeLine()->state() == QTimeLine::Running) {
 		mMachine->timeLine()->setPaused(true);
 		qreal step = mMachine->timeLine()->currentValue();
-		vs = mMachine->verticalScaleAt(step);
-		hs = mMachine->horizontalScaleAt(step);
-		//tx = mMachine->xTranslationAt(step);
-		//ty = mMachine->yTranslationAt(step);
-		mMachine->timeLine()->stop();
-	} else {
-		if (action == ZoomOut) {
-			//vs = zoom_max;
-			//hs = zoom_max;
-			//tx = tx_dst;
-			//ty = ty_dst;
-		}
-	}
-	//setTransformOriginPoint(transform().mapRect(boundingRect()).center());
-	if (action == ZoomIn) {
-		//mMachine->setTranslationAt(0.0, tx, ty);
-		//mMachine->setTranslationAt(1.0, tx_dst, ty_dst);
-		mMachine->setScaleAt(0.0, hs, vs);
-		mMachine->setScaleAt(1.0, mScale, mScale);
-	} else {
-		//mMachine->setTranslationAt(0.0, tx, ty);
-		//mMachine->setTranslationAt(1.0, 0.0, 0.0);
-		mMachine->setScaleAt(0.0, hs, vs);
-		mMachine->setScaleAt(1.0, mScale, mScale);
-	}
-	mMachine->timeLine()->start();//start(QAbstractAnimation::KeepWhenStopped);
-}
-
-void PhotoKitView::moveWithAnimation(qreal dx, qreal dy)
-{
-	qreal tx = 0;
-	qreal ty = 0;
-
-	if (mMachine->timeLine()->state() == QTimeLine::Running) {
-		mMachine->timeLine()->setPaused(true);
-		qreal step = mMachine->timeLine()->currentValue();
-		tx = mMachine->xTranslationAt(step);
-		ty = mMachine->yTranslationAt(step);
+		s0 = mMachine->verticalScaleAt(step);
+		x0 = mMachine->xTranslationAt(step);
+		y0 = mMachine->yTranslationAt(step);
+		xr0 = mMachine->xRotationAt(step);
+		yr0 = mMachine->yRotationAt(step);
 		mMachine->timeLine()->stop();
 	}
-	//mMachine->setStartMatrix(QMatrix().translate(this->matrix().dx(), this->matrix().dy()));
-	mMachine->setTranslationAt(0.0, tx, ty);
-	mMachine->setTranslationAt(1.0, dx, dy);
-	mMachine->timeLine()->start();//start(QAbstractAnimation::KeepWhenStopped);
+	mMachine->setTranslationAt(0, x0, y0);
+	mMachine->setTranslationAt(1, x, y);
+	mMachine->setScaleAt(0, s0, s0);
+	mMachine->setScaleAt(1, scale, scale);
+	mMachine->setRotationAt(0, xr0, yr0, 0);
+	mMachine->setRotationAt(0.618, xrot, yrot, zrot);
+	mMachine->setRotationAt(1, 0, 0, 0);
+	mMachine->setShearAt(0, hs0, vs0);
+	mMachine->setShearAt(0.618, xshear, yshear);
+	mMachine->setShearAt(1, 0, 0);
+	mMachine->timeLine()->start();
 }
 
 
-void PhotoKitView::doTransform(const QMatrix& m)
+void PhotoKitView::doTransform(const QTransform& m)
 {
 	//TODO: change origin. default origin is (0,0).
     UiManager::instance()->rootItem()->setTransform(QTransform(m));//, true); //combine?
@@ -179,12 +126,29 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 {
 	QPoint delta = e->pos() - mMousePos;
 	if (mPressed) {
-        //qDebug("%d", delta.x()); //not const. delta.x() is the max value of Easing
-		moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-		//horizontalScrollBar()->setValue(horizontalScrollBar()->value() - delta.x());
-		//verticalScrollBar()->setValue(verticalScrollBar()->value() - delta.y());
-		//setTransform(transform().translate(-e->x(), -e->y()));
-		//setSceneRect(sceneRect().translated(-delta));
+		mX += delta.x() << 1;
+		mY += delta.y();
+		//TODO: move out visible area effect
+		mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
+		mX = qMin(mX, qreal(Config::contentHMargin));
+		mY = qMax(mY, 0.0);
+		mY = qMin(mY, qreal(Config::contentVMargin));
+		qDebug("dx dy %d %d", delta.x(), delta.y());
+
+		qreal xrot, yrot;
+		if (delta.x() > 0) {
+			xrot = qMin(qreal(delta.x())/4, xrot_max);
+		} else {
+			xrot = qMax(qreal(delta.x())/4, xrot_min);
+		}
+		if (delta.y() > 0) {
+			yrot = qMin(qreal(delta.y())*4, yrot_max);
+		} else {
+			yrot = qMax(qreal(delta.y())*4, yrot_min);
+		}
+		//qDebug("mX=%f my=%f", mX, mY);
+		//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
+		smoothTransform(mX, mY, mScale, xrot, yrot, 0, 0, 0);
 		mMousePos = e->pos();
     }
     //qDebug("move in view");
@@ -224,13 +188,8 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 {qDebug("key %d", e->key());
 	switch(e->key()) {
 	case Qt::Key_Right:
-		qDebug("key right");
-        UiManager::instance()->rootItem()->setTransform(QTransform().rotate(1, Qt::YAxis).translate(-600,0), true);//
 		break;
 	case Qt::Key_Left:
-		qDebug("key left");
-        UiManager::instance()->rootItem()->setTransform(QTransform().rotate(-1, Qt::YAxis).translate(600, 0), true);//
-
 		break;
 	default:
 		break;
@@ -244,44 +203,21 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 	int numSteps = numDegrees / 15;
 	//qDebug("wheel steps: %d", numSteps); //1
 	if (numSteps > 0) {
-		scaleWithAnimation(ZoomIn);
+		mScale += 0.12;
+		mScale = qMin(scale_max, mScale);
 	} else {
-		scaleWithAnimation(ZoomOut);
+		mScale -= 0.12;
+		mScale = qMax(scale_min, mScale);
 	}
+	smoothTransform(mX, mY, mScale, 0, 0, 0, 0, 0);
 	//QGraphicsView::wheelEvent(event); //will scroll the content. centerOn will not work
-}
-
-void PhotoKitView::setRenderingSystem()
-{
-	QWidget *viewport = 0;
-
-#ifndef QT_NO_OPENGL
-	if (Config::openGlRendering) {
-		QGLWidget *glw = new QGLWidget(QGLFormat(QGL::SampleBuffers));
-		if (Config::noScreenSync)
-			glw->format().setSwapInterval(0);
-		glw->setAutoFillBackground(false);
-		viewport = glw;
-		setCacheMode(QGraphicsView::CacheNone);
-		if (Config::verbose)
-			qDebug("- using OpenGL");
-	} else // software rendering
-#endif
-	{
-		// software rendering
-		viewport = new QWidget;
-		setCacheMode(QGraphicsView::CacheBackground);
-		if (Config::verbose)
-			qDebug("- using software rendering");
-	}
-
-	setViewport(viewport);
 }
 
 void PhotoKitView::resizeEvent(QResizeEvent *event)
 {
     visibleSceneRect();
-    qDebug("resize: %dx%d", event->size().width(), event->size().height());
+	//qDebug("resize: %dx%d", event->size().width(), event->size().height());
+    UiManager::instance()->updateFixedItems();
     QGraphicsView::resizeEvent(event);
 }
 
@@ -318,6 +254,34 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 		break;
 	}
 	return QGraphicsView::viewportEvent(event);
+}
+
+
+void PhotoKitView::setRenderingSystem()
+{
+	QWidget *viewport = 0;
+
+#ifndef QT_NO_OPENGL
+	if (Config::openGlRendering) {
+		QGLWidget *glw = new QGLWidget(QGLFormat(QGL::SampleBuffers));
+		if (Config::noScreenSync)
+			glw->format().setSwapInterval(0);
+		glw->setAutoFillBackground(false);
+		viewport = glw;
+		setCacheMode(QGraphicsView::CacheNone);
+		if (Config::verbose)
+			qDebug("- using OpenGL");
+	} else // software rendering
+#endif
+	{
+		// software rendering
+		viewport = new QWidget;
+		setCacheMode(QGraphicsView::CacheBackground);
+		if (Config::verbose)
+			qDebug("- using software rendering");
+	}
+
+	setViewport(viewport);
 }
 
 } //namespace PhotoKit

@@ -24,7 +24,7 @@
 #include <QtCore/qpoint.h>
 #include <QtCore/qpointer.h>
 #include <QtCore/qpair.h>
-#include <QtGui/qmatrix.h>
+#include <QtGui/qtransform.h>
 
 namespace PhotoKit {
 
@@ -39,7 +39,7 @@ public:
 public:
 	QPointer<QTimeLine> timeLine;
 
-	QMatrix startMatrix;
+	QTransform startTransform;
 
 	qreal step;
 
@@ -54,7 +54,9 @@ public:
 	};
 	QList<Pair> xPosition;
 	QList<Pair> yPosition;
-	QList<Pair> rotation;
+	QList<Pair> xRotation;
+	QList<Pair> yRotation;
+	QList<Pair> zRotation;
 	QList<Pair> verticalScale;
 	QList<Pair> horizontalScale;
 	QList<Pair> verticalShear;
@@ -160,65 +162,96 @@ void TransformMachine::setTimeLine(QTimeLine *timeLine)
 }
 
 /*!
-  Returns the matrix used to transform the item at the specified \a step value.
+  Returns the transform used to transform the item at the specified \a step value.
 */
-QMatrix TransformMachine::matrixAt(qreal step) const
+QTransform TransformMachine::transformAt(qreal step) const
 {
 	if (step < 0.0 || step > 1.0)
-		qWarning("TransformMachine::matrixAt: invalid step = %f", step);
+		qWarning("TransformMachine::transformAt: invalid step = %f", step);
 
-	QMatrix matrix;
-	if (!d->rotation.isEmpty())
-		matrix.rotate(rotationAt(step));
+	QTransform transform;
+	if (!d->xRotation.isEmpty())
+		transform.rotate(xRotationAt(step), Qt::XAxis);
+	if (!d->yRotation.isEmpty())
+		transform.rotate(yRotationAt(step), Qt::YAxis);
+	if (!d->zRotation.isEmpty())
+		transform.rotate(zRotationAt(step), Qt::ZAxis);
 	if (!d->verticalScale.isEmpty())
-		matrix.scale(horizontalScaleAt(step), verticalScaleAt(step));
+		transform.scale(horizontalScaleAt(step), verticalScaleAt(step));
 	if (!d->verticalShear.isEmpty())
-		matrix.shear(horizontalShearAt(step), verticalShearAt(step));
+		transform.shear(horizontalShearAt(step), verticalShearAt(step));
 	if (!d->xTranslation.isEmpty())
-		matrix.translate(xTranslationAt(step), yTranslationAt(step));
-	return matrix;
+		transform.translate(xTranslationAt(step), yTranslationAt(step));
+	return transform;
 }
 
-void TransformMachine::setStartMatrix(const QMatrix &m)
+void TransformMachine::setStartTransform(const QTransform &m)
 {
-	d->startMatrix = m;
+	d->startTransform = m;
 }
 
-/*!
-  Returns the angle at which the item is rotated at the specified \a step value.
-
-  \sa setRotationAt()
-*/
-qreal TransformMachine::rotationAt(qreal step) const
+qreal TransformMachine::xRotationAt(qreal step) const
 {
 	if (step < 0.0 || step > 1.0)
-		qWarning("TransformMachine::rotationAt: invalid step = %f", step);
+		qWarning("TransformMachine::xRotationAt: invalid step = %f", step);
 
-	return d->linearValueForStep(step, &d->rotation);
+	return d->linearValueForStep(step, &d->xRotation);
 }
-
-/*!
-  Sets the rotation of the item at the given \a step value to the \a angle specified.
-
-  \sa rotationAt()
-*/
-void TransformMachine::setRotationAt(qreal step, qreal angle)
+void TransformMachine::setXRotationAt(qreal step, qreal angle)
 {
-	d->insertUniquePair(step, angle, &d->rotation, "setRotationAt");
+	d->insertUniquePair(step, angle, &d->xRotation, "setXRotationAt");
 }
-
-/*!
-  Returns all explicitly inserted rotations.
-
-  \sa rotationAt(), setRotationAt()
-*/
-QList<QPair<qreal, qreal> > TransformMachine::rotationList() const
+QList<QPair<qreal, qreal> > TransformMachine::xRotationList() const
 {
 	QList<QPair<qreal, qreal> > list;
-	for (int i = 0; i < d->rotation.size(); ++i)
-		list << QPair<qreal, qreal>(d->rotation.at(i).step, d->rotation.at(i).value);
+	for (int i = 0; i < d->xRotation.size(); ++i)
+		list << QPair<qreal, qreal>(d->xRotation.at(i).step, d->xRotation.at(i).value);
 
 	return list;
+}qreal TransformMachine::yRotationAt(qreal step) const
+{
+	if (step < 0.0 || step > 1.0)
+		qWarning("TransformMachine::yRotationAt: invalid step = %f", step);
+
+	return d->linearValueForStep(step, &d->yRotation);
+}
+void TransformMachine::setYRotationAt(qreal step, qreal angle)
+{
+	d->insertUniquePair(step, angle, &d->yRotation, "setYRotationAt");
+}
+QList<QPair<qreal, qreal> > TransformMachine::yRotationList() const
+{
+	QList<QPair<qreal, qreal> > list;
+	for (int i = 0; i < d->yRotation.size(); ++i)
+		list << QPair<qreal, qreal>(d->yRotation.at(i).step, d->yRotation.at(i).value);
+
+	return list;
+}
+qreal TransformMachine::zRotationAt(qreal step) const
+{
+	if (step < 0.0 || step > 1.0)
+		qWarning("TransformMachine::zRotationAt: invalid step = %f", step);
+
+	return d->linearValueForStep(step, &d->zRotation);
+}
+void TransformMachine::setZRotationAt(qreal step, qreal angle)
+{
+	d->insertUniquePair(step, angle, &d->zRotation, "setZRotationAt");
+}
+QList<QPair<qreal, qreal> > TransformMachine::zRotationList() const
+{
+	QList<QPair<qreal, qreal> > list;
+	for (int i = 0; i < d->zRotation.size(); ++i)
+		list << QPair<qreal, qreal>(d->zRotation.at(i).step, d->zRotation.at(i).value);
+
+	return list;
+}
+
+void TransformMachine::setRotationAt(qreal step, qreal xrot, qreal yrot, qreal zrot)
+{
+	d->insertUniquePair(step, xrot, &d->xRotation, "setXRotationAt");
+	d->insertUniquePair(step, yrot, &d->yRotation, "setYRotationAt");
+	d->insertUniquePair(step, zrot, &d->zRotation, "setZRotationAt");
 }
 
 /*!
@@ -233,12 +266,6 @@ qreal TransformMachine::xTranslationAt(qreal step) const
 
 	return d->linearValueForStep(step, &d->xTranslation);
 }
-
-/*!
-  Returns the vertical translation of the item at the specified \a step value.
-
-  \sa setTranslationAt()
-*/
 qreal TransformMachine::yTranslationAt(qreal step) const
 {
 	if (step < 0.0 || step > 1.0)
@@ -246,24 +273,11 @@ qreal TransformMachine::yTranslationAt(qreal step) const
 
 	return d->linearValueForStep(step, &d->yTranslation);
 }
-
-/*!
-  Sets the translation of the item at the given \a step value using the horizontal
-  and vertical coordinates specified by \a dx and \a dy.
-
-  \sa xTranslationAt(), yTranslationAt()
-*/
 void TransformMachine::setTranslationAt(qreal step, qreal dx, qreal dy)
 {
 	d->insertUniquePair(step, dx, &d->xTranslation, "setTranslationAt");
 	d->insertUniquePair(step, dy, &d->yTranslation, "setTranslationAt");
 }
-
-/*!
-  Returns all explicitly inserted translations.
-
-  \sa xTranslationAt(), yTranslationAt(), setTranslationAt()
-*/
 QList<QPair<qreal, QPointF> > TransformMachine::translationList() const
 {
 	QList<QPair<qreal, QPointF> > list;
@@ -285,12 +299,6 @@ qreal TransformMachine::verticalScaleAt(qreal step) const
 
 	return d->linearValueForStep(step, &d->verticalScale, 1);
 }
-
-/*!
-  Returns the horizontal scale for the item at the specified \a step value.
-
-  \sa setScaleAt()
-*/
 qreal TransformMachine::horizontalScaleAt(qreal step) const
 {
 	if (step < 0.0 || step > 1.0)
@@ -298,24 +306,11 @@ qreal TransformMachine::horizontalScaleAt(qreal step) const
 
 	return d->linearValueForStep(step, &d->horizontalScale, 1);
 }
-
-/*!
-  Sets the scale of the item at the given \a step value using the horizontal and
-  vertical scale factors specified by \a sx and \a sy.
-
-  \sa verticalScaleAt(), horizontalScaleAt()
-*/
 void TransformMachine::setScaleAt(qreal step, qreal sx, qreal sy)
 {
 	d->insertUniquePair(step, sx, &d->horizontalScale, "setScaleAt");
 	d->insertUniquePair(step, sy, &d->verticalScale, "setScaleAt");
 }
-
-/*!
-  Returns all explicitly inserted scales.
-
-  \sa verticalScaleAt(), horizontalScaleAt(), setScaleAt()
-*/
 QList<QPair<qreal, QPointF> > TransformMachine::scaleList() const
 {
 	QList<QPair<qreal, QPointF> > list;
@@ -337,12 +332,6 @@ qreal TransformMachine::verticalShearAt(qreal step) const
 
 	return d->linearValueForStep(step, &d->verticalShear, 0);
 }
-
-/*!
-  Returns the horizontal shear for the item at the specified \a step value.
-
-  \sa setShearAt()
-*/
 qreal TransformMachine::horizontalShearAt(qreal step) const
 {
 	if (step < 0.0 || step > 1.0)
@@ -350,24 +339,11 @@ qreal TransformMachine::horizontalShearAt(qreal step) const
 
 	return d->linearValueForStep(step, &d->horizontalShear, 0);
 }
-
-/*!
-  Sets the shear of the item at the given \a step value using the horizontal and
-  vertical shear factors specified by \a sh and \a sv.
-
-  \sa verticalShearAt(), horizontalShearAt()
-*/
 void TransformMachine::setShearAt(qreal step, qreal sh, qreal sv)
 {
 	d->insertUniquePair(step, sh, &d->horizontalShear, "setShearAt");
 	d->insertUniquePair(step, sv, &d->verticalShear, "setShearAt");
 }
-
-/*!
-  Returns all explicitly inserted shears.
-
-  \sa verticalShearAt(), horizontalShearAt(), setShearAt()
-*/
 QList<QPair<qreal, QPointF> > TransformMachine::shearList() const
 {
 	QList<QPair<qreal, QPointF> > list;
@@ -394,12 +370,6 @@ void TransformMachine::setZValueAt(qreal step, qreal z)
 {
 	d->insertUniquePair(step, z, &d->zValue, "setZValueAt");
 }
-
-/*!
-  Returns all explicitly inserted zValues.
-
-  \sa zValueAt(), setZValueAt()
-*/
 QList<QPair<qreal, qreal> > TransformMachine::zValueList() const
 {
 	QList<QPair<qreal, qreal> > list;
@@ -416,7 +386,8 @@ void TransformMachine::clear()
 {
 	d->xPosition.clear();
 	d->yPosition.clear();
-	d->rotation.clear();
+	d->xRotation.clear();
+	d->zRotation.clear();
 	d->verticalScale.clear();
 	d->horizontalScale.clear();
 	d->verticalShear.clear();
@@ -442,14 +413,14 @@ void TransformMachine::setStep(qreal x)
 	beforeAnimationStep(x);
 
 	d->step = x;
-	if (!d->rotation.isEmpty()
+	if (!d->xRotation.isEmpty() || !d->yRotation.isEmpty() || !d->zRotation.isEmpty()
 		|| !d->verticalScale.isEmpty()
 		|| !d->horizontalScale.isEmpty()
 		|| !d->verticalShear.isEmpty()
 		|| !d->horizontalShear.isEmpty()
 		|| !d->xTranslation.isEmpty()
 		|| !d->yTranslation.isEmpty()) {
-		emit matrixChanged(d->startMatrix * matrixAt(x));
+		emit transformChanged(d->startTransform * transformAt(x));
 	}
 	if (!d->zValue.isEmpty()) {
 		emit zValueChanged(zValueAt(x));
@@ -466,7 +437,7 @@ void TransformMachine::setStep(qreal x)
 */
 void TransformMachine::reset()
 {
-	d->startMatrix = QMatrix();
+	d->startTransform = QTransform();
 }
 
 /*!

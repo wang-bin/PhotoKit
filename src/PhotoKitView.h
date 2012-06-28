@@ -36,15 +36,10 @@ public:
 	enum ZoomAction { ZoomIn, ZoomOut};
 	explicit PhotoKitView(QWidget *parent = 0);
     QRectF visibleSceneRect() const;
-    void transformThumbs(qreal x, qreal y, qreal scale, qreal xShear, qreal yShear, qreal maxRotation);//AXix may not be x, y or z
+	void smoothTransform(qreal x, qreal y, qreal scale, qreal xRot, qreal yRot, qreal zRot, qreal xShear, qreal yShear);
 signals:
-	
-public slots:
-	void scaleView(ZoomAction zoom);
 
 protected:
-	void scaleWithAnimation(ZoomAction zoom);
-	void moveWithAnimation(qreal dx, qreal dy);
 	//TODO: multiTouch
 	//virtual bool event(QEvent *event);
     /*not move to scene. scene may be transformed*/
@@ -58,13 +53,16 @@ protected:
 	virtual bool viewportEvent(QEvent *event);
 
 private slots:
-	void doTransform(const QMatrix& m);
+	void doTransform(const QTransform& m);
 private:
 	void setRenderingSystem();
 
 	bool mPressed;
 	PhotoKitScene *mScene;
 	qreal mScale;
+	//qreal mXRot, mYRot, mZRot;
+	qreal mX, mY;
+	//qreal mHShear, mVShear;
 	QPoint mMousePos;
 	//QTime mPressTime; //not required. use movement distance is enough
 
