@@ -23,7 +23,7 @@
 
 #include "ItemAnimation.h"
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 ItemAnimation::ItemAnimation(QGraphicsItem *item, QObject *parent) :
 	QObject(parent),mItem(item)
@@ -42,4 +42,4 @@ void ItemAnimation::setZValue(qreal z)
 	mItem->setZValue(z);
 }
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit

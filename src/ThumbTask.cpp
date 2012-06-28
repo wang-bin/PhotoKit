@@ -30,16 +30,13 @@
 #include <QtGui/QImageReader>
 
 #include "Config.h"
-#include "PhotoKitScene.h"
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 static QStringList image_formats;
 ThumbHash ThumbRecorder::thumbs;
 //OwnPtr<ThumbInfo>?
 
-QFutureWatcher<ThumbInfo> *ThumbTask::mThumbsWatcher = 0;
-//TODO: check md5
 static ThumbInfo createThumb(const QString& path)
 {
 	qDebug(qPrintable(path));
@@ -123,7 +120,6 @@ ThumbTask::ThumbTask()
 	}
 	mThumbRecorder = new ThumbRecorder;
 	mThumbsWatcher = new QFutureWatcher<ThumbInfo>();
-	QObject::connect(mThumbsWatcher, SIGNAL(resultReadyAt(int)), &PhotoKit::PhotoKitScene::instance(), SLOT(updateThumbItemAt(int)));
 	QObject::connect(mThumbsWatcher, SIGNAL(finished()), mThumbRecorder, SLOT(save()));
 }
 
@@ -139,6 +135,11 @@ ThumbTask::~ThumbTask()
 		delete mThumbRecorder;
 		mThumbRecorder = 0;
 	}
+}
+
+QFutureWatcher<ThumbInfo>* ThumbTask::watcher()
+{
+    return mThumbsWatcher;
 }
 
 void ThumbTask::createThumbs(const QStringList& paths)
@@ -169,4 +170,4 @@ ThumbInfo ThumbTask::thumbInfoAt(int index)
     return mThumbsWatcher->resultAt(index);
 }
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit

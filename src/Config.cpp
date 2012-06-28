@@ -97,14 +97,14 @@ QString Config::xml_config_path="xml/config.ini";
 int Config::contentHMargin = 666;
 int Config::contentVMargin = 88;
 
-QString Config::thumbRecordFile = QDir::homePath() + "/PhotoKit/thumbs.qds";
+QString Config::thumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs.qds";
 int Config::thumbRows = 3; //TODO: 2 for mobile
 int Config::thumbSpacing = 4;
 int Config::thumbMargin = 4;
 int Config::thumbBorder = 1;
 int Config::thumbItemWidth = 160;
 int Config::thumbItemHeight = 120;
-QString Config::thumbDir = QDir::homePath() + "/PhotoKit/.thumb";
+QString Config::thumbDir = QDir::homePath() + "/.PhotoKit/.thumb";
 
 bool Config::read(const QString& xml)
 {//r,font
@@ -408,4 +408,4 @@ void Config::postConfigure()
 }
 
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit

@@ -25,7 +25,7 @@
 
 #include <QGraphicsItem>
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 class ProgressBarItem : public QGraphicsItem
 {
@@ -35,5 +35,5 @@ public:
 	
 };
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit
 #endif // PHOTOKIT_PROGRESSBARITEM_H

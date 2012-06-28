@@ -25,7 +25,7 @@
 #include <QtCore/QString>
 #include <QtGui/QColor>
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 class Config
 {
@@ -121,6 +121,6 @@ private:
 	Config(){}
 };
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit
 
 #endif // PHOTOKIT_CONFIG_H

@@ -1,5 +1,5 @@
 /******************************************************************************
-	widget.h: description
+	ToolTip.h: description
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,57 +18,32 @@
 ******************************************************************************/
 
 
-#ifndef PHOTOKIT_WIDGET_H
-#define PHOTOKIT_WIDGET_H
+#ifndef TOOLTIP_H
+#define TOOLTIP_H
 
-#include "PhotoKit_Global.h"
-
-#include <QtCore/QFutureWatcher>
-#include <QtGui/QImage>
-
+#include <QGraphicsObject>
 namespace PhotoKit {
-
-struct ThumbInfo
-{
-	QImage thumb; //OwnPtr? use thumbPath?
-	QString path;
-};
-
-typedef QHash<QString, QString> ThumbHash;
-
-class ThumbRecorder : public QObject
+class ToolTip : public QGraphicsObject
 {
 	Q_OBJECT
 public:
-	static ThumbHash* thumbHash();
-	ThumbRecorder(QObject *parent = 0);
+	//static void showText(const QPointF& pos, const QString text, int msec);
+
+	explicit ToolTip(QGraphicsItem *parent = 0);
+	virtual QRectF boundingRect() const;
+
+protected:
+	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+	void computeRect();
+
 public slots:
-	void save();
+	void showText(const QString& text);
+
 private:
-	static ThumbHash thumbs;
-};
-
-class ThumbTask //Singleton?
-{
-public:
-	ThumbTask();
-	~ThumbTask();
-
-    QFutureWatcher<ThumbInfo>* watcher();
-	void createThumbs(const QStringList& paths);
-	void createThumbsFromDir(const QString& dir);
-
-    QImage thumbAt(int index);
-    ThumbInfo thumbInfoAt(int index);
-private:
-	ThumbRecorder *mThumbRecorder;
-#ifdef QT_NO_CONCURRENT
-
-#else
-    QFutureWatcher<ThumbInfo> *mThumbsWatcher; //OwnPtr<ThumbInfo>?
-#endif //QT_NO_CONCURRENT
+	bool mTextChanged;
+	QString mText;
+	QRectF mRect;
 };
 
 } //namespace PhotoKit
-
-#endif // PHOTOKIT_WIDGET_H
+#endif // TOOLTIP_H

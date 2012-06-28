@@ -20,14 +20,13 @@
 
 #include "PhotoKitScene.h"
 
+#include <cstdlib>
 #include <stdexcept>
 #include <QGraphicsPixmapItem>
-#include "ReflectEffectItem.h"
-#include "ThumbItem.h"
-#include "ThumbTask.h"
-#include "Config.h"
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsView>
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 PhotoKitScene* PhotoKitScene::mpInstance = 0;
 bool PhotoKitScene::mDestroyed = false;
@@ -47,27 +46,15 @@ PhotoKitScene::PhotoKitScene(QObject *parent) :
 	qDebug("ctor scene");
 	//setItemIndexMethod(QGraphicsScene::NoIndex);
 	setBackgroundBrush(QBrush(QColor(66, 66, 66)));
+
 }
 
-void PhotoKitScene::updateThumbItemAt(int index)
+/*
+void PhotoKitScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-	qDebug("updateing thumb at %d", index);
-	int col = index / Config::thumbRows;
-	int row = index % Config::thumbRows;
-
-    ThumbInfo info(ThumbTask::thumbInfoAt(index));
-    ThumbItem *item = new ThumbItem(info.thumb);
-    item->setOriginImage(info.path);
-    item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
-				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemWidth - item->boundingRect().width())/2
-                 , row * (Config::thumbItemHeight + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
-				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemHeight - item->boundingRect().height())/2);
-	addItem(item);
-    if (row == Config::thumbRows - 1) {
-        new ReflectEffectItem(item);
-    }
-	setSceneRect(itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
-}
+    //qDebug("move in scene");
+	event->accept();
+}*/
 
 void PhotoKitScene::MakeInstance()
 {
@@ -88,4 +75,4 @@ void PhotoKitScene::DestroySingleton()
 }
 
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit

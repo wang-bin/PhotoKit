@@ -27,7 +27,12 @@ SOURCES += src/main.cpp \
     src/OutlineGlowItem.cpp \
     src/TransformMachine.cpp \
     src/ItemAnimation.cpp \
-    src/ReflectEffectItem.cpp
+    src/ReflectEffectItem.cpp \
+    src/ShareManager.cpp \
+    src/Button.cpp \
+    src/UiManager.cpp \
+    src/ToolTip.cpp \
+    src/ToolBar.cpp
 
 HEADERS  += \
 	src/ThumbTask.h \
@@ -45,7 +50,12 @@ HEADERS  += \
     src/OutlineGlowItem.h \
     src/TransformMachine.h \
     src/ItemAnimation.h \
-    src/ReflectEffectItem.h
+    src/ReflectEffectItem.h \
+    src/ShareManager.h \
+    src/Button.h \
+    src/UiManager.h \
+    src/ToolTip.h \
+    src/ToolBar.h
 
 CONFIG += mobility
 MOBILITY = 
@@ -55,4 +65,18 @@ symbian {
     # TARGET.CAPABILITY += 
     TARGET.EPOCSTACKSIZE = 0x14000
     TARGET.EPOCHEAPSIZE = 0x020000 0x800000
+}
+
+OTHER_FILES += \
+    qtc_packaging/debian_harmattan/rules \
+    qtc_packaging/debian_harmattan/README \
+    qtc_packaging/debian_harmattan/manifest.aegis \
+    qtc_packaging/debian_harmattan/copyright \
+    qtc_packaging/debian_harmattan/control \
+    qtc_packaging/debian_harmattan/compat \
+    qtc_packaging/debian_harmattan/changelog
+
+contains(MEEGO_EDITION,harmattan) {
+    target.path = /opt/PhotoKit/bin
+    INSTALLS += target
 }

@@ -29,6 +29,7 @@
 #include "ItemAnimation.h"
 #include "OutlineGlowItem.h"
 #include "TransformMachine.h"
+#include "UiManager.h"
 #include "Config.h"
 
 namespace PhotoKit {
@@ -121,7 +122,8 @@ void ThumbItem::showGlow()
 
 void ThumbItem::hideGlow()
 {
-	mGlow->setVisible(false);
+	if (mGlow)
+		mGlow->setVisible(false);
 }
 //TODO:matrix
 void ThumbItem::zoom(ZoomAction action)
@@ -170,6 +172,7 @@ void ThumbItem::zoom(ZoomAction action)
 	//mAnimation->setStartMatrix(matrix());
 	//setTransformOriginPoint(transform().mapRect(boundingRect()).center());
 	if (action == ZoomIn) {
+        showGlow();
 		mAnimation->setZValueAt(0.0, z);
 		mAnimation->setZValueAt(1.0, 2.0);
 		mAnimation->setTranslationAt(0.0, tx, ty);
@@ -177,6 +180,7 @@ void ThumbItem::zoom(ZoomAction action)
 		mAnimation->setScaleAt(0.0, hs, vs);
 		mAnimation->setScaleAt(1.0, zoom_max, zoom_max);
 	} else {
+        hideGlow();
 		mAnimation->setZValueAt(0.0, z);
 		mAnimation->setZValueAt(1.0, 0);
 		mAnimation->setTranslationAt(0.0, tx, ty);
@@ -204,28 +208,44 @@ void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
+    qDebug("enter. last hover: %#x", UiManager::lastHoverThumb);
+    if (UiManager::lastHoverThumb) {
+        UiManager::lastHoverThumb->zoom(ZoomOut);
+        qDebug("last hover: %#x", UiManager::lastHoverThumb);
+    }
+    UiManager::lastHoverThumb = this;
+	//manual center on
 	//scene()->views().at(0)->centerOn(this);
-	//scene()->views().at(0)->ensureVisible(this);
+    ensureVisible();
 	//setTransform(QTransform().scale(2.0, 2.0));
-	//qDebug("z=%f", zValue()); //keep in animation
+    //qDebug("z=%f", zValue()); //keep in animation
 	setZValue(zValue() + 1.0);
 	zoom(ZoomIn);
-	showGlow();
 	QGraphicsItem::hoverEnterEvent(event);
 }
 
+//TODO: record last zoom item. hover leave event some times not recived
+
 void ThumbItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
+    qDebug("leave. last hover: %#x", UiManager::lastHoverThumb);
+    UiManager::lastHoverThumb = 0;
 	//scene()->views().at(0)->ensureVisible(this);
 	//setTransform(QTransform().scale(1.0, 1.0));
 	setZValue(zValue() - 1);
 	zoom(ZoomOut);
-	hideGlow();
 	QGraphicsItem::hoverLeaveEvent(event);
 }
 
 void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
+    //toggle zoom
+    /*
+    qDebug("press");
+    qDebug("z=%f", zValue()); //keep in animation
+    setZValue(zValue() + 1.0);
+    zoom(ZoomIn);
+    showGlow();*/
 	QGraphicsItem::mousePressEvent(event);
 }
 
@@ -233,7 +253,7 @@ void ThumbItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
-/*
+
 bool ThumbItem::sceneEvent(QEvent *event)
 {
 	switch (event->type()) {
@@ -259,6 +279,6 @@ bool ThumbItem::sceneEvent(QEvent *event)
 		return QGraphicsItem::sceneEvent(event);
 	}
 	return true;
-}*/
+}
 
 } //namespace PhotoKit

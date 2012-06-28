@@ -1,6 +1,9 @@
 #ifndef REFLECTEFFECTITEM_H
 #define REFLECTEFFECTITEM_H
 
+/*!
+  TODO: subclass of QGraphicsEffect
+*/
 #include <QGraphicsItem>
 class QGraphicsBlurEffect;
 namespace PhotoKit {

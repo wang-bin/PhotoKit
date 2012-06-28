@@ -78,8 +78,6 @@ public:
 Q_SIGNALS:
 	void matrixChanged(const QMatrix& matrix);
 	void zValueChanged(qreal value);
-	void scaleChanged(qreal sx, qreal sy);
-	void translationChanged(qreal dx, qreal dy);
 
 public Q_SLOTS:
 	void setStep(qreal x);

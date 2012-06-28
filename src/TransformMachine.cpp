@@ -19,9 +19,6 @@
 
 
 #include "TransformMachine.h"
-#include <QGraphicsItem>
-#include <QGraphicsScene>
-#include <QGraphicsView>
 
 #include <QtCore/qtimeline.h>
 #include <QtCore/qpoint.h>
@@ -453,8 +450,6 @@ void TransformMachine::setStep(qreal x)
 		|| !d->xTranslation.isEmpty()
 		|| !d->yTranslation.isEmpty()) {
 		emit matrixChanged(d->startMatrix * matrixAt(x));
-		emit scaleChanged(horizontalScaleAt(x), verticalScaleAt(x));
-		emit translationChanged(xTranslationAt(x), yTranslationAt(x));
 	}
 	if (!d->zValue.isEmpty()) {
 		emit zValueChanged(zValueAt(x));

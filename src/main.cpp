@@ -20,7 +20,7 @@
 #include <QtCore/QDir>
 #include <QApplication>
 #include "PhotoKitView.h"
-#include "ThumbTask.h"
+#include "UiManager.h"
 #include "Config.h"
 int main(int argc, char *argv[])
 {
@@ -28,9 +28,11 @@ int main(int argc, char *argv[])
 
 	PhotoKit::PhotoKitView view;
 	view.setFocus();
-	PhotoKit::ThumbTask task;
-	view.show();
-	task.createThumbsFromDir("/media/Share/photo");
+	PhotoKit::UiManager::instance()->init(&view);
+    //view.showFullScreen();
+    view.showMaximized();
+    PhotoKit::UiManager::instance()->showImagesFromThumb("/media/Share/Media/NaomiLisa");
+    qDebug("PhotoKit thumbdir: %s", qPrintable(PhotoKit::Config::thumbDir));
 	QDir().mkpath(PhotoKit::Config::thumbDir);
 	return a.exec();
 }

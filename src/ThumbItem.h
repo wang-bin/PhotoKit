@@ -52,12 +52,14 @@ public:
 
 protected:
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option = 0, QWidget *widget = 0);
+
 	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 	virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 	//virtual QImage *createImage(const QMatrix &) const { return 0; }
 	//virtual bool collidesWithItem(const QGraphicsItem *, Qt::ItemSelectionMode) const { return false; }
+    virtual bool sceneEvent(QEvent *event);
 
 private:
 	QString origin_image_path;

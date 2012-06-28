@@ -1,5 +1,5 @@
 /******************************************************************************
-	widget.h: description
+	UiManager.h: description
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,57 +18,47 @@
 ******************************************************************************/
 
 
-#ifndef PHOTOKIT_WIDGET_H
-#define PHOTOKIT_WIDGET_H
+#ifndef UIMANAGER_H
+#define UIMANAGER_H
 
-#include "PhotoKit_Global.h"
-
-#include <QtCore/QFutureWatcher>
-#include <QtGui/QImage>
-
+#include <QObject>
+class QGraphicsWidget;
+class QGraphicsItem;
 namespace PhotoKit {
-
-struct ThumbInfo
-{
-	QImage thumb; //OwnPtr? use thumbPath?
-	QString path;
-};
-
-typedef QHash<QString, QString> ThumbHash;
-
-class ThumbRecorder : public QObject
+class ToolTip;
+class PhotoKitView;
+class ThumbItem;
+class ThumbTask;
+class UiManager : public QObject
 {
 	Q_OBJECT
 public:
-	static ThumbHash* thumbHash();
-	ThumbRecorder(QObject *parent = 0);
+	enum PageType {
+		CategoryPage, WallPage, PlayPage, InfoPage, ConfigPage, HelpPage
+	};
+	static UiManager* instance();
+    virtual ~UiManager();
+	void init(PhotoKitView *view);
+    QGraphicsItem* rootItem();
+    ToolTip* toolTipItem();
+
+    void showImagesFromThumb(const QString& dir, bool yes = true);
+    void showImagesFromThumb(const QStringList& paths, bool yes = true);
+
+    static ThumbItem *lastHoverThumb;
+signals:
+	
 public slots:
-	void save();
+    void updateThumbItemAt(int index);
+
 private:
-	static ThumbHash thumbs;
+	explicit UiManager(QObject *parent = 0);
+
+	static UiManager *mInstance;
+    QGraphicsWidget *mRoot;
+    ToolTip *mToolTip;
+	PhotoKitView *mView;
+    ThumbTask *mThumbTask;
 };
-
-class ThumbTask //Singleton?
-{
-public:
-	ThumbTask();
-	~ThumbTask();
-
-    QFutureWatcher<ThumbInfo>* watcher();
-	void createThumbs(const QStringList& paths);
-	void createThumbsFromDir(const QString& dir);
-
-    QImage thumbAt(int index);
-    ThumbInfo thumbInfoAt(int index);
-private:
-	ThumbRecorder *mThumbRecorder;
-#ifdef QT_NO_CONCURRENT
-
-#else
-    QFutureWatcher<ThumbInfo> *mThumbsWatcher; //OwnPtr<ThumbInfo>?
-#endif //QT_NO_CONCURRENT
-};
-
 } //namespace PhotoKit
-
-#endif // PHOTOKIT_WIDGET_H
+#endif // UIMANAGER_H

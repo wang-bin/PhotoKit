@@ -31,7 +31,16 @@
 #endif
 #include "TransformMachine.h"
 #include "PhotoKitScene.h"
+#include "UiManager.h"
 #include "Config.h"
+
+/*!
+ * WARNING: QGraphicsView's translate does not work.in Qt4. We can create a root item and translate that.
+ * QGraphicsItem::ItemIgnoresTransformations ignores except translation even if it's parent is 0. OtherWise
+ * its position is still anchored to its parent. So if an item want to be in a fixed position, do not scroll
+ * the content. key left/right/up/down will move the scroll, we must disable that. It seems that the only way
+ * to translate the other items is using root item again!
+*/
 
 namespace PhotoKit {
 
@@ -40,10 +49,13 @@ static const qreal zoom_min = 0.618;
 PhotoKitView::PhotoKitView(QWidget *parent) :
 	QGraphicsView(parent),mPressed(false),mScale(1.0),mMachine(0)
 {
+	QGraphicsView::setDragMode(QGraphicsView::NoDrag);
+    //setAlignment(Qt::AlignBottom);
 	setTransformationAnchor(QGraphicsView::AnchorUnderMouse); //AnchorViewCenter
 	setResizeAnchor(QGraphicsView::AnchorUnderMouse);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	//setBackgroundBrush(QBrush(Qt::gray));
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    //setBackgroundBrush(QBrush(Qt::gray));
 	mScene = new PhotoKitScene(this);
 
 	setRenderingSystem();
@@ -57,6 +69,14 @@ PhotoKitView::PhotoKitView(QWidget *parent) :
 	timer->setEasingCurve(QEasingCurve::OutQuad);
 	timer->setFrameRange(0, 100);
 	mMachine->setTimeLine(timer);
+}
+
+QRectF PhotoKitView::visibleSceneRect() const
+{
+    QPointF A = mapToScene(QPoint(0,0));
+    QPointF B = mapToScene(QPoint(viewport()->width(), viewport()->height()));
+    qDebug("%f,%f %f,%f", A.x(), A.y(), B.x(), B.y());
+    return QRectF(A, B);
 }
 
 void PhotoKitView::scaleView(ZoomAction zoom)
@@ -91,7 +111,7 @@ void PhotoKitView::scaleWithAnimation(ZoomAction action)
 		mScale -= 0.2;
 		mScale = qMax(mScale, zoom_min);
 	}
-	qDebug("scale: %f", mScale);
+    //qDebug("scale: %f", mScale);
 	/*!
 		translate then zoom. so if keep the center, the translation t satisfies
 		t_dst * s = 0.5 * (w - w0, h - h0) = 0.5 * (s - 1) * (w0, h0)
@@ -150,7 +170,8 @@ void PhotoKitView::moveWithAnimation(qreal dx, qreal dy)
 
 void PhotoKitView::doTransform(const QMatrix& m)
 {
-	setTransform(QTransform(m));//, true); //combine?
+	//TODO: change origin. default origin is (0,0).
+    UiManager::instance()->rootItem()->setTransform(QTransform(m));//, true); //combine?
 }
 
 //TODO: delta.y() to rotate around XAix and translate y. delta.x() rotate around YAix and translate x;
@@ -158,15 +179,17 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 {
 	QPoint delta = e->pos() - mMousePos;
 	if (mPressed) {
-		qDebug("%d", delta.x()); //not const. delta.x() is the max value of Easing
-		//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-		horizontalScrollBar()->setValue(horizontalScrollBar()->value() - delta.x());
-		verticalScrollBar()->setValue(verticalScrollBar()->value() - delta.y());
+        //qDebug("%d", delta.x()); //not const. delta.x() is the max value of Easing
+		moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
+		//horizontalScrollBar()->setValue(horizontalScrollBar()->value() - delta.x());
+		//verticalScrollBar()->setValue(verticalScrollBar()->value() - delta.y());
 		//setTransform(transform().translate(-e->x(), -e->y()));
 		//setSceneRect(sceneRect().translated(-delta));
 		mMousePos = e->pos();
-	}
-	QGraphicsView::mouseMoveEvent(e);
+    }
+    //qDebug("move in view");
+    //e->accept();
+    QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
 }
 
 void PhotoKitView::mousePressEvent(QMouseEvent *e)
@@ -174,12 +197,27 @@ void PhotoKitView::mousePressEvent(QMouseEvent *e)
 	mPressed = true;
 	mMousePos = e->pos();
 	//mPressTime.restart();
+    QGraphicsView::mousePressEvent(e);
 }
 
 void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
 {
 	mPressed = false;
 	mMousePos = e->pos();
+    QGraphicsView::mouseReleaseEvent(e);
+}
+/*
+bool PhotoKitView::event(QEvent *event)
+{
+	qDebug("event: %d", event->type());
+	return false;
+}
+*/
+
+void PhotoKitView::dragMoveEvent(QDragMoveEvent *event)
+{
+	qDebug("drag");
+	event->accept();
 }
 
 void PhotoKitView::keyPressEvent(QKeyEvent *e)
@@ -187,11 +225,11 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 	switch(e->key()) {
 	case Qt::Key_Right:
 		qDebug("key right");
-		setTransform(QTransform().rotate(1, Qt::YAxis).translate(-66,0), true);
+        UiManager::instance()->rootItem()->setTransform(QTransform().rotate(1, Qt::YAxis).translate(-600,0), true);//
 		break;
 	case Qt::Key_Left:
 		qDebug("key left");
-		setTransform(QTransform().rotate(-1, Qt::YAxis).translate(66, 0), true);
+        UiManager::instance()->rootItem()->setTransform(QTransform().rotate(-1, Qt::YAxis).translate(600, 0), true);//
 
 		break;
 	default:
@@ -238,6 +276,13 @@ void PhotoKitView::setRenderingSystem()
 	}
 
 	setViewport(viewport);
+}
+
+void PhotoKitView::resizeEvent(QResizeEvent *event)
+{
+    visibleSceneRect();
+    qDebug("resize: %dx%d", event->size().width(), event->size().height());
+    QGraphicsView::resizeEvent(event);
 }
 
 bool PhotoKitView::viewportEvent(QEvent *event)

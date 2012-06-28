@@ -23,7 +23,7 @@
 #include <QGraphicsBlurEffect>
 #include <QPainter>
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 OutlineGlowItem::OutlineGlowItem(QGraphicsItem *parent)
     :QGraphicsPixmapItem(parent),mGlowWidth(7),mColor(QColor(Qt::blue).lighter(123))
@@ -54,20 +54,23 @@ void OutlineGlowItem::render()
 	pps.setJoinStyle(Qt::RoundJoin);
 	pps.setWidth(mGlowWidth);
 	mOutline = pps.createStroke(mShape).simplified();//.united(mShape).simplified();
+	//QImage image(mSize, QImage::Format_ARGB32_Premultiplied);
 	mPixmap = QPixmap(mSize);
 	mPixmap.fill(Qt::transparent);
+	//QPainter painter(&image);//&mPixmap);
 	QPainter painter(&mPixmap);
 	QBrush brush(mColor);
+	painter.drawPath(mOutline);
 	painter.fillPath(mOutline, brush);
 	//painter.setPen(mColor.lighter(123));
 	//painter.drawPath(mOutline);
 	setPixmap(mPixmap);
+	//setPixmap(QPixmap::fromImage(image));
 }
 
 void OutlineGlowItem::setColor(const QColor& color)
 {
 	mColor = color;
-	//mColor.setAlpha(88);
 }
 
 void OutlineGlowItem::setGlowWidth(qreal glowWidth)
@@ -86,4 +89,4 @@ void OutlineGlowItem::setSize(const QSize& size)
 }
 
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit

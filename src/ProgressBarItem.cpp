@@ -20,11 +20,11 @@
 
 #include "ProgressBarItem.h"
 
-BEGIN_NAMESPACE_PHOTOKIT
+namespace PhotoKit {
 
 ProgressBarItem::ProgressBarItem(QGraphicsItem *parent) :
 	QGraphicsItem(parent)
 {
 }
 
-END_NAMESPACE_PHOTOKIT
+} //namespace PhotoKit

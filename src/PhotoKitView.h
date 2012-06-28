@@ -35,7 +35,8 @@ class PhotoKitView : public QGraphicsView
 public:
 	enum ZoomAction { ZoomIn, ZoomOut};
 	explicit PhotoKitView(QWidget *parent = 0);
-	
+    QRectF visibleSceneRect() const;
+    void transformThumbs(qreal x, qreal y, qreal scale, qreal xShear, qreal yShear, qreal maxRotation);//AXix may not be x, y or z
 signals:
 	
 public slots:
@@ -45,11 +46,15 @@ protected:
 	void scaleWithAnimation(ZoomAction zoom);
 	void moveWithAnimation(qreal dx, qreal dy);
 	//TODO: multiTouch
+	//virtual bool event(QEvent *event);
+    /*not move to scene. scene may be transformed*/
+	virtual void dragMoveEvent(QDragMoveEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void wheelEvent(QWheelEvent *event);
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseMoveEvent(QMouseEvent *event); //TODO:test rotate
 	virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void resizeEvent(QResizeEvent *event);
 	virtual bool viewportEvent(QEvent *event);
 
 private slots:
