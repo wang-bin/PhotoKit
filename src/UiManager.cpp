@@ -19,10 +19,16 @@
 
 
 #include "UiManager.h"
+#include <QAction>
+#include <QIcon>
 #include <QGraphicsWidget>
-
+#include <QGraphicsProxyWidget>
+#include <QApplication>
+#include <QDesktopWidget>
+#include "Button.h"
 #include "PhotoKitView.h"
 #include "ReflectEffectItem.h"
+#include "ToolBar.h"
 #include "ToolTip.h"
 #include "ThumbItem.h"
 #include "ThumbTask.h"
@@ -69,9 +75,20 @@ void UiManager::init(PhotoKitView *view)
     mRoot = new QGraphicsWidget;
     mRoot->setAcceptHoverEvents(true);
     mView->scene()->addItem(mRoot);
-	mToolTip = new ToolTip;
-	mToolTip->setPos(100, 0);
+	//mToolTip = new ToolTip;
+	//mToolTip->setPos(100, 0);
 	mView->scene()->addItem(mToolTip);
+    mBottomBar = new ToolBar;
+    mView->scene()->addItem(mBottomBar);
+    updateFixedItems();
+    QRectF r = mView->visibleSceneRect();
+   // mBottomBar->resize(QSizeF(qApp->desktop()->rect().width(), 66));
+   //     mBottomBar->setPos(r.bottomLeft().x(), r.bottomLeft().y() - mBottomBar->rect().height());
+    //mBottomBar->setPos(0, mView->viewport()->height() - mBottomBar->rect().height());
+   // QPixmap icon(":/icons/add.png");
+	//Button *bt = new Button(icon, mBottomBar);
+	//bt->resize(mBottomBar->rect().height(), mBottomBar->rect().height());
+
 }
 
 QGraphicsItem* UiManager::rootItem()
@@ -83,6 +100,14 @@ QGraphicsItem* UiManager::rootItem()
 ToolTip *UiManager::toolTipItem()
 {
 	return mToolTip;
+}
+
+void UiManager::updateFixedItems()
+{
+    QRectF r(mView->visibleSceneRect());
+    //mBottomBar->resize(QSizeF(r.width(), 100));
+    //mBottomBar->setPos(r.bottomLeft().x(), r.bottomLeft().y() - mBottomBar->rect().height());
+   // mBottomBar->setPos(0, mView->viewport()->height() - mBottomBar->rect().height());
 }
 
 void UiManager::showImagesFromThumb(const QString &dir, bool yes)

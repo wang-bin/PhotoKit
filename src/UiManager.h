@@ -29,6 +29,7 @@ class ToolTip;
 class PhotoKitView;
 class ThumbItem;
 class ThumbTask;
+class ToolBar;
 class UiManager : public QObject
 {
 	Q_OBJECT
@@ -41,6 +42,7 @@ public:
 	void init(PhotoKitView *view);
     QGraphicsItem* rootItem();
     ToolTip* toolTipItem();
+    void updateFixedItems();
 
     void showImagesFromThumb(const QString& dir, bool yes = true);
     void showImagesFromThumb(const QStringList& paths, bool yes = true);
@@ -55,7 +57,8 @@ private:
 	explicit UiManager(QObject *parent = 0);
 
 	static UiManager *mInstance;
-    QGraphicsWidget *mRoot;
+    QGraphicsWidget *mRoot; //mWallRoot
+    ToolBar *mBottomBar;
     ToolTip *mToolTip;
 	PhotoKitView *mView;
     ThumbTask *mThumbTask;
