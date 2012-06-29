@@ -25,6 +25,7 @@
 #include <QtCore/QDataStream>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#include <QtCore/QFileInfo>
 
 #include <QtCore/QtConcurrentMap>
 #include <QtGui/QImageReader>
@@ -151,13 +152,35 @@ void ThumbTask::createThumbs(const QStringList& paths)
 	mThumbsWatcher->setFuture(QtConcurrent::mapped(paths, createThumb));
 }
 
-void ThumbTask::createThumbsFromDir(const QString& dir)
+void ThumbTask::createThumbsFromDirs(const QStringList& dirs)
 {
 	qDebug(qPrintable(image_formats.join(";")));
-	QDir d(dir);
-	QStringList paths = d.entryList(image_formats, QDir::Files);
-	paths.replaceInStrings(QRegExp("^(.*)"), dir + "/\\1");
-	createThumbs(paths);
+    QStringList files;
+    foreach(const QString& dir, dirs) {
+        QDir d(dir);
+        if (!d.exists())
+            continue;
+        QStringList list = d.entryList(image_formats, QDir::Files);
+        list.replaceInStrings(QRegExp("^(.*)"), dir + "/\\1");
+        files << list;
+    }
+    createThumbs(files);
+}
+
+void ThumbTask::createThumbsFromDirsAndPaths(const QStringList &dirs, const QStringList &paths)
+{
+    qDebug(qPrintable(image_formats.join(";")));
+    QStringList files;
+    foreach(const QString& dir, dirs) {
+        QDir d(dir);
+        if (!d.exists())
+            continue;
+        QStringList list = d.entryList(image_formats, QDir::Files);
+        list.replaceInStrings(QRegExp("^(.*)"), dir + "/\\1");
+        files << list;
+    }
+    files << paths;
+    createThumbs(files);
 }
 
 QImage ThumbTask::thumbAt(int index)

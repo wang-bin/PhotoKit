@@ -114,7 +114,7 @@ void UiManager::showImagesFromThumb(const QString &dir, bool yes)
 {
     //ThumbTask or direct show
     if (yes) {
-        mThumbTask->createThumbsFromDir(dir);
+        mThumbTask->createThumbsFromDirs(QStringList() << dir);
     }
 }
 

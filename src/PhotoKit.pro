@@ -29,7 +29,8 @@ SOURCES += main.cpp \
     Button.cpp \
     UiManager.cpp \
     ToolTip.cpp \
-    ToolBar.cpp
+    ToolBar.cpp \
+    CmdParser.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -52,7 +53,8 @@ HEADERS  += \
     Button.h \
     UiManager.h \
     ToolTip.h \
-    ToolBar.h
+    ToolBar.h \
+    CmdParser.h
 
 CONFIG += mobility
 MOBILITY = 
