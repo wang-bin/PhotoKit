@@ -34,7 +34,7 @@ public:
 
 protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option = 0, QWidget *widget = 0);
-    void drawReflect();
+    void drawReflect(); //createImage
 
 private:
     bool mBlur, mGradient;

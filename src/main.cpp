@@ -19,7 +19,7 @@
 
 #include <QtCore/QDir>
 #include <QApplication>
-#include "CmdParser.h"
+#include "OptionParser.h"
 #include "PhotoKitView.h"
 #include "UiManager.h"
 #include "Config.h"
@@ -28,16 +28,16 @@ using namespace PhotoKit;
 
 int main(int argc, char *argv[])
 {
-    PhotoKit::CmdParser::parse(argc, argv);
     QApplication a(argc, argv);
+    OptionParser::parseCmd(argc, argv);
 
-	PhotoKit::PhotoKitView view;
+    PhotoKitView view;
 	view.setFocus();
-	PhotoKit::UiManager::instance()->init(&view);
+    UiManager::instance()->init(&view);
     //view.showFullScreen();
     view.showMaximized();
-    PhotoKit::UiManager::instance()->showImagesFromThumb(CmdParser::images);
-    qDebug("PhotoKit thumbdir: %s", qPrintable(PhotoKit::Config::thumbDir));
-	QDir().mkpath(PhotoKit::Config::thumbDir);
+    UiManager::instance()->showImagesFromThumb(OptionParser::images);
+    qDebug("PhotoKit thumbdir: %s", qPrintable(Config::thumbDir));
+    QDir().mkpath(Config::thumbDir);
 	return a.exec();
 }

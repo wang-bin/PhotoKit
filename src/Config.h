@@ -33,31 +33,12 @@ public:
 	static bool read(const QString& cfg=xml_config_path);
 	static bool save(const QString& cfg=xml_config_path);
 
-	static void parseArgs(int argc, char *argv[]);
 	static void detectSystemResources();
 	static void postConfigure();
 	static void setLowSettings();
 
-	// Colors:
-	static QColor sceneBg1;
-	static QColor sceneBg2;
-	static QColor sceneBg1Line;
-	//static QColor paperBg;
-	static QColor menuTextFg;
-	static QColor buttonText;
-	static QColor buttonBgLow;
-	static QColor buttonBgHigh;
-	static QColor tt_green;
-	static QColor fadeOut;
-	static QColor sceneLine;
-	static QColor heading;
 	static QString glVersion;
 
-	// Guides:
-	static int stageStartY;
-	static int stageHeight;
-	static int stageStartX;
-	static int stageWidth;
 	static int contentStartY;
 	static int contentHeight;
 
@@ -97,15 +78,10 @@ public:
 	static QString tickerText;
 	static QString rootMenuName;
 
-	// fonts
-/*	static QFont contentFont();
-	static QFont headingFont();
-	static QFont buttonFont();
-	static QFont tickerFont();
-*/
 	static QColor color0, color1;
 	static QString xml_config_path;
 
+    static bool showTips;
 	static int contentHMargin;
 	static int contentVMargin;
 	static QString thumbRecordFile;

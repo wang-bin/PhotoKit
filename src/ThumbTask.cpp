@@ -70,9 +70,9 @@ static ThumbInfo createThumb(const QString& path)
 	qreal k = qreal(s.width())/qreal(s.height());
 	qreal q = qreal(Config::thumbItemWidth)/qreal(Config::thumbItemHeight);
 	if (k > q) {
-		image = image.scaledToWidth(Config::thumbItemWidth);
+        image = image.scaledToWidth(Config::thumbItemWidth, Qt::SmoothTransformation);
     } else {
-		image = image.scaledToHeight(Config::thumbItemHeight);
+        image = image.scaledToHeight(Config::thumbItemHeight, Qt::SmoothTransformation);
 	}
 
 	//save thumb to file. use imagewriter and setKey() update hash with

@@ -11,7 +11,7 @@ ReflectEffectItem::ReflectEffectItem(ThumbItem* target, MirrorDirection directio
 {
 	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
 	setFlag(QGraphicsItem::ItemStacksBehindParent);
-    setOpacity(0.618);
+    //setOpacity(0.618);
 }
 
 ReflectEffectItem::~ReflectEffectItem()
@@ -121,7 +121,7 @@ void ReflectEffectItem::drawReflect()
         if (mBlurEffect)
             return;
         mBlurEffect = new QGraphicsBlurEffect;
-       mBlurEffect->setBlurRadius(1.3);
+        mBlurEffect->setBlurRadius(1.3);
         mBlurEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
         setGraphicsEffect(mBlurEffect);
     } //TODO: how to remove effect? can not delete

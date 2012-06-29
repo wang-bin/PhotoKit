@@ -36,10 +36,11 @@ public:
 	enum ZoomAction { ZoomIn, ZoomOut};
 	explicit PhotoKitView(QWidget *parent = 0);
     QRectF visibleSceneRect() const;
-	void smoothTransform(qreal x, qreal y, qreal scale, qreal xRot, qreal yRot, qreal zRot, qreal xShear, qreal yShear);
 signals:
 
 protected:
+	//TODO: add smoothTransform(qreal x, qreal y, qreal scale);
+	void smoothTransform(qreal x, qreal y, qreal scale, qreal xRot, qreal yRot, qreal zRot, qreal xShear, qreal yShear);
 	//TODO: multiTouch
 	//virtual bool event(QEvent *event);
     /*not move to scene. scene may be transformed*/
