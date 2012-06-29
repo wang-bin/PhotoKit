@@ -3,6 +3,8 @@
 #include <QtGui/QImageReader>
 #include "ProgramOptions.h"
 #include "Config.h"
+
+//priority: cmd > config.ini > auto detect
 namespace po = ProgramOptions;
 
 namespace PhotoKit {
@@ -11,7 +13,7 @@ QStringList OptionParser::images;
 void OptionParser::parseCmd(int argc, const char *const*argv)
 {
     static OptionParser cmd;
-    po::parse(argc, argv);
+	po::parse(argc, argv);
     if (po::get("h"))
         po::help();
     if (po::get("opengl")) {
@@ -29,8 +31,6 @@ void OptionParser::parseCmd(int argc, const char *const*argv)
         images << f.split(";");
     if (images.isEmpty())
         getImagesFromDirs(QStringList() << "~");
-
-    Config::postConfigure();
 }
 
 OptionParser::OptionParser()
@@ -48,8 +48,10 @@ OptionParser::OptionParser()
     foreach(QByteArray f, QImageReader::supportedImageFormats()) {
         image_formats << QString("*." + f);
     }
-    Config::read();
-    Config::detectSystemResources();
+	//the read after detect so that the configuration in config file will be applied
+	Config::detectSystemResources();
+	Config::read();
+	Config::postConfigure();
 }
 
 void OptionParser::getImagesFromDirs(const QStringList &dirs)
