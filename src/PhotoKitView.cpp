@@ -53,7 +53,7 @@ static const qreal xrot_min = -8;
 PhotoKitView::PhotoKitView(QWidget *parent) :
 	QGraphicsView(parent),mPressed(false),mScale(1.0),mX(0),mY(0),mMachine(0)
 {
-	QGraphicsView::setDragMode(QGraphicsView::NoDrag);
+    //QGraphicsView::setDragMode(QGraphicsView::NoDrag);
     //setAlignment(Qt::AlignBottom);
 	setTransformationAnchor(QGraphicsView::AnchorUnderMouse); //AnchorViewCenter
 	setResizeAnchor(QGraphicsView::AnchorUnderMouse);
@@ -131,7 +131,7 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 		//TODO: move out visible area effect
 		mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
 		mX = qMin(mX, qreal(Config::contentHMargin));
-		mY = qMax(mY, 0.0);
+        mY = qMax(mY, qreal(0.0));
 		mY = qMin(mY, qreal(Config::contentVMargin));
 		qDebug("dx dy %d %d", delta.x(), delta.y());
 
