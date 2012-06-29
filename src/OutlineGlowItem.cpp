@@ -26,7 +26,7 @@
 namespace PhotoKit {
 
 OutlineGlowItem::OutlineGlowItem(QGraphicsItem *parent)
-    :QGraphicsPixmapItem(parent),mGlowWidth(7),mColor(QColor(Qt::blue).lighter(123))
+    :QGraphicsPixmapItem(parent),mGlowWidth(7),mColor(QColor(Qt::green).lighter(100))
 {
 	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
 	setFlag(QGraphicsItem::ItemStacksBehindParent);

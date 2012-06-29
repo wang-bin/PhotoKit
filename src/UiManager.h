@@ -35,7 +35,7 @@ class UiManager : public QObject
 	Q_OBJECT
 public:
 	enum PageType {
-		CategoryPage, WallPage, PlayPage, InfoPage, ConfigPage, HelpPage
+		CategoryPage, ThumbPage, PlayPage, InfoPage, ConfigPage, HelpPage
 	};
 	static UiManager* instance();
     virtual ~UiManager();
@@ -48,6 +48,7 @@ public:
     void showImagesFromThumb(const QStringList& paths, bool yes = true);
 
     static ThumbItem *lastHoverThumb;
+	static PageType page;
 signals:
 	
 public slots:

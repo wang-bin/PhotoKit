@@ -38,6 +38,7 @@ namespace PhotoKit {
 
 UiManager* UiManager::mInstance = 0;
 ThumbItem* UiManager::lastHoverThumb = 0;
+UiManager::PageType UiManager::page = UiManager::ThumbPage;
 UiManager::UiManager(QObject *parent) :
     QObject(parent),mToolTip(0),mView(0),mThumbTask(new ThumbTask)
 {
