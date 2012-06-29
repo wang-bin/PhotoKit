@@ -9,6 +9,7 @@ TEMPLATE = app
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
 include(../common.pri)
 
+INCLUDEPATH += $$PWD
 SOURCES += main.cpp \
 	ThumbTask.cpp \
     Config.cpp \
@@ -30,7 +31,8 @@ SOURCES += main.cpp \
     UiManager.cpp \
     ToolTip.cpp \
     ToolBar.cpp \
-    CmdParser.cpp
+    OptionParser.cpp \
+    tools/Tools.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -54,7 +56,8 @@ HEADERS  += \
     UiManager.h \
     ToolTip.h \
     ToolBar.h \
-    CmdParser.h
+    OptionParser.h \
+    tools/Tools.h
 
 CONFIG += mobility
 MOBILITY = 

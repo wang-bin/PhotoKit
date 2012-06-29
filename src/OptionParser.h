@@ -4,12 +4,12 @@
 class QStringList;
 namespace PhotoKit {
 
-class CmdParser {
+class OptionParser {
 public:
-    static void parse(int argc, const char* const* argv);
+    static void parseCmd(int argc, const char* const* argv);
     static QStringList images;
 private:
-    CmdParser();
+    OptionParser();
     static void getImagesFromDirs(const QStringList& dirs);
 };
 

@@ -1,4 +1,4 @@
-#include "CmdParser.h"
+#include "OptionParser.h"
 #include <QtCore/QDir>
 #include <QtGui/QImageReader>
 #include "ProgramOptions.h"
@@ -7,10 +7,10 @@ namespace po = ProgramOptions;
 
 namespace PhotoKit {
 static QStringList image_formats;
-QStringList CmdParser::images;
-void CmdParser::parse(int argc, const char *const*argv)
+QStringList OptionParser::images;
+void OptionParser::parseCmd(int argc, const char *const*argv)
 {
-    static CmdParser cmd;
+    static OptionParser cmd;
     po::parse(argc, argv);
     if (po::get("h"))
         po::help();
@@ -29,9 +29,11 @@ void CmdParser::parse(int argc, const char *const*argv)
         images << f.split(";");
     if (images.isEmpty())
         getImagesFromDirs(QStringList() << "~");
+
+    Config::postConfigure();
 }
 
-CmdParser::CmdParser()
+OptionParser::OptionParser()
 {
     po::summary("PhotoKit is a photo browser with impressive 3d effects.\n"
                             "Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>")
@@ -46,9 +48,11 @@ CmdParser::CmdParser()
     foreach(QByteArray f, QImageReader::supportedImageFormats()) {
         image_formats << QString("*." + f);
     }
+    Config::read();
+    Config::detectSystemResources();
 }
 
-void CmdParser::getImagesFromDirs(const QStringList &dirs)
+void OptionParser::getImagesFromDirs(const QStringList &dirs)
 {
     images.clear();
     foreach(const QString& dir, dirs) {
