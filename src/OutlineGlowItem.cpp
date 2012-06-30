@@ -22,11 +22,12 @@
 
 #include <QGraphicsBlurEffect>
 #include <QPainter>
+#include "Config.h"
 
 namespace PhotoKit {
 
 OutlineGlowItem::OutlineGlowItem(QGraphicsItem *parent)
-    :QGraphicsPixmapItem(parent),mGlowWidth(7),mColor(QColor(Qt::green).lighter(100))
+	:QGraphicsPixmapItem(parent),mGlowWidth(7),mColor(Config::glowColor)
 {
 	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
 	setFlag(QGraphicsItem::ItemStacksBehindParent);
@@ -48,7 +49,6 @@ qreal OutlineGlowItem::glowWidth() const
 
 void OutlineGlowItem::render()
 {
-	qDebug("%s %s %d", __FILE__, __FUNCTION__, __LINE__);
 	QPainterPathStroker pps;
 	pps.setCapStyle(Qt::RoundCap);
 	pps.setJoinStyle(Qt::RoundJoin);

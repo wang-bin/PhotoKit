@@ -68,6 +68,7 @@ public slots:
 	void stopSlide();
 	void showCurrentImageInfo();
 	void shareToWeibo();
+	void setup();
 
     void updateThumbItemAt(int index);
 	void updateDisplayedThumbList();

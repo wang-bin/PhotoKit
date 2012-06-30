@@ -25,8 +25,10 @@
 #include <QTextEdit>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QSettings>
 #include <QStackedWidget>
 #include <QToolTip>
+#include "Config.h"
 #include "weiboapi.h"
 
 namespace PhotoKit {
@@ -37,6 +39,7 @@ WeiboDialog::WeiboDialog(QWidget *parent) :
 	mApi = new WeiboApi(this);
 	connect(mApi, SIGNAL(error(QString)), SLOT(doError(QString)));
 	connect(mApi, SIGNAL(loginOk()), SLOT(sendWeiboWithPicture()));
+
 	//mLoginPage = new QWidget;
 	mUserEdit = new QLineEdit;
 	mPasswdEdit = new QLineEdit;
@@ -90,11 +93,13 @@ WeiboDialog::WeiboDialog(QWidget *parent) :
 void WeiboDialog::setUser(const QString &user)
 {
 	mUser = user;
+	mUserEdit->setText(mUser);
 }
 
 void WeiboDialog::setPassword(const QString &passwd)
 {
 	mPasswd = passwd;
+	mPasswdEdit->setText(mPasswd);
 }
 
 void WeiboDialog::setImage(const QString &path)
@@ -133,6 +138,12 @@ void WeiboDialog::sendOk()
 
 void WeiboDialog::sendWeiboWithPicture()
 {
+	QSettings cfg(Config::configPath, QSettings::IniFormat);
+	cfg.setIniCodec("UTF-8");
+	Config::weiboUser = mUserEdit->text();
+	Config::weiboPasswd = mPasswdEdit->text();
+	cfg.setValue("weiboUser", qCompress(Config::weiboUser.toAscii()));
+	cfg.setValue("weiboPasswd", qCompress(Config::weiboPasswd.toAscii()));
 	QString text = mStatusEdit->toPlainText();
 	if (text.isEmpty())
 		QMessageBox::warning(0, tr("Error"), tr("Weibo can't be empty"));

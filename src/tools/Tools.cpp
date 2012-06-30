@@ -3,7 +3,8 @@
 
 #include <QToolTip>
 #include <QtGui/QImageReader>
-
+#include <QApplication>
+#include <QDesktopWidget>
 #include "Config.h"
 
 namespace PhotoKit {
@@ -13,7 +14,8 @@ namespace Tools {
 void showTip(const QString &text)
 {
 	if (Config::showTips) {
-		QToolTip::showText(QPoint(), text);
+		QToolTip::showText(qApp->desktop()->rect().center(), text);
+		qDebug("Tip: %s", qPrintable(text));
 	}
 
 }

@@ -31,13 +31,8 @@
 
 namespace PhotoKit {
 
-
 QString Config::glVersion("Not detected!");
 
-int Config::contentStartY = 22;
-int Config::contentHeight = 510;
-
-// Properties:
 bool Config::openGlRendering = true;
 bool Config::softwareRendering = false;
 bool Config::openGlAvailable = true;
@@ -55,26 +50,14 @@ bool Config::showBoundingRect = false;
 bool Config::showFps = false;
 bool Config::noAdapt = false;
 bool Config::noWindowMask = true;
-bool Config::useButtonBalls = false;
 bool Config::useEightBitPalette = false;
-bool Config::noTimerUpdate = false;
-bool Config::noTickerMorph = false;
 bool Config::adapted = false;
 bool Config::verbose = true;
-bool Config::pause = true;
-int Config::fps = 60;
-int Config::menuCount = 18;
-float Config::animSpeed = 1.0;
-float Config::animSpeedButtons = 1.0;
-float Config::benchmarkFps = -1;
-int Config::tickerLetterCount = 80;
-float Config::tickerMoveSpeed = 0.4f;
-float Config::tickerMorphSpeed = 2.5f;
-QString Config::tickerText = QString::fromUtf8(".EROM ETAERC .SSEL EDOC");
-QString Config::rootMenuName = "Qt Examples and Demos";
-QColor Config::color0=QColor(102, 175, 54, 200);
-QColor Config::color1=QColor(102, 175, 54, 60);
-QString Config::xml_config_path="xml/config.ini";
+
+QString Config::language = "zh_CN";
+QColor Config::backgroundColor = QColor(66, 66, 66);
+QColor Config::glowColor = QColor(Qt::green).lighter(100);
+QString Config::configPath = QDir::homePath() + "/.PhotoKit/config.ini";
 
 bool Config::showLastDisplayed = true;
 bool Config::showTips = true;
@@ -97,37 +80,54 @@ bool Config::keepAspectRatio = true;
 QString Config::weiboUser;
 QString Config::weiboPasswd;
 
-bool Config::read(const QString& xml)
-{//r,font
-	QSettings cfg(xml,QSettings::IniFormat);
+bool Config::read(const QString& ini)
+{
+	QSettings cfg(ini, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
-	cfg.setValue("path",xml);
-	cfg.setPath(QSettings::IniFormat,QSettings::UserScope,xml);
-	qDebug()<<cfg.fileName()<<" w: "<<cfg.isWritable();
-	color0.setRgba(cfg.value("color0",QColor(255, 85, 54, 200).rgba()).value<QRgb>());
-	color1.setRgba(cfg.value("color1",QColor(255, 85, 54, 60).rgba()).value<QRgb>());
-	tickerText=cfg.value("tickerText",QString::fromUtf8(".EROM ETAERC .SSEL EDOC")).toString();
-	tickerLetterCount=cfg.value("tickerLetterCount",Config::tickerLetterCount).toInt();
+	cfg.setValue("configPath", ini);
+	cfg.setPath(QSettings::IniFormat, QSettings::UserScope, ini);
+	qDebug() << cfg.fileName() << " w: " << cfg.isWritable();
 
-#if defined(Q_OS_MAC)
-	cfg.value("contentFont/famaly","Arial");
-#else
-	cfg.value("contentFont/famaly","Verdana");
-#endif
+	backgroundColor.setRgb(cfg.value("backgroundColor", QColor(66, 66, 66).rgb()).value<QRgb>());
+	glowColor.setRgb(cfg.value("glowColor", QColor(Qt::green).lighter(100).rgb()).value<QRgb>());
+	openGlRendering = cfg.value("opengl", true).toBool();
+	showTips = cfg.value("showTips", true).toBool();
+	weiboUser = qUncompress(cfg.value("weiboUser", "").toByteArray());
+	weiboPasswd = qUncompress(cfg.value("weiboPasswd", "").toByteArray());
+	qDebug() << "weibo: " << weiboUser << " " << weiboPasswd;
+
+	contentHMargin = cfg.value("contentHMargin", 666).toInt();
+	contentVMargin = cfg.value("contentVMargin", 88).toInt();
+	thumbRows = cfg.value("thumbRows", 3).toInt();
+	thumbSpacing = cfg.value("thumbSpacing", 4).toInt();
+	thumbMargin = cfg.value("thumbMargin", 4).toInt();
+	thumbBorder = cfg.value("thumbBorder", 1).toInt();
+
+	thumbItemWidth = cfg.value("thumbItemWidth", 160).toInt();
+	thumbItemHeight = cfg.value("thumbItemHeight", 120).toInt();
 
 	return true;
 }
 
-bool Config::save(const QString &xml)
+bool Config::save(const QString &ini)
 {
-	QSettings cfg(xml,QSettings::IniFormat);
+	QSettings cfg(ini, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
-	cfg.setValue("path",xml);
-	cfg.setValue("color0",color0.rgba());
-	cfg.setValue("color1",color1.rgba());
-	cfg.setValue("tickerText",Config::tickerText);
-	cfg.setValue("tickerLetterCount",Config::tickerLetterCount);
-
+	cfg.setValue("configPath", ini);
+	cfg.setValue("backgroundColor", backgroundColor.rgb());
+	cfg.setValue("glowColor", glowColor.rgb());
+	cfg.setValue("opengl", openGlRendering);
+	cfg.setValue("showTips", showTips);
+	cfg.setValue("weiboUser", qCompress(weiboUser.toAscii()));
+	cfg.setValue("weiboPasswd", qCompress(weiboPasswd.toAscii()));
+	cfg.setValue("contentHMargin", contentHMargin);
+	cfg.setValue("contentVMargin", contentVMargin);
+	cfg.setValue("thumbRows", thumbRows);
+	cfg.setValue("thumbSpacing", thumbSpacing);
+	cfg.setValue("thumbMargin", thumbMargin);
+	cfg.setValue("thumbBorder", thumbBorder);
+	cfg.setValue("thumbItemWidth", thumbItemWidth);
+	cfg.setValue("thumbItemHeight", thumbItemHeight);
 
 	return true;
 }
@@ -137,8 +137,6 @@ void Config::setLowSettings()
 	Config::openGlRendering = false;
 	Config::softwareRendering = true;
 	Config::noTicker = true;
-	Config::noTimerUpdate = true;
-	Config::fps = 30;
 	Config::usePixmaps = true;
 	Config::noAnimations = true;
 	Config::noBlending = true;

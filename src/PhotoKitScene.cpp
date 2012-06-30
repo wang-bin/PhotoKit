@@ -25,6 +25,7 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
+#include "Config.h"
 
 namespace PhotoKit {
 
@@ -32,7 +33,7 @@ PhotoKitScene::PhotoKitScene(QObject *parent) :
 	QGraphicsScene(parent)
 {
     //setItemIndexMethod(QGraphicsScene::NoIndex);
-	setBackgroundBrush(QBrush(QColor(66, 66, 66)));
+	setBackgroundBrush(QBrush(Config::backgroundColor));
 
 }
 

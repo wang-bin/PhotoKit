@@ -100,7 +100,7 @@ void WeiboApi::parseOAuth2ReplyData(const QByteArray &data)
 	p0 = d.indexOf(":", i) + 2;
 	p1 = d.indexOf("\"", p0);
 	mUid = d.mid(p0, p1 - p0);
-	qDebug("token=%s, uid=%s", qPrintable(mAccessToken), qPrintable(mUid));
+	qDebug("token=%s, uid=%s", mAccessToken.constData(), mUid.constData());
 
 	disconnect(this, SLOT(parseOAuth2ReplyData(QByteArray)));
 	emit loginOk();

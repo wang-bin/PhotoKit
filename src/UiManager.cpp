@@ -29,14 +29,12 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QAction>
-#include "Button.h"
+#include "tools/ConfigDialog.h"
 #include "network/WeiboDialog.h"
 #include "PhotoKitView.h"
 #include "ReflectEffectItem.h"
 #include "SlideDisplay.h"
 #include "SlidePlayControl.h"
-#include "ToolBar.h"
-#include "ToolTip.h"
 #include "tools/Tools.h"
 #include "ThumbItem.h"
 #include "ThumbTask.h"
@@ -95,19 +93,7 @@ void UiManager::init(PhotoKitView *view)
 	mView->scene()->addItem(mPlayPageRoot);
 	mPlayControl = new SlidePlayControl(this);
 	mPlayPageRoot->setPlayControl(mPlayControl);
-	//mToolTip = new ToolTip;
-	//mToolTip->setPos(100, 0);
-	//mView->scene()->addItem(mToolTip);
-	//mBottomBar = new ToolBar;
-	//mView->scene()->addItem(mBottomBar);
-	//updateFixedItems();
-	//QRectF r = mView->visibleSceneRect();
-   // mBottomBar->resize(QSizeF(qApp->desktop()->rect().width(), 66));
-   //     mBottomBar->setPos(r.bottomLeft().x(), r.bottomLeft().y() - mBottomBar->rect().height());
-    //mBottomBar->setPos(0, mView->viewport()->height() - mBottomBar->rect().height());
-   // QPixmap icon(":/icons/add.png");
-	//Button *bt = new Button(icon, mBottomBar);
-	//bt->resize(mBottomBar->rect().height(), mBottomBar->rect().height());
+
 	gotoPage(ThumbPage);
 
 }
@@ -188,8 +174,15 @@ void UiManager::stopSlide()
 
 void UiManager::showCurrentImageInfo()
 {
-	//flip to show
-	//QMessageBox
+	//TODO: flip to show backside
+	QString info(mPlayPageRoot->imagePath());
+	QImage image(mPlayPageRoot->imagePath());
+	info += "\n";
+	info += tr("Depth") + ": " + QString::number(image.depth()) + "\n";
+	info += tr("Width") + ": " +  QString::number(image.width()) + "\n";
+	info += tr("Height") + ": " + QString::number(image.height()) + "\n";
+
+	QMessageBox::information(0, tr("Image infomation"), info);
 }
 
 void UiManager::shareToWeibo()
@@ -199,6 +192,12 @@ void UiManager::shareToWeibo()
 	w.setUser(Config::weiboUser);
 	w.setPassword(Config::weiboPasswd);
 	w.exec();
+}
+
+void UiManager::setup()
+{
+	ConfigDialog d;
+	d.exec();
 }
 
 void UiManager::addImagesFromDir()
@@ -253,6 +252,7 @@ void UiManager::popupMenu(const QPoint& pos)
 		else
 			menu.addAction(tr("Start slide"), this, SLOT(startSlide()));
 	}
+	menu.addAction(tr("Setup"), this, SLOT(setup()));
 	menu.exec(pos);
 }
 
@@ -265,11 +265,19 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		mPlayPageRoot->hide();
 		mThumbPageRoot->show();
 		mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
+		Tools::showTip(tr("Right click to show menu.\n"
+						  "Press a picture to zoom\n"
+						  "Double click a picture to show large image\n"
+						  "Move mouse to see moving effect\n"
+						  "Two finger touch to zoom all images"));
+
 	} else if (page == PlayPage) {
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
 		mPlayPageRoot->show();
 		mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
+		Tools::showTip(tr("Right click to show menu.\n"
+						  "Double click to go back"));
 	}
 }
 

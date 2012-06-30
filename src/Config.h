@@ -30,17 +30,14 @@ namespace PhotoKit {
 class Config
 {
 public:
-	static bool read(const QString& cfg=xml_config_path);
-	static bool save(const QString& cfg=xml_config_path);
+	static bool read(const QString& cfg=configPath);
+	static bool save(const QString& cfg=configPath);
 
 	static void detectSystemResources();
 	static void postConfigure();
 	static void setLowSettings();
 
 	static QString glVersion;
-
-	static int contentStartY;
-	static int contentHeight;
 
 	// properties:
 	static bool openGlAvailable;
@@ -60,26 +57,14 @@ public:
 	static bool fullscreen;
 	static bool showBoundingRect;
 	static bool showFps;
-	static bool noTimerUpdate;
-	static bool noTickerMorph;
-	static bool useButtonBalls;
 	static bool adapted;
 	static bool verbose;
-	static bool pause;
 
-	static float animSpeed;
-	static float animSpeedButtons;
-	static float benchmarkFps;
-	static int tickerLetterCount;
-	static int fps;
-	static int menuCount;
-	static float tickerMoveSpeed;
-	static float tickerMorphSpeed;
-	static QString tickerText;
-	static QString rootMenuName;
+	static QString language;
 
-	static QColor color0, color1;
-	static QString xml_config_path;
+	static QColor backgroundColor;
+	static QColor glowColor;
+	static QString configPath;
 
 	static bool showLastDisplayed;
     static bool showTips;

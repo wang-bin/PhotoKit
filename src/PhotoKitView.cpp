@@ -273,15 +273,17 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 			qreal currentScaleFactor =
 					QLineF(touchPoint0.pos(), touchPoint1.pos()).length()
 					/ QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
-			if (touchEvent->touchPointStates() & Qt::TouchPointReleased) {
-				// if one of the fingers is released, remember the current scale
-				// factor so that adding another finger later will continue zooming
-				// by adding new scale factor to the existing remembered value.
-				//totalScaleFactor *= currentScaleFactor;
-				//currentScaleFactor = 1;
+			if (touchEvent->touchPointStates() & Qt::TouchPointMoved
+					|| touchEvent->touchPointStates() & Qt::TouchPointReleased) {
+				if (currentScaleFactor > 1) {
+					mScale += 0.12;
+					mScale = qMin(scale_max, mScale);
+				} else {
+					mScale -= 0.12;
+					mScale = qMax(scale_min, mScale);
+				}
+				smoothTransform(mX, mY, mScale, 0, 0, 0, 0, 0);
 			}
-			//setTransform(QTransform().scale(totalScaleFactor * currentScaleFactor,
-			//								totalScaleFactor * currentScaleFactor));
 		}
 		return true;
 	}
