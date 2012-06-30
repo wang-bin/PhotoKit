@@ -39,7 +39,7 @@ public slots:
 	void saveConfig();
 	void selectBackgroundColor();
 	void selectGlowColor();
-
+	void clearCache();
 private:
 	ConfigDialogPrivate *d_ptr;
 };

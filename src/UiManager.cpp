@@ -200,6 +200,16 @@ void UiManager::setup()
 	d.exec();
 }
 
+void UiManager::showHelp()
+{
+	QString help = tr("Right click to show menu.\n"
+					  "Press a picture to zoom\n"
+					  "Double click a picture to show large image and double click aagin to go back\n"
+					  "Move mouse to see moving effect\n"
+					  "Two finger touch to zoom all images");
+	QMessageBox::information(0, tr("Help"), help);
+}
+
 void UiManager::addImagesFromDir()
 {
 	QString dir = QFileDialog::getExistingDirectory();
@@ -253,6 +263,7 @@ void UiManager::popupMenu(const QPoint& pos)
 			menu.addAction(tr("Start slide"), this, SLOT(startSlide()));
 	}
 	menu.addAction(tr("Setup"), this, SLOT(setup()));
+	menu.addAction(tr("Help"), this, SLOT(showHelp()));
 	menu.exec(pos);
 }
 

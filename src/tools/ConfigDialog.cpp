@@ -28,6 +28,8 @@
 #include <QDesktopWidget>
 #include <QLayout>
 #include <QSettings>
+#include <QDir>
+#include <QMessageBox>
 #include "Config.h"
 
 namespace PhotoKit {
@@ -44,6 +46,7 @@ public:
 		thumbHeigh = new QSpinBox;
 		thumbSpace = new QSpinBox;
 		thumbRows = new QSpinBox;
+		clearCache = new QPushButton(QObject::tr("Clear thumbnail cache"));
 		//backgroundColor = new QLabel;
 		//back = new QPushButton(QObject::tr("Background"));
 		//glowColor = new QLabel;
@@ -92,6 +95,8 @@ public:
 		layout->addWidget(new QLabel(QObject::tr("Thumb rows")), r, 0);
 		layout->addWidget(thumbRows, r, 1);
 		r++;
+		layout->addWidget(clearCache, r, 0);
+		r++;
 		//layout->addWidget(backgroundColor, r, 0);
 		//layout->addWidget(back, r, 1);r++;
 		//layout->addWidget(glowColor, r, 0);
@@ -101,6 +106,7 @@ public:
 
 		dialog->setLayout(layout);
 
+		QObject::connect(clearCache, SIGNAL(clicked()), dialog, SLOT(clearCache()));
 		QObject::connect(ok, SIGNAL(clicked()), dialog, SLOT(saveConfig()));
 		QObject::connect(cancel, SIGNAL(clicked()), dialog, SLOT(reject()));
 		//QObject::connect(back, SIGNAL(clicked()), dialog, SLOT(selectBackgroundColor()));
@@ -135,6 +141,7 @@ public:
 	QLabel *backgroundColor, glowColor;
 	QPushButton *ok, *cancel;
 	QPushButton *back, *glow;
+	QPushButton *clearCache;
 };
 
 ConfigDialog::ConfigDialog(QWidget *parent) :
@@ -171,6 +178,17 @@ void ConfigDialog::saveConfig()
 	cfg.setValue("thumbItemWidth", d->thumbWidth->value());
 	cfg.setValue("thumbItemHeight", d->thumbHeigh->value());
 	accept();
+}
+
+void ConfigDialog::clearCache()
+{
+	QDir thumbDir(Config::thumbDir);
+	QStringList files = thumbDir.entryList(QDir::Files | QDir::Hidden);
+	foreach(QString f, files) {
+		QFile::remove(thumbDir.filePath(f));
+	}
+
+	QFile::remove(Config::thumbRecordFile);
 }
 
 } //namespace PhotoKit

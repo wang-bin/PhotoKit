@@ -69,6 +69,7 @@ public slots:
 	void showCurrentImageInfo();
 	void shareToWeibo();
 	void setup();
+	void showHelp();
 
     void updateThumbItemAt(int index);
 	void updateDisplayedThumbList();
