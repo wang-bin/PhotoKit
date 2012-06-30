@@ -32,18 +32,13 @@ class PhotoKitScene : public QGraphicsScene
 {
 	Q_OBJECT
 public:
-	static PhotoKitScene &instance();
 	explicit PhotoKitScene(QObject *parent = 0);
 
 protected:
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     //virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-private:
-	static void MakeInstance();
-	static void DestroySingleton();
 
 private:
-	static PhotoKitScene* mpInstance;
-	static bool mDestroyed;
 };
 
 } //namespace PhotoKit

@@ -19,6 +19,7 @@
 
 #include <QtCore/QDir>
 #include <QApplication>
+#include "ezlog.h"
 #include "OptionParser.h"
 #include "PhotoKitView.h"
 #include "UiManager.h"
@@ -28,8 +29,10 @@ using namespace PhotoKit;
 
 int main(int argc, char *argv[])
 {
+	ezlog_init_default();
     QApplication a(argc, argv);
     OptionParser::parseCmd(argc, argv);
+	QDir().mkpath(Config::thumbDir);
 
     PhotoKitView view;
 	view.setFocus();
@@ -38,6 +41,5 @@ int main(int argc, char *argv[])
     view.showMaximized();
     UiManager::instance()->showImagesFromThumb(OptionParser::images);
     qDebug("PhotoKit thumbdir: %s", qPrintable(Config::thumbDir));
-    QDir().mkpath(Config::thumbDir);
 	return a.exec();
 }

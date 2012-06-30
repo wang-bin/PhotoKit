@@ -135,9 +135,9 @@ void ThumbItem::zoom(ZoomAction action)
 		QObject::connect(mMachine, SIGNAL(zValueChanged(qreal)), mItemAnimation, SLOT(setZValue(qreal)));
 
 		//mMachine->setItem(this);
-		QTimeLine *timer = new QTimeLine(1000);
+        QTimeLine *timer = new QTimeLine(1000);
 		timer->setEasingCurve(QEasingCurve::OutQuad);
-		timer->setFrameRange(0, 100);
+        timer->setFrameRange(0, 100);
 		mMachine->setTimeLine(timer);
 	}
 	qreal vs = 1.0;
@@ -197,11 +197,11 @@ void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 	Q_UNUSED(widget)
 	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	//bool wasSmoothPixmapTransform = painter->testRenderHint(QPainter::SmoothPixmapTransform);
-	painter->save();
+    painter->save();
 	painter->setPen(Qt::black);
 	painter->drawRect(Config::thumbMargin, Config::thumbMargin, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
 	//painter->drawRect(-Config::thumbBorder, -Config::thumbBorder, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
-	painter->restore();
+    painter->restore();
 	painter->drawImage(Config::thumbBorder + Config::thumbMargin, Config::thumbBorder + Config::thumbMargin, thumb);
 	//painter->drawImage(0, 0, thumb);
 }
@@ -258,6 +258,7 @@ void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void ThumbItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
+	UiManager::instance()->gotoPage(UiManager::PlayPage, origin_image_path);
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
 

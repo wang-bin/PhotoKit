@@ -64,7 +64,7 @@ protected:
 private:
 	QString origin_image_path;
 	QImage thumb;
-    QImage origin;
+	//QImage origin;
 	OutlineGlowItem *mGlow;
 	TransformMachine *mMachine;
 	ItemAnimation *mItemAnimation;

@@ -76,12 +76,14 @@ QColor Config::color0=QColor(102, 175, 54, 200);
 QColor Config::color1=QColor(102, 175, 54, 60);
 QString Config::xml_config_path="xml/config.ini";
 
+bool Config::showLastDisplayed = true;
 bool Config::showTips = true;
 
 int Config::contentHMargin = 666;
 int Config::contentVMargin = 88;
 
 QString Config::thumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs.qds";
+QString Config::displayedThumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs_show.qds";
 int Config::thumbRows = 3; //TODO: 2 for mobile
 int Config::thumbSpacing = 4;
 int Config::thumbMargin = 4;
@@ -89,6 +91,11 @@ int Config::thumbBorder = 1;
 int Config::thumbItemWidth = 160;
 int Config::thumbItemHeight = 120;
 QString Config::thumbDir = QDir::homePath() + "/.PhotoKit/thumb";
+
+bool Config::keepAspectRatio = true;
+
+QString Config::weiboUser;
+QString Config::weiboPasswd;
 
 bool Config::read(const QString& xml)
 {//r,font

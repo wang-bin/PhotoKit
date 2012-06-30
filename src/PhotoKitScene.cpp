@@ -28,25 +28,18 @@
 
 namespace PhotoKit {
 
-PhotoKitScene* PhotoKitScene::mpInstance = 0;
-bool PhotoKitScene::mDestroyed = false;
-
-PhotoKitScene& PhotoKitScene::instance()
-{
-	if (!mpInstance) {
-		MakeInstance();
-	}
-	return *mpInstance;
-}
-
 PhotoKitScene::PhotoKitScene(QObject *parent) :
 	QGraphicsScene(parent)
 {
-	mpInstance = this;
-	qDebug("ctor scene");
-	//setItemIndexMethod(QGraphicsScene::NoIndex);
+    //setItemIndexMethod(QGraphicsScene::NoIndex);
 	setBackgroundBrush(QBrush(QColor(66, 66, 66)));
 
+}
+
+void PhotoKitScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    //
+    QGraphicsScene::contextMenuEvent(event);
 }
 
 /*
@@ -55,24 +48,5 @@ void PhotoKitScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     //qDebug("move in scene");
 	event->accept();
 }*/
-
-void PhotoKitScene::MakeInstance()
-{
-	if (!mpInstance) {
-		if (mDestroyed) {
-			mDestroyed = false;
-			throw std::logic_error("Dead Reference Detected");
-		}
-		qDebug("instance scene");
-		mpInstance = new PhotoKitScene();
-		std::atexit(&DestroySingleton);
-	}
-}
-
-void PhotoKitScene::DestroySingleton()
-{
-
-}
-
 
 } //namespace PhotoKit

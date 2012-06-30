@@ -81,10 +81,12 @@ public:
 	static QColor color0, color1;
 	static QString xml_config_path;
 
+	static bool showLastDisplayed;
     static bool showTips;
 	static int contentHMargin;
 	static int contentVMargin;
 	static QString thumbRecordFile;
+	static QString displayedThumbRecordFile;
 	static int thumbRows;
 	static int thumbSpacing;
 	static int thumbMargin;
@@ -93,6 +95,10 @@ public:
 	static int thumbItemHeight;
 	static QString thumbDir;
 
+	static bool keepAspectRatio;
+
+	static QString weiboUser;
+	static QString weiboPasswd;
 private:
 	Config(){}
 };
