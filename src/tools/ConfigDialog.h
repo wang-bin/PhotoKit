@@ -1,5 +1,5 @@
 /******************************************************************************
-	WebGet.cpp: description
+	ConfigDialog.h: description
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,9 +18,30 @@
 ******************************************************************************/
 
 
-#include "WebGet.h"
+#ifndef CONFIGDIALOG_H
+#define CONFIGDIALOG_H
 
-WebGet::WebGet(QObject *parent) :
-    QObject(parent)
+#include <QDialog>
+
+namespace PhotoKit {
+
+class ConfigDialogPrivate;
+class ConfigDialog : public QDialog
 {
-}
+	Q_OBJECT
+	Q_DECLARE_PRIVATE(ConfigDialog)
+public:
+	explicit ConfigDialog(QWidget *parent = 0);
+	
+signals:
+	
+public slots:
+	void saveConfig();
+	void selectBackgroundColor();
+	void selectGlowColor();
+
+private:
+	ConfigDialogPrivate *d_ptr;
+};
+} //namespace PhotoKit
+#endif // CONFIGDIALOG_H
