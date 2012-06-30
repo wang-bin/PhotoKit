@@ -29,21 +29,24 @@
 #include <QtCore/QTimerEvent>
 #include <QDesktopWidget>
 #endif
-
+#include "ezlog.h"
 #include "nexteffect.h"
 #include "SlideDisplay.h"
 #include "nexteffectfactory.h"
-
+#include "tools/Tools.h"
 #include "Config.h"
 
 namespace PhotoKit {
 
 SlidePlayControl::SlidePlayControl(QObject *parent) :
-	QObject(parent)
+	QObject(parent),direction(Forward)
 {
 	random = true;
+	one = false;
+	running = false;
 	effect = 0;
 	view = 0;
+	NextEffectFactory::init();
 }
 
 SlidePlayControl::~SlidePlayControl()
@@ -73,23 +76,48 @@ void SlidePlayControl::start()
 		//view->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, view->size(),qApp->desktop()->availableGeometry()));
 		*/
 	}
+	ezlog_debug();
 	if (random)
 		effect = NextEffectFactory::Instance().getRandomEffect();
+	ezlog_debug();
 
 	startOne();
 	tid_slide = startTimer(5555);
+	running = true;
 }
 
 void SlidePlayControl::stop()
 {
 	killTimer(tid_slide);
 	killTimer(tid_effect);
+	running = false;
+	view->setImagePath(current_path);
+	view->update();
+}
+
+void SlidePlayControl::setDisplay(SlideDisplay *display)
+{
+	view = display;
 }
 
 void SlidePlayControl::setDirectory(const QString &dir)
 {
-	QStringList ext = QStringList()<<"*.png"<<"*.jpg"<<"*.bmp"<<"*.gif";
-	paths = QDir(dir).entryList(ext).replaceInStrings(QRegExp("^"), dir+"/");
+	paths = QDir(dir).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), dir+"/");
+}
+
+void SlidePlayControl::setImages(const QStringList &images)
+{
+	paths = images;
+}
+
+void SlidePlayControl::setPlayOne(bool yes)
+{
+	one = yes;
+}
+
+void SlidePlayControl::setDirection(Direction d)
+{
+	direction = d;
 }
 
 void SlidePlayControl::setEffectType(EffectId t)
@@ -119,6 +147,12 @@ void SlidePlayControl::timerEvent(QTimerEvent *e)
 		if (!effect->prepareNextFrame()) {
 			killTimer(tid_effect);
 			qDebug("%s: Effect [%d %s] end!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
+			if (one) {
+				killTimer(tid_slide);
+				running = false;
+				view->setImagePath(current_path);
+				view->update();
+			}
 		}
 #if QT_VERSION<0x040000
 		//bitBlt()
@@ -131,7 +165,7 @@ void SlidePlayControl::timerEvent(QTimerEvent *e)
 }
 
 void SlidePlayControl::startOne()
-{
+{/*
 	int idx = paths.indexOf(next_path);
 	bool first = (idx==-1);
 	if (idx==paths.size()-1 || first)
@@ -142,39 +176,35 @@ void SlidePlayControl::startOne()
 		next_path = paths.at(0);
 	else
 		next_path = paths.at(idx+1);
-
+*/
+	qDebug("total slide images: %d", paths.size());
+	int idx = paths.indexOf(current_path);
+	if (direction == Forward) {
+		bool last = (idx == (paths.size() -1));
+		if (last) {
+			next_path = paths.first();
+		} else {
+			next_path = paths.at(idx + 1);
+		}
+	} else {
+		bool first = (idx == 0);
+		if (first) {
+			next_path = paths.last();
+		} else {
+			next_path = paths.at(idx - 1);
+		}
+	}
+	qDebug("%s ==>> %s", qPrintable(current_path), qPrintable(next_path));
 	QImage p0(view->size(), QImage::Format_RGB32), p1(view->size(), QImage::Format_RGB32);
-	if (first) {
+	/*if (first) {
 		next_path = current_path = paths.at(0);
 		p0.fill(Qt::black);
 	} else {
 		p0.load(current_path);
-	}
+	}*/
+	p0.load(current_path);
 	p1.load(next_path);
-/*
-	if (p0.width()>qApp->desktop()->width())
-		p0 = p0.scaledToWidth(qApp->desktop()->width());
-	else if (p0.height()>qApp->desktop()->height())
-		p0 = p0.scaledToHeight(qApp->desktop()->height());
-	if (p1.width()>qApp->desktop()->width())
-		p1 = p1.scaledToWidth(qApp->desktop()->width());
-	else if (p1.height()>qApp->desktop()->height())
-		p1 = p1.scaledToHeight(qApp->desktop()->height());
-*/
-	/*
-	if (p0.width()>qApp->desktop()->width() || p0.height()>qApp->desktop()->height()) {
-		if (p0.width()>p0.height())
-			p0 = p0.scaledToWidth(qApp->desktop()->width());
-		else
-			p0 = p0.scaledToHeight(qApp->desktop()->height());
-	}
-	if (p1.width()>qApp->desktop()->width() || p1.height()>qApp->desktop()->height()) {
-		if (p1.width()>p1.height())
-			p1 = p1.scaledToWidth(qApp->desktop()->width());
-		else
-			p1 = p1.scaledToHeight(qApp->desktop()->height());
-	}
-	*/
+
 	//TODO: view's size
 	static QSize s = qApp->desktop()->size();
 	if (p0.size() != s) {
@@ -215,6 +245,7 @@ void SlidePlayControl::startOne()
 
 	tid_effect = startTimer(33);
 	qDebug("%s: Effect [%d %s] start!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
+	setCurrentImage(next_path);
 }
 
 } //namespace PhotoKit

@@ -25,12 +25,14 @@
 #include <QGraphicsItem>
 #include <QtCore/QTimeLine>
 #include <QtGui/QWheelEvent>
+#include <QContextMenuEvent>
 #include <QScrollBar>
 #ifndef QT_NO_OPENGL
 #include <QtOpenGL/QGLWidget>
 #endif
 #include "TransformMachine.h"
 #include "PhotoKitScene.h"
+#include "SlideDisplay.h"
 #include "UiManager.h"
 #include "Config.h"
 
@@ -53,10 +55,11 @@ static const qreal xrot_min = -8;
 PhotoKitView::PhotoKitView(QWidget *parent) :
 	QGraphicsView(parent),mPressed(false),mScale(1.0),mX(0),mY(0),mMachine(0)
 {
-    //QGraphicsView::setDragMode(QGraphicsView::NoDrag);
+	//setDragMode(QGraphicsView::NoDrag);
     //setAlignment(Qt::AlignBottom);
-	setTransformationAnchor(QGraphicsView::AnchorUnderMouse); //AnchorViewCenter
-	setResizeAnchor(QGraphicsView::AnchorUnderMouse);
+    //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+    setResizeAnchor(QGraphicsView::AnchorUnderMouse);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     //setBackgroundBrush(QBrush(Qt::gray));
@@ -114,62 +117,20 @@ void PhotoKitView::smoothTransform(qreal x, qreal y, qreal scale, qreal xrot, qr
 	mMachine->timeLine()->start();
 }
 
-
+//TODO:
 void PhotoKitView::doTransform(const QTransform& m)
 {
 	//TODO: change origin. default origin is (0,0).
-    UiManager::instance()->rootItem()->setTransform(QTransform(m));//, true); //combine?
+/*
+	if (UiManager::page == UiManager::PlayPage) {
+		qDebug("slide page transform");
+		UiManager::instance()->playPageItem()->setTransform(m);
+	} else if (UiManager::page == UiManager::ThumbPage) {
+		qDebug("thumb page transform");*/
+		UiManager::instance()->thumbPageRootItem()->setTransform(m);//, true); //combine?
+	//}
 }
 
-//TODO: delta.y() to rotate around XAix and translate y. delta.x() rotate around YAix and translate x;
-void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
-{
-	QPoint delta = e->pos() - mMousePos;
-	if (mPressed) {
-		mX += delta.x() << 1;
-		mY += delta.y();
-		//TODO: move out visible area effect
-		mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
-		mX = qMin(mX, qreal(Config::contentHMargin));
-        mY = qMax(mY, qreal(0.0));
-		mY = qMin(mY, qreal(Config::contentVMargin));
-		qDebug("dx dy %d %d", delta.x(), delta.y());
-
-		qreal xrot, yrot;
-		if (delta.x() > 0) {
-			xrot = qMin(qreal(delta.x())/4, xrot_max);
-		} else {
-			xrot = qMax(qreal(delta.x())/4, xrot_min);
-		}
-		if (delta.y() > 0) {
-			yrot = qMin(qreal(delta.y())*4, yrot_max);
-		} else {
-			yrot = qMax(qreal(delta.y())*4, yrot_min);
-		}
-		//qDebug("mX=%f my=%f", mX, mY);
-		//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-		smoothTransform(mX, mY, mScale, xrot, yrot, 0, 0, 0);
-		mMousePos = e->pos();
-    }
-    //qDebug("move in view");
-    //e->accept();
-    QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
-}
-
-void PhotoKitView::mousePressEvent(QMouseEvent *e)
-{
-	mPressed = true;
-	mMousePos = e->pos();
-	//mPressTime.restart();
-    QGraphicsView::mousePressEvent(e);
-}
-
-void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
-{
-	mPressed = false;
-	mMousePos = e->pos();
-    QGraphicsView::mouseReleaseEvent(e);
-}
 /*
 bool PhotoKitView::event(QEvent *event)
 {
@@ -177,15 +138,28 @@ bool PhotoKitView::event(QEvent *event)
 	return false;
 }
 */
-
+/*
 void PhotoKitView::dragMoveEvent(QDragMoveEvent *event)
 {
+	if (UiManager::page != UiManager::ThumbPage) {
+
+	}
 	qDebug("drag");
 	event->accept();
+}
+*/
+
+void PhotoKitView::contextMenuEvent(QContextMenuEvent *event)
+{
+	qDebug("PhotoKitView::contextMenuEvent");
+	UiManager::instance()->popupMenu(mapToGlobal(event->pos()));
 }
 
 void PhotoKitView::keyPressEvent(QKeyEvent *e)
 {qDebug("key %d", e->key());
+	if (UiManager::page != UiManager::ThumbPage) {
+
+	}
 	switch(e->key()) {
 	case Qt::Key_Right:
 		break;
@@ -194,7 +168,68 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 	default:
 		break;
 	}
-	e->accept();
+	//e->accept(); //accept then scene with move if arrow keys pressed
+}
+
+
+void PhotoKitView::mousePressEvent(QMouseEvent *e)
+{
+	if (UiManager::page != UiManager::ThumbPage) {
+
+	}
+	mPressed = true;
+	mMousePos = e->posF();
+	//mPressTime.restart();
+	QGraphicsView::mousePressEvent(e);
+}
+
+//TODO: delta.y() to rotate around XAix and translate y. delta.x() rotate around YAix and translate x;
+void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
+{
+	if (!UiManager::instance()->thumbPageRootItem()->isVisible()) {
+		return;
+	}
+
+	QPointF delta = e->posF() - mMousePos;
+	if (mPressed) {
+		mX += delta.x() * 2;
+		mY += delta.y();
+		//TODO: move out visible area effect
+		mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
+		mX = qMin(mX, qreal(Config::contentHMargin));
+		mY = qMax(mY, qreal(0.0));
+		mY = qMin(mY, qreal(Config::contentVMargin));
+		//qDebug("dx dy %d %d", delta.x(), delta.y());
+
+		qreal xrot, yrot;
+		if (delta.x() > 0) {
+			xrot = qMin(delta.x()/4, xrot_max);
+		} else {
+			xrot = qMax(delta.x()/4, xrot_min);
+		}
+		if (delta.y() > 0) {
+			yrot = qMin(delta.y()*4, yrot_max);
+		} else {
+			yrot = qMax(delta.y()*4, yrot_min);
+		}
+		//qDebug("mX=%f my=%f", mX, mY);
+		//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
+		smoothTransform(mX, mY, mScale, xrot, yrot, 0, 0, 0);
+		mMousePos = e->posF();
+	}
+	//qDebug("move in view");
+	//e->accept();
+	QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
+}
+
+void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
+{
+	if (UiManager::page != UiManager::ThumbPage) {
+
+	}
+	mPressed = false;
+	mMousePos = e->posF();
+	QGraphicsView::mouseReleaseEvent(e);
 }
 
 void PhotoKitView::wheelEvent(QWheelEvent *event)
@@ -215,9 +250,9 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 
 void PhotoKitView::resizeEvent(QResizeEvent *event)
 {
-    visibleSceneRect();
+	//visibleSceneRect();
 	//qDebug("resize: %dx%d", event->size().width(), event->size().height());
-    UiManager::instance()->updateFixedItems();
+	//UiManager::instance()->updateFixedItems();
     QGraphicsView::resizeEvent(event);
 }
 
@@ -263,6 +298,7 @@ void PhotoKitView::setRenderingSystem()
 
 #ifndef QT_NO_OPENGL
 	if (Config::openGlRendering) {
+        setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 		QGLWidget *glw = new QGLWidget(QGLFormat(QGL::SampleBuffers));
 		if (Config::noScreenSync)
 			glw->format().setSwapInterval(0);
@@ -275,6 +311,7 @@ void PhotoKitView::setRenderingSystem()
 #endif
 	{
 		// software rendering
+        setViewportUpdateMode(QGraphicsView::MinimalViewportUpdate);
 		viewport = new QWidget;
 		setCacheMode(QGraphicsView::CacheBackground);
 		if (Config::verbose)

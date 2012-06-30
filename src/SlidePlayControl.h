@@ -31,12 +31,18 @@ class SlidePlayControl : public QObject
 {
 	Q_OBJECT
 public:
+	enum Direction { Forward, Backward};
 	explicit SlidePlayControl(QObject *parent = 0);
 	~SlidePlayControl();
 
+	bool isRunning() const {return running;}
 	void setDisplay(SlideDisplay* display); //not own the display
 	void setDirectory(const QString& dir); //add remove
+	void setImages(const QStringList& images);
+	void setPlayOne(bool yes); //TODO: remove
+	void setDirection(Direction d);
 	//void setImages(const QStringList& paths); //add remove
+	QString currentImage() const {return current_path;}
 	void setCurrentImage(const QString& path) {current_path = path;}
 	void setNextImage(const QString& path) {next_path = path;}
 
@@ -46,14 +52,17 @@ public:
 public slots:
 	void start();
 	void stop();
+	void startOne();
 
 protected:
 	virtual void timerEvent(QTimerEvent *);
 
-	void startOne();
 
 private:
 	bool random;
+	bool one;
+	bool running;
+	Direction direction;
 	SlideDisplay *view;
 	NextEffect *effect;
 	int tid_effect, tid_slide;

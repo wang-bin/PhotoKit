@@ -21,23 +21,33 @@
 #ifndef PHOTOKIT_SLIDEDISPLAY_H
 #define PHOTOKIT_SLIDEDISPLAY_H
 
-class NextEffect;
 #include <QGraphicsItem>
+#include <QtCore/QDateTime>
+
+class NextEffect;
 
 namespace PhotoKit {
+class SlidePlayControl;
 //TODO: flip background to show information
 class SlideDisplay : public QGraphicsItem
 {
 public:
 	enum ViewMode { SingleImage, SlideImage};
 	SlideDisplay(QGraphicsItem *parent = 0);
+	void setImagePath(const QString& path);
+	QString imagePath() const;
+	void setPlayControl(SlidePlayControl* control);
+	SlidePlayControl* playControl() const;
 	void setEffect(NextEffect* effect);
 	QSize size();
 
 	virtual QRectF boundingRect() const;
+	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
 protected:
+	void prepairImage();
 	//depends on mode
+	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
 	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event); //next pre
@@ -47,7 +57,12 @@ protected:
 protected:
 	ViewMode mMode;
 	NextEffect *mSlideEffect;
+	SlidePlayControl *mControl;
 	qreal mWidth, mHeight;
+	QPointF mMousePos;
+	QTime mMouseOnTime;
+	QString mPath;
+	QImage mImage;
 };
 
 } //namespace PhotoKit

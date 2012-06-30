@@ -21,15 +21,23 @@
 #include "UiManager.h"
 #include <QAction>
 #include <QIcon>
+#include <QFileDialog>
 #include <QGraphicsWidget>
 #include <QGraphicsProxyWidget>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QMenu>
+#include <QMessageBox>
+#include <QAction>
 #include "Button.h"
+#include "network/WeiboDialog.h"
 #include "PhotoKitView.h"
 #include "ReflectEffectItem.h"
+#include "SlideDisplay.h"
+#include "SlidePlayControl.h"
 #include "ToolBar.h"
 #include "ToolTip.h"
+#include "tools/Tools.h"
 #include "ThumbItem.h"
 #include "ThumbTask.h"
 #include "Config.h"
@@ -39,10 +47,12 @@ namespace PhotoKit {
 UiManager* UiManager::mInstance = 0;
 ThumbItem* UiManager::lastHoverThumb = 0;
 UiManager::PageType UiManager::page = UiManager::ThumbPage;
+
 UiManager::UiManager(QObject *parent) :
-    QObject(parent),mToolTip(0),mView(0),mThumbTask(new ThumbTask)
+	QObject(parent),mToolTip(0),mView(0),mThumbTask(new ThumbTask),mThumbsCount(0)
 {
-    connect(mThumbTask->watcher(), SIGNAL(resultReadyAt(int)), this, SLOT(updateThumbItemAt(int)));
+	connect(mThumbTask->watcher(), SIGNAL(resultReadyAt(int)), this, SLOT(updateThumbItemAt(int)));
+	connect(mThumbTask->watcher(), SIGNAL(finished()), this, SLOT(updateDisplayedThumbList()));
 }
 
 UiManager* UiManager::instance()
@@ -64,39 +74,53 @@ UiManager::~UiManager()
          delete mToolTip ;
         mToolTip = 0;
     }
-    if (mRoot) {
-        delete mRoot;
-        mRoot = 0;
+	if (mThumbPageRoot) {
+		delete mThumbPageRoot;
+		mThumbPageRoot = 0;
     }
+	if (mPlayPageRoot) {
+		delete mPlayPageRoot;
+		mPlayPageRoot = 0;
+	}
 }
 
 void UiManager::init(PhotoKitView *view)
 {
 	mView = view;
-    mRoot = new QGraphicsWidget;
-    mRoot->setAcceptHoverEvents(true);
-    mView->scene()->addItem(mRoot);
+	mThumbPageRoot = new QGraphicsWidget;
+	mThumbPageRoot->setAcceptHoverEvents(true);
+	mView->scene()->addItem(mThumbPageRoot);
+	mPlayPageRoot = new SlideDisplay;
+	mPlayPageRoot->hide();
+	mView->scene()->addItem(mPlayPageRoot);
+	mPlayControl = new SlidePlayControl(this);
+	mPlayPageRoot->setPlayControl(mPlayControl);
 	//mToolTip = new ToolTip;
 	//mToolTip->setPos(100, 0);
-	mView->scene()->addItem(mToolTip);
-    mBottomBar = new ToolBar;
-    mView->scene()->addItem(mBottomBar);
-    updateFixedItems();
-    QRectF r = mView->visibleSceneRect();
+	//mView->scene()->addItem(mToolTip);
+	//mBottomBar = new ToolBar;
+	//mView->scene()->addItem(mBottomBar);
+	//updateFixedItems();
+	//QRectF r = mView->visibleSceneRect();
    // mBottomBar->resize(QSizeF(qApp->desktop()->rect().width(), 66));
    //     mBottomBar->setPos(r.bottomLeft().x(), r.bottomLeft().y() - mBottomBar->rect().height());
     //mBottomBar->setPos(0, mView->viewport()->height() - mBottomBar->rect().height());
    // QPixmap icon(":/icons/add.png");
 	//Button *bt = new Button(icon, mBottomBar);
 	//bt->resize(mBottomBar->rect().height(), mBottomBar->rect().height());
+	gotoPage(ThumbPage);
 
 }
 
-QGraphicsItem* UiManager::rootItem()
+QGraphicsItem* UiManager::thumbPageRootItem()
 {
-    return mRoot;
+	return mThumbPageRoot;
 }
 
+bool UiManager::isSliding() const
+{
+	return mPlayControl->isRunning();
+}
 
 ToolTip *UiManager::toolTipItem()
 {
@@ -105,7 +129,7 @@ ToolTip *UiManager::toolTipItem()
 
 void UiManager::updateFixedItems()
 {
-    QRectF r(mView->visibleSceneRect());
+	//QRectF r(mView->visibleSceneRect());
     //mBottomBar->resize(QSizeF(r.width(), 100));
     //mBottomBar->setPos(r.bottomLeft().x(), r.bottomLeft().y() - mBottomBar->rect().height());
    // mBottomBar->setPos(0, mView->viewport()->height() - mBottomBar->rect().height());
@@ -127,14 +151,73 @@ void UiManager::showImagesFromThumb(const QStringList &paths, bool yes)
     }
 }
 
+void UiManager::clearThumbs()
+{
+	QMessageBox::StandardButton res = QMessageBox::question(0, "", tr("Clear will not delete the image. Continue?"), QMessageBox::Ok | QMessageBox::No);
+	if (res != QMessageBox::Ok)
+		return;
+	//mView->scene()->removeItem(mThumbPageRoot);
+	QList<QGraphicsItem*> cs = mThumbPageRoot->childItems();
+	foreach(QGraphicsItem* c, cs)
+		mView->scene()->removeItem(c);
+	mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect());
+	ThumbRecorder::displayedThumbs().clear();
+	mThumbsCount = 0;
+}
+
+void UiManager::addImages()
+{
+	QStringList paths = QFileDialog::getOpenFileNames(0, tr("Select images"), QDir::homePath(), Tools::imageNameFilters().join(" "));
+	if (paths.isEmpty())
+		return;
+	showImagesFromThumb(paths, true);
+}
+
+void UiManager::startSlide()
+{
+	mPlayControl->setDirection(SlidePlayControl::Forward);
+	mPlayControl->setCurrentImage(mPlayPageRoot->imagePath());
+	qDebug("slide begin: %s", qPrintable(mPlayPageRoot->imagePath()));
+	mPlayControl->start();
+}
+
+void UiManager::stopSlide()
+{
+	mPlayControl->stop();
+}
+
+void UiManager::showCurrentImageInfo()
+{
+	//flip to show
+	//QMessageBox
+}
+
+void UiManager::shareToWeibo()
+{
+	WeiboDialog w;
+	w.setImage(mPlayPageRoot->imagePath());
+	w.setUser(Config::weiboUser);
+	w.setPassword(Config::weiboPasswd);
+	w.exec();
+}
+
+void UiManager::addImagesFromDir()
+{
+	QString dir = QFileDialog::getExistingDirectory();
+	if (!dir.isEmpty()) {
+		showImagesFromThumb(dir);
+	}
+}
+
 void UiManager::updateThumbItemAt(int index)
 {
-    qDebug("updateing thumb at %d", index);
-    int col = index / Config::thumbRows;
-    int row = index % Config::thumbRows;
+	int show_index = index + mThumbsCount;
+	qDebug("updateing thumb at %d. show on %d", index, show_index);
+	int col = show_index / Config::thumbRows;
+	int row = show_index % Config::thumbRows;
 
     ThumbInfo info(mThumbTask->thumbInfoAt(index));
-    ThumbItem *item = new ThumbItem(info.thumb, mRoot);
+	ThumbItem *item = new ThumbItem(info.thumb, mThumbPageRoot);
     item->setOriginImage(info.path);
     item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
                  + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemWidth - item->boundingRect().width())/2
@@ -147,5 +230,48 @@ void UiManager::updateThumbItemAt(int index)
     //scene rect is importance.
     mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 }
+
+void UiManager::updateDisplayedThumbList()
+{
+	mPlayControl->setImages(ThumbRecorder::displayedThumbs()); //current record
+	mThumbsCount = ThumbRecorder::displayedThumbs().size();
+	qDebug("total %d", mThumbsCount);
+}
+
+void UiManager::popupMenu(const QPoint& pos)
+{
+	QMenu menu;
+	if (page == UiManager::ThumbPage) {
+		menu.addAction(tr("Clear"), this, SLOT(clearThumbs()));
+		menu.addAction(tr("Add images"), this, SLOT(addImages()));
+		menu.addAction(tr("Add dir"), this, SLOT(addImagesFromDir()));
+	} else if (page == UiManager::PlayPage) {
+		menu.addAction(tr("Information"), this, SLOT(showCurrentImageInfo()));
+		menu.addAction(tr("Weibo share"), this, SLOT(shareToWeibo()));
+		if (mPlayControl->isRunning())
+			menu.addAction(tr("Stop slide"), this, SLOT(stopSlide()));
+		else
+			menu.addAction(tr("Start slide"), this, SLOT(startSlide()));
+	}
+	menu.exec(pos);
+}
+
+void UiManager::gotoPage(PageType pageType, const QString& image)
+{
+	if (page == pageType)
+		return;
+	page = pageType;
+	if (page == ThumbPage) {
+		mPlayPageRoot->hide();
+		mThumbPageRoot->show();
+		mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
+	} else if (page == PlayPage) {
+		mThumbPageRoot->hide();
+		mPlayPageRoot->setImagePath(image);
+		mPlayPageRoot->show();
+		mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
+	}
+}
+
 } //namespace PhotoKit
 

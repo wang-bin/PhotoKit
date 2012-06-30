@@ -24,12 +24,16 @@
 #include <QObject>
 class QGraphicsWidget;
 class QGraphicsItem;
+class QMenu;
+class QPoint;
 namespace PhotoKit {
 class ToolTip;
 class PhotoKitView;
 class ThumbItem;
 class ThumbTask;
 class ToolBar;
+class SlideDisplay;
+class SlidePlayControl;
 class UiManager : public QObject
 {
 	Q_OBJECT
@@ -39,30 +43,49 @@ public:
 	};
 	static UiManager* instance();
     virtual ~UiManager();
-	void init(PhotoKitView *view);
-    QGraphicsItem* rootItem();
+	void init(PhotoKitView *view);  //call createMenus
+	QGraphicsItem* thumbPageRootItem();
+	SlideDisplay* playPageItem() {return mPlayPageRoot;}
+	bool isSliding() const;
     ToolTip* toolTipItem();
     void updateFixedItems();
 
     void showImagesFromThumb(const QString& dir, bool yes = true);
     void showImagesFromThumb(const QStringList& paths, bool yes = true);
 
+	void popupMenu(const QPoint& pos);
+	void gotoPage(PageType pageType, const QString& image = QString());
+
     static ThumbItem *lastHoverThumb;
 	static PageType page;
 signals:
 	
 public slots:
+	void clearThumbs();
+	void addImagesFromDir();
+	void addImages();
+	void startSlide();
+	void stopSlide();
+	void showCurrentImageInfo();
+	void shareToWeibo();
+
     void updateThumbItemAt(int index);
+	void updateDisplayedThumbList();
 
 private:
 	explicit UiManager(QObject *parent = 0);
+	void createMenus(); //called by init()
 
 	static UiManager *mInstance;
-    QGraphicsWidget *mRoot; //mWallRoot
-    ToolBar *mBottomBar;
+	QGraphicsWidget *mThumbPageRoot; //mWallRoot
+	SlideDisplay *mPlayPageRoot;
+	SlidePlayControl *mPlayControl;
+	ToolBar *mBottomBar;
     ToolTip *mToolTip;
 	PhotoKitView *mView;
     ThumbTask *mThumbTask;
+	int mThumbsCount;
+
 };
 } //namespace PhotoKit
 #endif // UIMANAGER_H

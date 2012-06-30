@@ -6,9 +6,11 @@
 
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS = libprogramoptions photokit
+SUBDIRS = libezlog libprogramoptions libNextEffect photokit
 
+libezlog.file = src/ezlog/src/libezlog.pro
 libprogramoptions.file = src/ProgramOptions/src/libProgramOptions.pro
+libNextEffect.file = src/NextEffect/src/libNextEffect.pro
 photokit.file = src/PhotoKit.pro
 photokit.depends += libprogramoptions
 
@@ -19,7 +21,7 @@ symbian {
     TARGET.EPOCHEAPSIZE = 0x020000 0x800000
 }
 
-OTHER_FILES += \
+OTHER_FILES += TODO \
     qtc_packaging/debian_harmattan/rules \
     qtc_packaging/debian_harmattan/README \
     qtc_packaging/debian_harmattan/manifest.aegis \
