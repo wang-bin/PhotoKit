@@ -21,6 +21,8 @@
 #include <time.h>
 #include <stdexcept>
 #include <assert.h>
+#include <cstdlib>
+#include <algorithm> //std::remove
 #include "nexteffectfactory.h"
 #include "nexteffect_blinds.h"
 #include "nexteffect_center.h"
