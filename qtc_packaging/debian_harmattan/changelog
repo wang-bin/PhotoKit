@@ -1,5 +1,15 @@
+photokit (0.1.0) unstable; urgency=low
+  * base functions done
+
+ -- LucasWang <wbsecg1@gmail.com>  Sat, 30 Jun 2012 22:39:12 +0800
+
+photokit (0.1.1) unstable; urgency=low
+  * <Add change description here>
+
+ -- LucasWang <wbsecg1@gmail.com>  Sat, 30 Jun 2012 22:39:09 +0800
+
 photokit (0.0.1) unstable; urgency=low
 
   * Initial Release.
 
- -- LucasWang <lucaswang@unknown>  Wed, 27 Jun 2012 10:00:42 +0800
+ -- LucasWang <wbsecg1@gmail.com>  Wed, 27 Jun 2012 10:00:42 +0800

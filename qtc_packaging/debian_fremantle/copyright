@@ -1,15 +1,17 @@
-This package was debianized by WangBin <wbsecg1@gmail.com> on
-Wed, 27 Jun 2012 10:00:42 +0800.
+This package was debianized by wbin <wbin@unknown> on
+Sat, 23 Jun 2012 21:41:07 +0800.
 
-It was downloaded from <https://github.com/wang-bin/PhotoKit>
+It was downloaded from <url://example.com>
 
 Upstream Author(s):
 
-	WangBin aka. LucasWang, wbsecg1@gmail.com
+    <put author's name and email here>
+    <likewise for another author>
 
 Copyright:
 
-	<Copyright (C) 2012 WangBin>
+    <Copyright (C) YYYY Name OfAuthor>
+    <likewise for another author>
 
 License:
 
@@ -30,7 +32,7 @@ License:
 On Debian systems, the complete text of the GNU General
 Public License can be found in `/usr/share/common-licenses/GPL'.
 
-The Debian packaging is (C) 2012, WangBin <wbsecg1@gmail.com> and
+The Debian packaging is (C) 2012, wbin <wbin@unknown> and
 is licensed under the GPL, see above.
 
 
