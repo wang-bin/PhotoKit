@@ -40,12 +40,17 @@ class ThumbRecorder : public QObject
 {
 	Q_OBJECT
 public:
+	static ThumbRecorder* instance();
 	static ThumbHash* thumbHash();
-	ThumbRecorder(QObject *parent = 0);
+	static QStringList displayedThumbs();
+	static void addDisplayedThumb(const QString& path);
 public slots:
 	void save();
 private:
+	ThumbRecorder(QObject *parent = 0);
+	static ThumbRecorder* self;
 	static ThumbHash thumbs;
+	static QStringList display;
 };
 
 class ThumbTask //Singleton?
@@ -62,7 +67,6 @@ public:
     QImage thumbAt(int index);
     ThumbInfo thumbInfoAt(int index);
 private:
-	ThumbRecorder *mThumbRecorder;
 #ifdef QT_NO_CONCURRENT
 
 #else

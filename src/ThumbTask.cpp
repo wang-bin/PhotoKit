@@ -30,12 +30,13 @@
 #include <QtCore/QtConcurrentMap>
 #include <QtGui/QImageReader>
 
+#include "tools/Tools.h"
 #include "Config.h"
 
 namespace PhotoKit {
 
-static QStringList image_formats;
 ThumbHash ThumbRecorder::thumbs;
+QStringList ThumbRecorder::display;
 //OwnPtr<ThumbInfo>?
 
 static ThumbInfo createThumb(const QString& path)
@@ -58,6 +59,7 @@ static ThumbInfo createThumb(const QString& path)
 			thumb.thumb = QImage(thumb_path);
 			thumb.path = path;
 			if (!thumb.thumb.isNull()) {
+				ThumbRecorder::addDisplayedThumb(path);
 				return thumb;
 			}
 		}
@@ -78,6 +80,7 @@ static ThumbInfo createThumb(const QString& path)
 	//save thumb to file. use imagewriter and setKey() update hash with
 	QString thumbPath = Config::thumbDir + "/" + md5;
 	ThumbRecorder::thumbHash()->insert(path, thumbPath);
+	ThumbRecorder::addDisplayedThumb(path);
 	image.save(thumbPath, "PNG");
 	ThumbInfo thumb;
 	thumb.thumb = image;
@@ -85,21 +88,53 @@ static ThumbInfo createThumb(const QString& path)
 	return thumb;
 }
 
+
+ThumbRecorder* ThumbRecorder::self = 0;
 ThumbRecorder::ThumbRecorder(QObject *parent)
 	:QObject(parent)
 {
+	self = this;
 	QFile f(Config::thumbRecordFile);
 	if (!f.open(QIODevice::ReadOnly)) {
 		qWarning("Open thumb record file error: %s", qPrintable(f.errorString()));
-		return;
+	} else {QDataStream d(&f);
+		d >> thumbs;
 	}
-	QDataStream d(&f);
-	d >> thumbs;
+	QFile f2(Config::displayedThumbRecordFile);
+	if (!f2.open(QIODevice::ReadOnly)) {
+		qWarning("Open thumb record file error: %s", qPrintable(f2.errorString()));
+	} else {QDataStream d2(&f2);
+		d2 >> display;
+	}
+}
+
+ThumbRecorder* ThumbRecorder::instance()
+{
+	if (!self) {
+		new ThumbRecorder;
+	}
+	return self;
 }
 
 ThumbHash *ThumbRecorder::thumbHash()
 {
+	if (!self)
+		new ThumbRecorder;
 	return &ThumbRecorder::thumbs;
+}
+
+QStringList ThumbRecorder::displayedThumbs()
+{
+	if (!self)
+		new ThumbRecorder;
+	return ThumbRecorder::display;
+}
+
+void ThumbRecorder::addDisplayedThumb(const QString &path)
+{
+	if (display.contains(path))
+		return;
+	display.append(path);
 }
 
 void ThumbRecorder::save()
@@ -111,17 +146,19 @@ void ThumbRecorder::save()
 	}
 	QDataStream d(&f);
 	d << thumbs;
+	QFile f2(Config::displayedThumbRecordFile);
+	if (!f2.open(QIODevice::WriteOnly)) {
+		qWarning("Open thumb record file error: %s", qPrintable(f2.errorString()));
+		return;
+	}
+	QDataStream d2(&f2);
+	d2 << display;
 }
 
 ThumbTask::ThumbTask()
 {
-	image_formats.clear();
-	foreach(QByteArray f, QImageReader::supportedImageFormats()) {
-		image_formats << QString("*." + f);
-	}
-	mThumbRecorder = new ThumbRecorder;
 	mThumbsWatcher = new QFutureWatcher<ThumbInfo>();
-	QObject::connect(mThumbsWatcher, SIGNAL(finished()), mThumbRecorder, SLOT(save()));
+	QObject::connect(mThumbsWatcher, SIGNAL(finished()), ThumbRecorder::instance(), SLOT(save()));
 }
 
 ThumbTask::~ThumbTask()
@@ -131,10 +168,6 @@ ThumbTask::~ThumbTask()
 			mThumbsWatcher->cancel();
 		delete mThumbsWatcher;
 		mThumbsWatcher = 0;
-	}
-	if (mThumbRecorder) {
-		delete mThumbRecorder;
-		mThumbRecorder = 0;
 	}
 }
 
@@ -154,13 +187,13 @@ void ThumbTask::createThumbs(const QStringList& paths)
 
 void ThumbTask::createThumbsFromDirs(const QStringList& dirs)
 {
-	qDebug(qPrintable(image_formats.join(";")));
+	qDebug(qPrintable(Tools::imageNameFilters().join(";")));
     QStringList files;
     foreach(const QString& dir, dirs) {
         QDir d(dir);
         if (!d.exists())
             continue;
-        QStringList list = d.entryList(image_formats, QDir::Files);
+		QStringList list = d.entryList(Tools::imageNameFilters(), QDir::Files);
         list.replaceInStrings(QRegExp("^(.*)"), dir + "/\\1");
         files << list;
     }
@@ -169,13 +202,12 @@ void ThumbTask::createThumbsFromDirs(const QStringList& dirs)
 
 void ThumbTask::createThumbsFromDirsAndPaths(const QStringList &dirs, const QStringList &paths)
 {
-    qDebug(qPrintable(image_formats.join(";")));
     QStringList files;
     foreach(const QString& dir, dirs) {
         QDir d(dir);
         if (!d.exists())
             continue;
-        QStringList list = d.entryList(image_formats, QDir::Files);
+		QStringList list = d.entryList(Tools::imageNameFilters(), QDir::Files);
         list.replaceInStrings(QRegExp("^(.*)"), dir + "/\\1");
         files << list;
     }

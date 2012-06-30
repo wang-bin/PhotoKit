@@ -1,14 +1,14 @@
 #include "OptionParser.h"
 #include <QtCore/QDir>
-#include <QtGui/QImageReader>
 #include "ProgramOptions.h"
+#include "ThumbTask.h"
+#include "tools/Tools.h"
 #include "Config.h"
 
 //priority: cmd > config.ini > auto detect
 namespace po = ProgramOptions;
 
 namespace PhotoKit {
-static QStringList image_formats;
 QStringList OptionParser::images;
 void OptionParser::parseCmd(int argc, const char *const*argv)
 {
@@ -27,10 +27,13 @@ void OptionParser::parseCmd(int argc, const char *const*argv)
         getImagesFromDirs(d.split(";"));
     }
     QString f(po::get("f").str().c_str());
-    if (!f.isEmpty())
-        images << f.split(";");
-    if (images.isEmpty())
-        getImagesFromDirs(QStringList() << "~");
+	if (!f.isEmpty()) {
+		Config::showLastDisplayed = false;
+		images << f.split(";");
+	}
+	if (images.isEmpty()) {
+		images << ThumbRecorder::displayedThumbs();
+	}
 }
 
 OptionParser::OptionParser()
@@ -44,10 +47,7 @@ OptionParser::OptionParser()
             ("-d,--dirs", "", "load images from dirs")
             ("-f,--files", "", "load image from files")
     ;
-    image_formats.clear();
-    foreach(QByteArray f, QImageReader::supportedImageFormats()) {
-        image_formats << QString("*." + f);
-    }
+
 	//the read after detect so that the configuration in config file will be applied
 	Config::detectSystemResources();
 	Config::read();
@@ -61,7 +61,7 @@ void OptionParser::getImagesFromDirs(const QStringList &dirs)
         QDir d(dir);
         if (!d.exists())
             continue;
-        QStringList list = d.entryList(image_formats, QDir::Files);
+		QStringList list = d.entryList(Tools::imageNameFilters(), QDir::Files);
         list.replaceInStrings(QRegExp("^(.*)"), dir + "/\\1");
         images << list;
     }
