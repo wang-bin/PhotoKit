@@ -1,3 +1,4 @@
+*.git.old*
 Makefile*
 *.*pro*.user*
 *.[oa]

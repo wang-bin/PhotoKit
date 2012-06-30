@@ -1,12 +1,14 @@
 
-QT       += core gui opengl
+QT       += core gui opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = PhotoKit
 TEMPLATE = app
 
+!include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
+!include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
 include(../common.pri)
 
 INCLUDEPATH += $$PWD
@@ -32,7 +34,12 @@ SOURCES += main.cpp \
     ToolTip.cpp \
     ToolBar.cpp \
     OptionParser.cpp \
-    tools/Tools.cpp
+    tools/Tools.cpp \
+    SlideDisplay.cpp \
+    SlidePlayControl.cpp \
+    network/weiboapi.cpp \
+    network/qput.cpp \
+    network/WeiboDialog.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -57,7 +64,12 @@ HEADERS  += \
     ToolTip.h \
     ToolBar.h \
     OptionParser.h \
-    tools/Tools.h
+    tools/Tools.h \
+    SlideDisplay.h \
+    SlidePlayControl.h \
+    network/weiboapi.h \
+    network/qput.h \
+    network/WeiboDialog.h
 
 CONFIG += mobility
 MOBILITY = 

@@ -21,20 +21,18 @@
 #ifndef TOOLTIP_H
 #define TOOLTIP_H
 
-#include <QGraphicsObject>
+#include <QGraphicsWidget>
 namespace PhotoKit {
-class ToolTip : public QGraphicsObject
+class ToolTip : public QGraphicsWidget
 {
 	Q_OBJECT
 public:
 	//static void showText(const QPointF& pos, const QString text, int msec);
 
 	explicit ToolTip(QGraphicsItem *parent = 0);
-	virtual QRectF boundingRect() const;
 
 protected:
 	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-	void computeRect();
 
 public slots:
 	void showText(const QString& text);
