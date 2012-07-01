@@ -46,7 +46,7 @@ SlidePlayControl::SlidePlayControl(QObject *parent) :
 	running = false;
 	effect = 0;
 	view = 0;
-	NextEffectFactory::init();
+	//NextEffectFactory::init();
 }
 
 SlidePlayControl::~SlidePlayControl()
@@ -146,7 +146,7 @@ void SlidePlayControl::timerEvent(QTimerEvent *e)
 	} else if (e->timerId()==tid_effect) {
 		if (!effect->prepareNextFrame()) {
 			killTimer(tid_effect);
-			qDebug("%s: Effect [%d %s] end!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
+			ezlog_debug("%s: Effect [%d %s] end!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
 			if (one) {
 				killTimer(tid_slide);
 				running = false;
@@ -177,7 +177,7 @@ void SlidePlayControl::startOne()
 	else
 		next_path = paths.at(idx+1);
 */
-	qDebug("total slide images: %d", paths.size());
+	ezlog_debug("total slide images: %d", paths.size());
 	int idx = paths.indexOf(current_path);
 	if (direction == Forward) {
 		bool last = (idx == (paths.size() -1));
@@ -194,7 +194,7 @@ void SlidePlayControl::startOne()
 			next_path = paths.at(idx - 1);
 		}
 	}
-	qDebug("%s ==>> %s", qPrintable(current_path), qPrintable(next_path));
+	ezlog_debug("%s ==>> %s", qPrintable(current_path), qPrintable(next_path));
 	QImage p0(view->size(), QImage::Format_RGB32), p1(view->size(), QImage::Format_RGB32);
 	/*if (first) {
 		next_path = current_path = paths.at(0);
@@ -211,7 +211,7 @@ void SlidePlayControl::startOne()
 		if (Config::keepAspectRatio) {
 			p0 = p0.scaled(s, Qt::KeepAspectRatio);
 			if (p0.size() != s) {
-				QImage backGoundImage0(s, QImage::Format_RGB32);
+				QImage backGoundImage0(s, QImage::Format_ARGB32_Premultiplied);
 				QPainter painter(&backGoundImage0);
 				painter.fillRect(backGoundImage0.rect(), Qt::black);
 				painter.drawImage((s.width()-p0.width())/2, (s.height()-p0.height())/2, p0);
@@ -225,7 +225,7 @@ void SlidePlayControl::startOne()
 		if (Config::keepAspectRatio) {
 			p1 = p1.scaled(s, Qt::KeepAspectRatio);
 			if (p1.size() != s) {
-				QImage backGoundImage1(s, QImage::Format_RGB32);
+				QImage backGoundImage1(s, QImage::Format_ARGB32_Premultiplied);
 				QPainter painter(&backGoundImage1);
 				painter.fillRect(backGoundImage1.rect(), Qt::black);
 				painter.drawImage((s.width()-p1.width())/2, (s.height()-p1.height())/2, p1);
@@ -235,16 +235,16 @@ void SlidePlayControl::startOne()
 			p1 = p1.scaled(s, Qt::IgnoreAspectRatio);
 		}
 	}
-	qDebug("playing '%s' format=%d %dx%d", qPrintable(next_path), p1.format(), p1.width(), p1.height());
+	ezlog_debug("playing '%s' format=%d %dx%d", qPrintable(next_path), p1.format(), p1.width(), p1.height());
 	effect->setInitialPixmaps(p0, p1);
 	effect->setSpeed(0.618);
 	effect->prepare();
 	view->setEffect(effect);
 	//view->resize(effect->size());
-	//qDebug("size=%dx%d", effect->size().width(), effect->size().height());
+	//ezlog_debug("size=%dx%d", effect->size().width(), effect->size().height());
 
 	tid_effect = startTimer(33);
-	qDebug("%s: Effect [%d %s] start!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
+	ezlog_debug("%s: Effect [%d %s] start!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
 	setCurrentImage(next_path);
 }
 
