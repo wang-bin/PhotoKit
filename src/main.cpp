@@ -19,10 +19,13 @@
 
 #include <QtCore/QDir>
 #include <QApplication>
+#include <QtCore/QTranslator>
+#include <QtDebug>
 #include "ezlog.h"
 #include "OptionParser.h"
 #include "PhotoKitView.h"
 #include "UiManager.h"
+#include "tools/Tools.h"
 #include "Config.h"
 
 using namespace PhotoKit;
@@ -34,12 +37,25 @@ int main(int argc, char *argv[])
     OptionParser::parseCmd(argc, argv);
 	QDir().mkpath(Config::thumbDir);
 
+	QTranslator translator;
+	translator.load("PhotoKit", ":/i18n");
+	a.installTranslator(&translator);
+
     PhotoKitView view;
 	view.setFocus();
     UiManager::instance()->init(&view);
     //view.showFullScreen();
     view.showMaximized();
-    UiManager::instance()->showImagesFromThumb(OptionParser::images);
+	qDebug() << QDir::homePath();
+	if (OptionParser::images.isEmpty()) {
+		QStringList defalutimages = QDir(":/images").entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), ":/images/");
+		foreach(QString f, defalutimages)
+			qDebug() << f;
+		qDebug("default images: %d", defalutimages.size());
+		UiManager::instance()->showImagesFromThumb(defalutimages);
+	} else {
+		UiManager::instance()->showImagesFromThumb(OptionParser::images);
+	}
     qDebug("PhotoKit thumbdir: %s", qPrintable(Config::thumbDir));
 	return a.exec();
 }
