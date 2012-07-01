@@ -48,7 +48,7 @@ ThumbItem* UiManager::lastHoverThumb = 0;
 UiManager::PageType UiManager::page = UiManager::ThumbPage;
 
 UiManager::UiManager(QObject *parent) :
-	QObject(parent),mToolTip(0),mView(0),mThumbTask(new ThumbTask),mThumbsCount(0)
+	QObject(parent)/*,mToolTip(0)*/,mView(0),mThumbTask(new ThumbTask),mThumbsCount(0)
 {
 	connect(mThumbTask->watcher(), SIGNAL(resultReadyAt(int)), this, SLOT(updateThumbItemAt(int)));
 	connect(mThumbTask->watcher(), SIGNAL(finished()), this, SLOT(updateDisplayedThumbList()));
@@ -69,10 +69,10 @@ UiManager::~UiManager()
         delete mThumbTask;
         mThumbTask = 0;
     }
-    if (mToolTip) {
+  /*  if (mToolTip) {
          delete mToolTip ;
         mToolTip = 0;
-    }
+	}*/
 	if (mThumbPageRoot) {
 		delete mThumbPageRoot;
 		mThumbPageRoot = 0;
@@ -111,12 +111,12 @@ bool UiManager::isSliding() const
 {
 	return mPlayControl->isRunning();
 }
-
+/*
 ToolTip *UiManager::toolTipItem()
 {
 	return mToolTip;
 }
-
+*/
 void UiManager::updateFixedItems()
 {
 	//QRectF r(mView->visibleSceneRect());
@@ -298,6 +298,11 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		Tools::showTip(tr("Right click to show menu.\n"
 						  "Double click to go back"));
 	}
+}
+
+void UiManager::tryMoveCenter(QGraphicsItem *item)
+{
+	QPointF p0 = item->scenePos();
 }
 
 } //namespace PhotoKit

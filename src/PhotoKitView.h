@@ -37,11 +37,11 @@ public:
 	explicit PhotoKitView(QWidget *parent = 0);
     QRectF visibleSceneRect() const;
 	void setAnimationDuration(int ms);
-	void smoothTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xRot, qreal yRot, qreal zRot, qreal xShear, qreal yShear);
+	void smartTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xRot, qreal yRot, qreal zRot, qreal xShear, qreal yShear);
 signals:
 
 protected:
-	//TODO: add smoothTransform(qreal x, qreal y, qreal scale);
+	//TODO: add smartTransform(qreal x, qreal y, qreal scale);
 	//TODO: multiTouch
 	//virtual bool event(QEvent *event);
     /*not move to scene. scene may be transformed*/

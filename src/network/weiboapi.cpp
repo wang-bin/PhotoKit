@@ -25,7 +25,7 @@
 #include <QtGui/QImage>
 
 #include "qput.h"
-
+#include "ezlog.h"
 namespace PhotoKit {
 
 const QString OAuthUrl = "https://api.weibo.com/oauth2/access_token";
@@ -80,7 +80,7 @@ void WeiboApi::updateStatusWithPicture(const QString &status, const QString &fil
 	mStatus = status;
 	mFile = fileName;
 	if (mAccessToken.isEmpty()) {
-		qDebug("Not login.");
+		ezlog_debug("Not login.");
 		connect(this, SIGNAL(loginOk()), SLOT(sendStatusWithPicture()));
 		login();
 		return;
@@ -100,7 +100,7 @@ void WeiboApi::parseOAuth2ReplyData(const QByteArray &data)
 	p0 = d.indexOf(":", i) + 2;
 	p1 = d.indexOf("\"", p0);
 	mUid = d.mid(p0, p1 - p0);
-	qDebug("token=%s, uid=%s", mAccessToken.constData(), mUid.constData());
+	ezlog_debug("token=%s, uid=%s", mAccessToken.constData(), mUid.constData());
 
 	disconnect(this, SLOT(parseOAuth2ReplyData(QByteArray)));
 	emit loginOk();
@@ -108,7 +108,7 @@ void WeiboApi::parseOAuth2ReplyData(const QByteArray &data)
 
 void WeiboApi::sendStatusWithPicture()
 {
-	qDebug("update weibo with picture");
+	ezlog_debug("update weibo with picture");
 	QString path(mFile);
 	if (!path.endsWith("jpg", Qt::CaseInsensitive)
 			&& !path.endsWith("jpeg", Qt::CaseInsensitive)
@@ -123,7 +123,7 @@ void WeiboApi::sendStatusWithPicture()
 	}
 	QFile f(path);
 	if (!f.open(QIODevice::ReadOnly)) {
-		qDebug("open error: %s", qPrintable(f.errorString()));
+		ezlog_debug("open error: %s", qPrintable(f.errorString()));
 		return;
 	}
 	QByteArray data = f.readAll();

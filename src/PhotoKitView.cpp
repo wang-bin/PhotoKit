@@ -99,9 +99,9 @@ void PhotoKitView::setAnimationDuration(int ms)
 }
 
 //params x, y and scale are the final value. final rotation and shear params are the values in animation, final values are 0
-void PhotoKitView::smoothTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
+void PhotoKitView::smartTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
 {
-	ezlog_debug();
+	//ezlog_debug();
 	qreal x0 = mX, y0 = mY;
 	qreal s0 = scale0;
 	qreal xr0 = 0, yr0 = 0;
@@ -201,46 +201,47 @@ void PhotoKitView::mousePressEvent(QMouseEvent *e)
 //TODO: delta.y() to rotate around XAix and translate y. delta.x() rotate around YAix and translate x;
 void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 {
-	if (!UiManager::instance()->thumbPageRootItem()->isVisible()) {
-		return;
-	}
-
-	QPointF delta = e->posF() - mMousePos;
 	if (mPressed) {
-		mX += delta.x() * 2;
-		mY += delta.y();
-		//TODO: move out visible area effect
-		mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
-		mX = qMin(mX, qreal(Config::contentHMargin));
-		mY = qMax(mY, qreal(0.0));
-		mY = qMin(mY, qreal(Config::contentVMargin));
-		//ezlog_debug("dx dy %d %d", delta.x(), delta.y());
-		qreal hs = delta.x()/100;
-		qreal vs = delta.y()/100;
-		qreal xrot = delta.x()/8, yrot = delta.x()/8;
-		if (delta.x() > 0) {
-			xrot = qMin(xrot, xrot_max);
-			hs = qMin(hs, xshear_max);
-		} else {
-			xrot = qMax(xrot, xrot_min);
-			hs = qMax(hs, xshear_min);
-		}
-		if (delta.y() > 0) {
-			yrot = qMin(yrot, yrot_max);
-			vs = qMin(vs, yshear_max);
-		} else {
-			yrot = qMax(yrot, yrot_min);
-			vs = qMax(vs, yshear_min);
-		}
-		//ezlog_debug("mX=%f my=%f", mX, mY);
-		//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-		setAnimationDuration(ani_duration);
-		smoothTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
-		mMousePos = e->posF();
+		//setCursor(Qt::ClosedHandCursor);
 	}
-	//ezlog_debug("move in view");
-	//e->accept();
-	QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
+	if (UiManager::instance()->thumbPageRootItem()->isVisible()) {
+		QPointF delta = e->posF() - mMousePos;
+		if (mPressed) {
+			mX += delta.x() * 2;
+			mY += delta.y();
+			//TODO: move out visible area effect
+			mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
+			mX = qMin(mX, qreal(Config::contentHMargin));
+			mY = qMax(mY, qreal(0.0));
+			mY = qMin(mY, qreal(Config::contentVMargin));
+			//ezlog_debug("dx dy %d %d", delta.x(), delta.y());
+			qreal hs = delta.x()/100;
+			qreal vs = delta.y()/100;
+			qreal xrot = delta.x()/8, yrot = delta.x()/8;
+			if (delta.x() > 0) {
+				xrot = qMin(xrot, xrot_max);
+				hs = qMin(hs, xshear_max);
+			} else {
+				xrot = qMax(xrot, xrot_min);
+				hs = qMax(hs, xshear_min);
+			}
+			if (delta.y() > 0) {
+				yrot = qMin(yrot, yrot_max);
+				vs = qMin(vs, yshear_max);
+			} else {
+				yrot = qMax(yrot, yrot_min);
+				vs = qMax(vs, yshear_min);
+			}
+			//ezlog_debug("mX=%f my=%f", mX, mY);
+			//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
+			setAnimationDuration(ani_duration);
+			smartTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
+			mMousePos = e->posF();
+		}
+		//ezlog_debug("move in view");
+		//e->accept();
+	}
+	e->accept(); //WARNING: item will not recive hover event if remove this
 }
 
 void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
@@ -267,7 +268,7 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 		mScale = qMax(scale_min, mScale);
 	}
 	setAnimationDuration(ani_duration);
-	smoothTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
+	smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
 	//QGraphicsView::wheelEvent(event); //will scroll the content. centerOn will not work
 }
 
@@ -307,7 +308,7 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 					mScale = qMax(scale_min, mScale);
 				}
 				setAnimationDuration(ani_duration);
-				smoothTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
+				smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
 			}
 		}
 		return true;

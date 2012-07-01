@@ -26,8 +26,9 @@ class QGraphicsWidget;
 class QGraphicsItem;
 class QMenu;
 class QPoint;
+class QTransform;
 namespace PhotoKit {
-class ToolTip;
+//class ToolTip;
 class PhotoKitView;
 class ThumbItem;
 class ThumbTask;
@@ -47,7 +48,7 @@ public:
 	QGraphicsItem* thumbPageRootItem();
 	SlideDisplay* playPageItem() {return mPlayPageRoot;}
 	bool isSliding() const;
-    ToolTip* toolTipItem();
+	//ToolTip* toolTipItem();
     void updateFixedItems();
 
     void showImagesFromThumb(const QString& dir, bool yes = true);
@@ -56,11 +57,14 @@ public:
 	void popupMenu(const QPoint& pos);
 	void gotoPage(PageType pageType, const QString& image = QString());
 
+	void tryMoveCenter(QGraphicsItem* item);
+
     static ThumbItem *lastHoverThumb;
 	static PageType page;
 signals:
 	
 public slots:
+	//void transformItem(const QTransform& t);
 	void clearThumbs();
 	void addImagesFromDir();
 	void addImages();
@@ -83,7 +87,7 @@ private:
 	SlideDisplay *mPlayPageRoot;
 	SlidePlayControl *mPlayControl;
 	ToolBar *mBottomBar;
-    ToolTip *mToolTip;
+	//ToolTip *mToolTip;
 	PhotoKitView *mView;
     ThumbTask *mThumbTask;
 	int mThumbsCount;

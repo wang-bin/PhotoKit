@@ -27,6 +27,7 @@
 #include <QtCore/QDateTime>
 #include <QtCore/QMapIterator>
 #include <QtCore/QList>
+#include "ezlog.h"
 
 namespace PhotoKit {
 QPut::QPut(QObject *parent)
@@ -82,10 +83,10 @@ void QPut::upload()
     mData = mTextPart + mDataPart;
     mData.append("--" + mBoundary + "--\r\n");
 
-    qDebug("form:\n%s", mData.constData());
+	ezlog_debug("form:\n%s", mData.constData());
     QNetworkRequest request(mUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "multipart/form-data; boundary=" + mBoundary);
-    qDebug("sending data to %s", qPrintable(mUrl.path()));
+	ezlog_debug("sending data to %s", qPrintable(mUrl.path()));
     QNetworkReply *reply = mNetwork->post(request, mData);
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(DoReplyError()));
     connect(reply, SIGNAL(finished()), this, SLOT(DoFinished()));
@@ -97,7 +98,7 @@ void QPut::post()
     QNetworkRequest request(mUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     request.setHeader(QNetworkRequest::ContentLengthHeader, QByteArray::number(data.length()));
-    qDebug("post data %s to %s", data.constData(), mUrl.toString().toLocal8Bit().constData());
+	ezlog_debug("post data %s to %s", data.constData(), mUrl.toString().toLocal8Bit().constData());
     QNetworkReply *reply = mNetwork->post(request, data);
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(DoReplyError()));
     connect(reply, SIGNAL(finished()), this, SLOT(DoFinished()));
@@ -143,9 +144,9 @@ void QPut::DoFinished()
 	QNetworkRequest r = reply->request();
 
 	foreach(QByteArray h, r.rawHeaderList())
-		qDebug("Head [%s] = %s", h.constData(), r.rawHeader(h).constData());
+		ezlog_debug("Head [%s] = %s", h.constData(), r.rawHeader(h).constData());
 
-	qDebug("Network finished. Result: %s", res.trimmed().constData());
+	ezlog_debug("Network finished. Result: %s", res.trimmed().constData());
 	reply->deleteLater();
 	//qApp->exit(!mSuccess);
 }
