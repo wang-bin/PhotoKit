@@ -99,7 +99,7 @@ void UiManager::init(PhotoKitView *view)
 
 	gotoPage(ThumbPage);
 	mView->setAnimationDuration(1618);
-	mView->smoothTransform(0, 0, 0.5, 1, 0, 0, 0, 0, 0);
+	mView->smartTransform(0, 0, 0.5, 1, 0, 0, 0, 0, 0);
 }
 
 QGraphicsItem* UiManager::thumbPageRootItem()
@@ -280,7 +280,6 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		return;
 	page = pageType;
 	if (page == ThumbPage) {
-		mPlayPageRoot->hide();
 		mThumbPageRoot->show();
 		mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 		Tools::showTip(tr("Right click to show menu.\n"
@@ -289,9 +288,11 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 						  "Move mouse to see moving effect\n"
 						  "Two finger touch to zoom all images"));
 
+		//mPlayPageRoot->hide();
 	} else if (page == PlayPage) {
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
+		mPlayPageRoot->smoothScale(4, 1, ItemAnimation::FadeIn);
 		mPlayPageRoot->show();
 		mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
 		Tools::showTip(tr("Right click to show menu.\n"

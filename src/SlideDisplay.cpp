@@ -24,10 +24,13 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QtGui/QPainter>
 #include <QtGui/QKeyEvent>
+#include <QtCore/QTimeLine>
 #include "SlidePlayControl.h"
 #include "UiManager.h"
 #include "nexteffect.h"
+#include "TransformMachine.h"
 #include "Config.h"
+#include "ezlog.h"
 namespace PhotoKit {
 
 SlideDisplay::SlideDisplay(QGraphicsItem *parent)
@@ -38,6 +41,9 @@ SlideDisplay::SlideDisplay(QGraphicsItem *parent)
 	mHeight = (qreal)qApp->desktop()->height();
 	setAcceptTouchEvents(true);
 	setAcceptDrops(true);
+
+	mItemAnimation = new ItemAnimation(this);
+	//mMachine->setItem(this);
 }
 
 void SlideDisplay::setImagePath(const QString &path)
@@ -91,6 +97,34 @@ void SlideDisplay::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 	}
 }
 
+void SlideDisplay::smoothScale(qreal s0, qreal s, ItemAnimation::Fade fade)
+{
+	mItemAnimation->setFade(fade);
+	/*!
+		translate then zoom(origin is the origin origin). so if keep the center, the translation t satisfies
+		t_dst * s = 0.5 * (w - w0, h - h0) = 0.5 * (s - 1) * (w0, h0)
+		here w0 = mWidth
+	*/
+	qreal tx0 = -mWidth*0.5*(s0 - 1.0)/s0;
+	qreal ty0 = -mHeight*0.5*(s0 - 1.0)/s0;
+	qreal tx = -mWidth*0.5*(s - 1.0)/s;
+	qreal ty = -mHeight*0.5*(s - 1.0)/s;
+	if (mItemAnimation->isRunning()) {
+		mItemAnimation->stop();
+		qreal step = mItemAnimation->currentStep();
+		s0 = mItemAnimation->transformMachine()->verticalScaleAt(step);
+		tx0 = mItemAnimation->transformMachine()->xTranslationAt(step);
+		ty0 = mItemAnimation->transformMachine()->yTranslationAt(step);
+	}
+	//mMachine->setStartMatrix(matrix());
+	//setTransformOriginPoint(transform().mapRect(boundingRect()).center());
+	mItemAnimation->transformMachine()->setTranslationAt(0.0, tx0, ty0);
+	mItemAnimation->transformMachine()->setTranslationAt(1.0, tx, ty);
+	mItemAnimation->transformMachine()->setScaleAt(0.0, s0, s0);
+	mItemAnimation->transformMachine()->setScaleAt(1.0, s, s);
+	mItemAnimation->start();//start(QAbstractAnimation::KeepWhenStopped);
+}
+
 void SlideDisplay::prepairImage()
 {
 	mImage.load(mPath);
@@ -98,7 +132,7 @@ void SlideDisplay::prepairImage()
 		if (Config::keepAspectRatio) {
 			mImage = mImage.scaled(size(), Qt::KeepAspectRatio);
 			if (mImage.size() != size()) {
-				QImage backGoundImage1(size(), QImage::Format_RGB32);
+				QImage backGoundImage1(size(), QImage::Format_ARGB32_Premultiplied);
 				QPainter painter(&backGoundImage1);
 				painter.fillRect(backGoundImage1.rect(), Qt::transparent);
 				painter.drawImage((mWidth-mImage.width())/2, (mHeight-mImage.height())/2, mImage);
@@ -133,7 +167,7 @@ void SlideDisplay::keyPressEvent(QKeyEvent *event)
 */
 void SlideDisplay::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-	qDebug("Slide  pressed");
+	ezlog_debug("Slide  pressed");
 	mMousePos = event->pos();
 	if (mMode == SingleImage) {
 		mMouseOnTime.restart();
@@ -146,7 +180,7 @@ void SlideDisplay::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void SlideDisplay::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-	qDebug("elapsed: %d", mMouseOnTime.elapsed());
+	ezlog_debug("elapsed: %d", mMouseOnTime.elapsed());
 	/*if (mMode != SingleImage) {
 		QGraphicsItem::mouseReleaseEvent(event);
 		return;
@@ -168,7 +202,7 @@ void SlideDisplay::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void SlideDisplay::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-	qDebug("Slide mouse move");
+	ezlog_debug("Slide mouse move");
 	if (mMode == SingleImage) {
 		//translate the item. ensureVisible; //2 finger to next/pre
 		//
@@ -184,13 +218,14 @@ void SlideDisplay::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void SlideDisplay::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
 	//go back to ThumbPage
+	smoothScale(1, 0.2, ItemAnimation::FadeOut);
 	UiManager::instance()->gotoPage(UiManager::ThumbPage);
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
 bool SlideDisplay::sceneEvent(QEvent *event)
 {
-	QGraphicsItem::sceneEvent(event);
+	return QGraphicsItem::sceneEvent(event);
 }
 
 }

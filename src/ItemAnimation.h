@@ -22,25 +22,38 @@
 #define ITEMANIMATION_H
 
 #include <QtCore/QObject>
-
 #include "PhotoKit_Global.h"
 
 class QGraphicsItem;
 class QTransform;
 
 namespace PhotoKit {
-
+class TransformMachine;
 //We can use QGraphicsItemAnimation instead. but zValue can't be animated;
 class ItemAnimation : public QObject
 {
 	Q_OBJECT
 public:
+	enum Fade {FadeIn, FadeOut, None};
 	ItemAnimation(QGraphicsItem *item, QObject *parent = 0);
+	void setAutoHide(bool hide);
+	void setFade(Fade fade);
+	TransformMachine* transformMachine();
+	qreal currentStep() const;
+	bool isRunning() const;
+
+	void start();
+	void stop();
 public slots:
 	void setTransform(const QTransform& m);
 	void setZValue(qreal z);
+	void tryHide();
+
 private:
 	QGraphicsItem* mItem;
+	TransformMachine *mMachine;
+	bool mHide;
+	Fade mFade;
 };
 
 }//namespace PhotoKit

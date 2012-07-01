@@ -23,7 +23,7 @@
 
 #include <QGraphicsItem>
 #include <QtCore/QDateTime>
-
+#include "ItemAnimation.h"
 class NextEffect;
 
 namespace PhotoKit {
@@ -44,6 +44,8 @@ public:
 	virtual QRectF boundingRect() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
+	void smoothScale(qreal s0, qreal s, ItemAnimation::Fade fade);
+
 protected:
 	void prepairImage();
 	//depends on mode
@@ -63,6 +65,8 @@ protected:
 	QTime mMouseOnTime;
 	QString mPath;
 	QImage mImage;
+
+	ItemAnimation *mItemAnimation;
 };
 
 } //namespace PhotoKit

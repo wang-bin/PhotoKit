@@ -26,7 +26,6 @@
 
 class QGraphicsItemAnimation;
 namespace PhotoKit {
-class TransformMachine;
 class ItemAnimation;
 class OutlineGlowItem;
 class ThumbItem : public QGraphicsItem
@@ -66,7 +65,6 @@ private:
 	QImage thumb;
 	//QImage origin;
 	OutlineGlowItem *mGlow;
-	TransformMachine *mMachine;
 	ItemAnimation *mItemAnimation;
 	//ProgressItem
 	//TextItem *name

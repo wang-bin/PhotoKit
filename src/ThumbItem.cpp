@@ -31,14 +31,14 @@
 #include "TransformMachine.h"
 #include "UiManager.h"
 #include "Config.h"
-
+#include "ezlog.h"
 namespace PhotoKit {
 
 //TODO: calculate to fit screen
 static const qreal zoom_max = 2.2;
 
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
-	QGraphicsItem(parent),mGlow(0),mMachine(0),mItemAnimation(0)
+	QGraphicsItem(parent),mGlow(0),mItemAnimation(0)
 {
 	//setAcceptTouchEvents(true);
 	setAcceptHoverEvents(true); //default: false
@@ -47,17 +47,13 @@ ThumbItem::ThumbItem(QGraphicsItem *parent) :
 }
 
 ThumbItem::ThumbItem(const QImage& image, QGraphicsItem *parent) :
-	QGraphicsItem(parent),thumb(image),mGlow(0),mMachine(0)
+	QGraphicsItem(parent),thumb(image),mGlow(0),mItemAnimation(0)
 {
 	setAcceptHoverEvents(true); //default: false
 }
 
 ThumbItem::~ThumbItem()
 {
-	if (mMachine) {
-		delete mMachine;
-		mMachine = 0;
-	}
 }
 
 void ThumbItem::setOriginImage(const QString& path)
@@ -105,7 +101,7 @@ qreal ThumbItem::boundingHeight() const
 void ThumbItem::showGlow()
 {
 	if (!mGlow) {
-		qDebug("%s %s %d", __FILE__, __FUNCTION__, __LINE__);
+		ezlog_debug();
 		mGlow = new OutlineGlowItem(this);
 		//mGlow->setZValue(zValue() + 1);
 		QSizeF s = boundingRect().size();
@@ -128,17 +124,8 @@ void ThumbItem::hideGlow()
 //TODO:matrix
 void ThumbItem::zoom(ZoomAction action)
 {
-	if (!mMachine) {
-		mMachine = new TransformMachine;//QGraphicsItemAnimation;
+	if (!mItemAnimation) {
 		mItemAnimation = new ItemAnimation(this);
-		QObject::connect(mMachine, SIGNAL(transformChanged(QTransform)), mItemAnimation, SLOT(setTransform(QTransform)));
-		QObject::connect(mMachine, SIGNAL(zValueChanged(qreal)), mItemAnimation, SLOT(setZValue(qreal)));
-
-		//mMachine->setItem(this);
-        QTimeLine *timer = new QTimeLine(1000);
-		timer->setEasingCurve(QEasingCurve::OutQuad);
-        timer->setFrameRange(0, 100);
-		mMachine->setTimeLine(timer);
 	}
 	qreal vs = 1.0;
 	qreal hs = 1.0;
@@ -149,17 +136,16 @@ void ThumbItem::zoom(ZoomAction action)
 		translate then zoom. so if keep the center, the translation t satisfies
 		t_dst * s = 0.5 * (w - w0, h - h0) = 0.5 * (s - 1) * (w0, h0)
 	*/
-	qreal tx_dst = -boundingWidth()*0.5*(zoom_max - 1.0)/zoom_max;
-	qreal ty_dst = -boundingHeight()*0.5*(zoom_max - 1.0)/zoom_max;
-	if (mMachine->timeLine()->state() == QTimeLine::Running) {
-		mMachine->timeLine()->setPaused(true);
-		qreal step = mMachine->timeLine()->currentValue();
-		vs = mMachine->verticalScaleAt(step);
-		hs = mMachine->horizontalScaleAt(step);
-		tx = mMachine->xTranslationAt(step);
-		ty = mMachine->yTranslationAt(step);
-		z = mMachine->zValueAt(step);
-		mMachine->timeLine()->stop();
+	static qreal tx_dst = -boundingWidth()*0.5*(zoom_max - 1.0)/zoom_max;
+	static qreal ty_dst = -boundingHeight()*0.5*(zoom_max - 1.0)/zoom_max;
+	if (mItemAnimation->isRunning()) {
+		mItemAnimation->stop();
+		qreal step = mItemAnimation->currentStep();
+		vs = mItemAnimation->transformMachine()->verticalScaleAt(step);
+		hs = mItemAnimation->transformMachine()->horizontalScaleAt(step);
+		tx = mItemAnimation->transformMachine()->xTranslationAt(step);
+		ty = mItemAnimation->transformMachine()->yTranslationAt(step);
+		z = mItemAnimation->transformMachine()->zValueAt(step);
 	} else {
 		if (action == ZoomOut) {
 			vs = zoom_max;
@@ -173,22 +159,22 @@ void ThumbItem::zoom(ZoomAction action)
 	//setTransformOriginPoint(transform().mapRect(boundingRect()).center());
 	if (action == ZoomIn) {
         showGlow();
-		mMachine->setZValueAt(0.0, z);
-		mMachine->setZValueAt(1.0, 2.0);
-		mMachine->setTranslationAt(0.0, tx, ty);
-		mMachine->setTranslationAt(1.0, tx_dst, ty_dst);
-		mMachine->setScaleAt(0.0, hs, vs);
-		mMachine->setScaleAt(1.0, zoom_max, zoom_max);
+		mItemAnimation->transformMachine()->setZValueAt(0.0, z);
+		mItemAnimation->transformMachine()->setZValueAt(1.0, 2.0);
+		mItemAnimation->transformMachine()->setTranslationAt(0.0, tx, ty);
+		mItemAnimation->transformMachine()->setTranslationAt(1.0, tx_dst, ty_dst);
+		mItemAnimation->transformMachine()->setScaleAt(0.0, hs, vs);
+		mItemAnimation->transformMachine()->setScaleAt(1.0, zoom_max, zoom_max);
 	} else {
-        hideGlow();
-		mMachine->setZValueAt(0.0, z);
-		mMachine->setZValueAt(1.0, 0);
-		mMachine->setTranslationAt(0.0, tx, ty);
-		mMachine->setTranslationAt(1.0, 0.0, 0.0);
-		mMachine->setScaleAt(0.0, hs, vs);
-		mMachine->setScaleAt(1.0, 1.0, 1.0);
+		mItemAnimation->transformMachine()->setZValueAt(0.0, z);
+		mItemAnimation->transformMachine()->setZValueAt(1.0, 0);
+		mItemAnimation->transformMachine()->setTranslationAt(0.0, tx, ty);
+		mItemAnimation->transformMachine()->setTranslationAt(1.0, 0.0, 0.0);
+		mItemAnimation->transformMachine()->setScaleAt(0.0, hs, vs);
+		mItemAnimation->transformMachine()->setScaleAt(1.0, 1.0, 1.0);
+		hideGlow();
 	}
-	mMachine->timeLine()->start();//start(QAbstractAnimation::KeepWhenStopped);
+	mItemAnimation->start();//start(QAbstractAnimation::KeepWhenStopped);
 }
 
 void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -211,7 +197,7 @@ void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 #if ZOOM_ON_HOVER
     if (UiManager::lastHoverThumb) {
         UiManager::lastHoverThumb->zoom(ZoomOut);
-        qDebug("last hover: %#x", UiManager::lastHoverThumb);
+		ezlog_debug("last hover: %#x", UiManager::lastHoverThumb);
     }
     UiManager::lastHoverThumb = this;
 	//scene()->views().at(0)->centerOn(this);
@@ -235,9 +221,9 @@ void ThumbItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     //toggle zoom
-	qDebug("last press: %#x", UiManager::lastHoverThumb);
+	ezlog_debug("last press: %#x", UiManager::lastHoverThumb);
 	if (UiManager::lastHoverThumb) {
-		qDebug("zoom out");
+		ezlog_debug("zoom out");
 		UiManager::lastHoverThumb->zoom(ZoomOut);
 	}
 	if (UiManager::lastHoverThumb == this) {
@@ -245,7 +231,7 @@ void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 		return;
 	}
 	if (!mGlow || !mGlow->isVisible()) {//test !mGlow first. mGlow may be 0
-		qDebug("zoom in");
+		ezlog_debug("zoom in");
 		zoom(ZoomIn);
 		showGlow();
 		ensureVisible();
