@@ -62,8 +62,8 @@ QString Config::configPath = QDir::homePath() + "/.PhotoKit/config.ini";
 bool Config::showLastDisplayed = true;
 bool Config::showTips = true;
 
-int Config::contentHMargin = 666;
-int Config::contentVMargin = 88;
+int Config::contentHMargin = 444;
+int Config::contentVMargin = 120;
 
 QString Config::thumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs.qds";
 QString Config::displayedThumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs_show.qds";
@@ -86,7 +86,6 @@ bool Config::read(const QString& ini)
 	cfg.setIniCodec("UTF-8");
 	cfg.setValue("configPath", ini);
 	cfg.setPath(QSettings::IniFormat, QSettings::UserScope, ini);
-	qDebug() << cfg.fileName() << " w: " << cfg.isWritable();
 
 	backgroundColor.setRgb(cfg.value("backgroundColor", QColor(66, 66, 66).rgb()).value<QRgb>());
 	glowColor.setRgb(cfg.value("glowColor", QColor(Qt::green).lighter(100).rgb()).value<QRgb>());
@@ -145,17 +144,45 @@ void Config::setLowSettings()
 void Config::detectSystemResources()
 {
 #ifndef QT_NO_OPENGL
-    if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_0)
-		Config::glVersion = "2.0 or higher";
+	Config::openGlAvailable = QGLFormat::hasOpenGL();
+	if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_ES_Version_2_0)
+		Config::glVersion = "ES 2.0";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_ES_Common_Version_1_0)
+		Config::glVersion = "ES Common 1.0";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_ES_CommonLite_Version_1_0)
+		Config::glVersion = "ES Common Lite 1.0";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_ES_Common_Version_1_1)
+		Config::glVersion = "ES Common 1.1";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_ES_CommonLite_Version_1_1)
+		Config::glVersion = "ES Common Lite 1.1";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_1)
+		Config::glVersion = "2.1";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_0)
+		Config::glVersion = "2.0";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_4_0)
+		Config::glVersion = "4.0";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3)
+		Config::glVersion = "3.3";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_2)
+		Config::glVersion = "3.2";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_1)
+		Config::glVersion = "3.1";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_0)
+		Config::glVersion = "3.0";
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_5)
 		Config::glVersion = "1.5";
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_4)
 		Config::glVersion = "1.4";
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_3)
-		Config::glVersion = "1.3 or lower";
+		Config::glVersion = "1.3";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2)
+		Config::glVersion = "1.2";
+	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_1)
+		Config::glVersion = "1.1";
+
 	if (Config::verbose)
 		qDebug() << "- OpenGL version:" << Config::glVersion;
-
+/*
 	QGLWidget glw;
 	if (!QGLFormat::hasOpenGL()
 		|| !glw.format().directRendering()
@@ -180,12 +207,13 @@ void Config::detectSystemResources()
 		if (Config::verbose)
 			qDebug("- X render not present");
 	}
-
+*/
 #endif
-
+/*
 	QWidget w;
 	if (Config::verbose)
-		qDebug() << "- Color depth: " << QString::number(w.depth());
+		qDebug() << "- Color depth: " << QString::number(w.depth());*/
+
 }
 
 void Config::postConfigure()
