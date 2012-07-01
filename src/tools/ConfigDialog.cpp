@@ -39,7 +39,7 @@ class ConfigDialogPrivate {
 public:
 	void setupUi(ConfigDialog* dialog) {
 		dialog->setWindowTitle(QObject::tr("Setup"));
-		gl = new QCheckBox(QObject::tr("OpenGL"));
+		gl = new QCheckBox("OpenGL " + Config::glVersion);
 		showTips = new QCheckBox(QObject::tr("Show tips"));
 		marginH = new QSpinBox;
 		marginV = new QSpinBox;
