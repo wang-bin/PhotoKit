@@ -28,6 +28,7 @@
 #include <QSettings>
 #include <QStackedWidget>
 #include <QToolTip>
+#include <QScrollArea>
 #include "Config.h"
 #include "weiboapi.h"
 
@@ -80,6 +81,7 @@ WeiboDialog::WeiboDialog(QWidget *parent) :
 	hb->addWidget(mCancel);
 
 	QVBoxLayout *vb = new QVBoxLayout;
+	vb->setSizeConstraint(QLayout::SetMaximumSize);
 	vb->addWidget(new QLabel(tr("New weibo")));
 	vb->addWidget(mStatusEdit);
 	vb->addLayout(hb_user);
@@ -87,7 +89,14 @@ WeiboDialog::WeiboDialog(QWidget *parent) :
 	//vb->addWidget(mContent);
 	vb->addLayout(hb);
 
-	setLayout(vb);
+	QWidget *content = new QWidget;
+	content->setMinimumWidth(width());
+	content->setLayout(vb);
+	QScrollArea *area = new QScrollArea;
+	area->setWidget(content);
+	QVBoxLayout *layout = new QVBoxLayout;
+	layout->addWidget(area);
+	setLayout(layout);
 }
 
 void WeiboDialog::setUser(const QString &user)

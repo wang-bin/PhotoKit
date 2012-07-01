@@ -30,6 +30,7 @@
 #include <QSettings>
 #include <QDir>
 #include <QMessageBox>
+#include <QScrollArea>
 #include "Config.h"
 
 namespace PhotoKit {
@@ -104,7 +105,14 @@ public:
 		layout->addWidget(cancel, r, 0);
 		layout->addWidget(ok, r, 1);
 
-		dialog->setLayout(layout);
+		QWidget *content = new QWidget;
+		content->setMinimumWidth(dialog->width());
+		content->setLayout(layout);
+		QScrollArea *area = new QScrollArea;
+		area->setWidget(content);
+		QVBoxLayout *vb = new QVBoxLayout;
+		vb->addWidget(area);
+		dialog->setLayout(vb);
 
 		QObject::connect(clearCache, SIGNAL(clicked()), dialog, SLOT(clearCache()));
 		QObject::connect(ok, SIGNAL(clicked()), dialog, SLOT(saveConfig()));
