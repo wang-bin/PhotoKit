@@ -134,12 +134,10 @@ defineReplace(qtLongName) {
 
 
 ##############################paths####################################
-#message(pwd=$$PWD)			#this file dir
-#message(out pwd=$$OUT_PWD)	#Makefile dir
-#message(pro file=$$_PRO_FILE_)
-#message(pro file pwd=$$_PRO_FILE_PWD_)
+#!isEqual(COMMON_PRI_INCLUDED, 1) {
+#TRANSLATIONS += i18n/$${TARGET}_zh-cn.ts i18n/$${TARGET}_zh_CN.ts
+#}
 BUILD_DIR=$$PWD
-
 isEqual(TEMPLATE, app) {
 	DESTDIR = $$BUILD_DIR/bin
 	!isEqual(COMMON_PRI_INCLUDED, 1): TARGET = $$qtLongName($$TARGET)

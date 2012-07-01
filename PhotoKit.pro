@@ -12,7 +12,7 @@ libezlog.file = src/ezlog/src/libezlog.pro
 libprogramoptions.file = src/ProgramOptions/src/libProgramOptions.pro
 libNextEffect.file = src/NextEffect/src/libNextEffect.pro
 photokit.file = src/PhotoKit.pro
-photokit.depends += libprogramoptions
+photokit.depends += libezlog libprogramoptions libNextEffect
 
 symbian {
     TARGET.UID3 = 0xea6f847b

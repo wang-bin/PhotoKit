@@ -6,6 +6,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = PhotoKit
 TEMPLATE = app
 PROJECTROOT = $$PWD/..
+TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$${TARGET}_zh_CN.ts
 !include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
 !include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
