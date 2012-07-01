@@ -20,14 +20,13 @@
 #include <QtCore/QDir>
 #include <QApplication>
 #include <QtCore/QTranslator>
-#include <QtDebug>
 #include "ezlog.h"
 #include "OptionParser.h"
 #include "PhotoKitView.h"
 #include "UiManager.h"
 #include "tools/Tools.h"
 #include "Config.h"
-
+#include "ezlog.h"
 using namespace PhotoKit;
 
 int main(int argc, char *argv[])
@@ -46,16 +45,13 @@ int main(int argc, char *argv[])
     UiManager::instance()->init(&view);
     //view.showFullScreen();
     view.showMaximized();
-	qDebug() << QDir::homePath();
 	if (OptionParser::images.isEmpty()) {
 		QStringList defalutimages = QDir(":/images").entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), ":/images/");
-		foreach(QString f, defalutimages)
-			qDebug() << f;
-		qDebug("default images: %d", defalutimages.size());
+		ezlog_debug("default images: %d", defalutimages.size());
 		UiManager::instance()->showImagesFromThumb(defalutimages);
 	} else {
 		UiManager::instance()->showImagesFromThumb(OptionParser::images);
 	}
-    qDebug("PhotoKit thumbdir: %s", qPrintable(Config::thumbDir));
+	ezlog_debug("PhotoKit thumbdir: %s", qPrintable(Config::thumbDir));
 	return a.exec();
 }

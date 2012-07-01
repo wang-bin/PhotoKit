@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include "Config.h"
+#include "ezlog.h"
 
 namespace PhotoKit {
 
@@ -15,7 +16,7 @@ void showTip(const QString &text)
 {
 	if (Config::showTips) {
 		QToolTip::showText(qApp->desktop()->rect().center(), text);
-		qDebug("Tip: %s", qPrintable(text));
+		ezlog_debug("Tip: %s", qPrintable(text));
 	}
 
 }

@@ -32,7 +32,7 @@
 
 #include "tools/Tools.h"
 #include "Config.h"
-
+#include "ezlog.h"
 namespace PhotoKit {
 
 ThumbHash ThumbRecorder::thumbs;
@@ -41,7 +41,7 @@ QStringList ThumbRecorder::display;
 
 static ThumbInfo createThumb(const QString& path)
 {
-	qDebug(qPrintable(path));
+	ezlog_debug("%s", qPrintable(path));
 	QCryptographicHash md5sum(QCryptographicHash::Md5);
 	QFile f(path);
 	if (!f.open(QIODevice::ReadOnly)) {
@@ -63,7 +63,7 @@ static ThumbInfo createThumb(const QString& path)
 				return thumb;
 			}
 		}
-		qDebug("existing thumb file not match");
+		ezlog_debug("existing thumb file not match");
 		ThumbRecorder::thumbHash()->remove(path);
 		QFile::remove(thumb_path);
 	}
@@ -187,7 +187,7 @@ void ThumbTask::createThumbs(const QStringList& paths)
 
 void ThumbTask::createThumbsFromDirs(const QStringList& dirs)
 {
-	qDebug(qPrintable(Tools::imageNameFilters().join(";")));
+	ezlog_debug("%s", qPrintable(Tools::imageNameFilters().join(";")));
     QStringList files;
     foreach(const QString& dir, dirs) {
         QDir d(dir);

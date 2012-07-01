@@ -26,7 +26,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include "Config.h"
-
+#include "ezlog.h"
 namespace PhotoKit {
 
 PhotoKitScene::PhotoKitScene(QObject *parent) :
@@ -46,7 +46,7 @@ void PhotoKitScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 /*
 void PhotoKitScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    //qDebug("move in scene");
+	//ezlog_debug("move in scene");
 	event->accept();
 }*/
 
