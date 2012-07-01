@@ -36,6 +36,7 @@
 #include "UiManager.h"
 #include "Config.h"
 
+#include "ezlog.h"
 /*!
  * WARNING: QGraphicsView's translate does not work.in Qt4. We can create a root item and translate that.
  * QGraphicsItem::ItemIgnoresTransformations ignores except translation even if it's parent is 0. OtherWise
@@ -52,6 +53,11 @@ static const qreal yrot_max = 45;
 static const qreal yrot_min = -45;
 static const qreal xrot_max = 8;
 static const qreal xrot_min = -8;
+static const qreal xshear_min = -0.2;
+static const qreal xshear_max = 0.2;
+static const qreal yshear_min = -0.2;
+static const qreal yshear_max = 0.2;
+static const int ani_duration = 1400;
 PhotoKitView::PhotoKitView(QWidget *parent) :
 	QGraphicsView(parent),mPressed(false),mScale(1.0),mX(0),mY(0),mMachine(0)
 {
@@ -72,7 +78,7 @@ PhotoKitView::PhotoKitView(QWidget *parent) :
 	mMachine = new TransformMachine;//QGraphicsItemAnimation;
 	connect(mMachine, SIGNAL(transformChanged(QTransform)), SLOT(doTransform(QTransform)));
 
-	QTimeLine *timer = new QTimeLine(1234);
+	QTimeLine *timer = new QTimeLine(ani_duration);
 	timer->setEasingCurve(QEasingCurve::OutQuad);
 	timer->setFrameRange(0, 100);
 	mMachine->setTimeLine(timer);
@@ -83,15 +89,21 @@ QRectF PhotoKitView::visibleSceneRect() const
 {
     QPointF A = mapToScene(QPoint(0,0));
     QPointF B = mapToScene(QPoint(viewport()->width(), viewport()->height()));
-    qDebug("%f,%f %f,%f", A.x(), A.y(), B.x(), B.y());
+	ezlog_debug("%f,%f %f,%f", A.x(), A.y(), B.x(), B.y());
     return QRectF(A, B);
 }
 
-//params x, y and scale are the final value. final rotation and shear params are the values in animation, final values are 0
-void PhotoKitView::smoothTransform(qreal x, qreal y, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
+void PhotoKitView::setAnimationDuration(int ms)
 {
+	mMachine->timeLine()->setDuration(ms);
+}
+
+//params x, y and scale are the final value. final rotation and shear params are the values in animation, final values are 0
+void PhotoKitView::smoothTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
+{
+	ezlog_debug();
 	qreal x0 = mX, y0 = mY;
-	qreal s0 = mScale;
+	qreal s0 = scale0;
 	qreal xr0 = 0, yr0 = 0;
 	qreal hs0 = 0, vs0 = 0;
 	if (mMachine->timeLine()->state() == QTimeLine::Running) {
@@ -102,6 +114,8 @@ void PhotoKitView::smoothTransform(qreal x, qreal y, qreal scale, qreal xrot, qr
 		y0 = mMachine->yTranslationAt(step);
 		xr0 = mMachine->xRotationAt(step);
 		yr0 = mMachine->yRotationAt(step);
+		hs0 = mMachine->horizontalShearAt(step);
+		vs0 = mMachine->verticalShearAt(step);
 		mMachine->timeLine()->stop();
 	}
 	mMachine->setTranslationAt(0, x0, y0);
@@ -117,16 +131,17 @@ void PhotoKitView::smoothTransform(qreal x, qreal y, qreal scale, qreal xrot, qr
 	mMachine->timeLine()->start();
 }
 
-//TODO:
+//TODO: Move to uimanager
 void PhotoKitView::doTransform(const QTransform& m)
 {
 	//TODO: change origin. default origin is (0,0).
 /*
 	if (UiManager::page == UiManager::PlayPage) {
-		qDebug("slide page transform");
+		ezlog_debug("slide page transform");
 		UiManager::instance()->playPageItem()->setTransform(m);
 	} else if (UiManager::page == UiManager::ThumbPage) {
-		qDebug("thumb page transform");*/
+		ezlog_debug("thumb page transform");*/
+	//UiManager::instance()->thumbPageRootItem()->setTransformOriginPoint(UiManager::instance()->thumbPageRootItem()->boundingRect().center());
 		UiManager::instance()->thumbPageRootItem()->setTransform(m);//, true); //combine?
 	//}
 }
@@ -134,7 +149,7 @@ void PhotoKitView::doTransform(const QTransform& m)
 /*
 bool PhotoKitView::event(QEvent *event)
 {
-	qDebug("event: %d", event->type());
+	ezlog_debug("event: %d", event->type());
 	return false;
 }
 */
@@ -144,19 +159,19 @@ void PhotoKitView::dragMoveEvent(QDragMoveEvent *event)
 	if (UiManager::page != UiManager::ThumbPage) {
 
 	}
-	qDebug("drag");
+	ezlog_debug("drag");
 	event->accept();
 }
 */
 
 void PhotoKitView::contextMenuEvent(QContextMenuEvent *event)
 {
-	qDebug("PhotoKitView::contextMenuEvent");
+	ezlog_debug("PhotoKitView::contextMenuEvent");
 	UiManager::instance()->popupMenu(mapToGlobal(event->pos()));
 }
 
 void PhotoKitView::keyPressEvent(QKeyEvent *e)
-{qDebug("key %d", e->key());
+{ezlog_debug("key %d", e->key());
 	if (UiManager::page != UiManager::ThumbPage) {
 
 	}
@@ -199,25 +214,31 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 		mX = qMin(mX, qreal(Config::contentHMargin));
 		mY = qMax(mY, qreal(0.0));
 		mY = qMin(mY, qreal(Config::contentVMargin));
-		//qDebug("dx dy %d %d", delta.x(), delta.y());
-
-		qreal xrot, yrot;
+		//ezlog_debug("dx dy %d %d", delta.x(), delta.y());
+		qreal hs = delta.x()/100;
+		qreal vs = delta.y()/100;
+		qreal xrot = delta.x()/8, yrot = delta.x()/8;
 		if (delta.x() > 0) {
-			xrot = qMin(delta.x()/4, xrot_max);
+			xrot = qMin(xrot, xrot_max);
+			hs = qMin(hs, xshear_max);
 		} else {
-			xrot = qMax(delta.x()/4, xrot_min);
+			xrot = qMax(xrot, xrot_min);
+			hs = qMax(hs, xshear_min);
 		}
 		if (delta.y() > 0) {
-			yrot = qMin(delta.y()*4, yrot_max);
+			yrot = qMin(yrot, yrot_max);
+			vs = qMin(vs, yshear_max);
 		} else {
-			yrot = qMax(delta.y()*4, yrot_min);
+			yrot = qMax(yrot, yrot_min);
+			vs = qMax(vs, yshear_min);
 		}
-		//qDebug("mX=%f my=%f", mX, mY);
+		//ezlog_debug("mX=%f my=%f", mX, mY);
 		//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-		smoothTransform(mX, mY, mScale, xrot, yrot, 0, 0, 0);
+		setAnimationDuration(ani_duration);
+		smoothTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
 		mMousePos = e->posF();
 	}
-	//qDebug("move in view");
+	//ezlog_debug("move in view");
 	//e->accept();
 	QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
 }
@@ -236,7 +257,8 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 {
 	int numDegrees = event->delta() / 8;
 	int numSteps = numDegrees / 15;
-	//qDebug("wheel steps: %d", numSteps); //1
+	//ezlog_debug("wheel steps: %d", numSteps); //1
+	qreal scale0 = mScale;
 	if (numSteps > 0) {
 		mScale += 0.12;
 		mScale = qMin(scale_max, mScale);
@@ -244,14 +266,15 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 		mScale -= 0.12;
 		mScale = qMax(scale_min, mScale);
 	}
-	smoothTransform(mX, mY, mScale, 0, 0, 0, 0, 0);
+	setAnimationDuration(ani_duration);
+	smoothTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
 	//QGraphicsView::wheelEvent(event); //will scroll the content. centerOn will not work
 }
 
 void PhotoKitView::resizeEvent(QResizeEvent *event)
 {
 	//visibleSceneRect();
-	//qDebug("resize: %dx%d", event->size().width(), event->size().height());
+	//ezlog_debug("resize: %dx%d", event->size().width(), event->size().height());
 	//UiManager::instance()->updateFixedItems();
     QGraphicsView::resizeEvent(event);
 }
@@ -275,6 +298,7 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 					/ QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
 			if (touchEvent->touchPointStates() & Qt::TouchPointMoved
 					|| touchEvent->touchPointStates() & Qt::TouchPointReleased) {
+				qreal scale0 = mScale;
 				if (currentScaleFactor > 1) {
 					mScale += 0.12;
 					mScale = qMin(scale_max, mScale);
@@ -282,7 +306,8 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 					mScale -= 0.12;
 					mScale = qMax(scale_min, mScale);
 				}
-				smoothTransform(mX, mY, mScale, 0, 0, 0, 0, 0);
+				setAnimationDuration(ani_duration);
+				smoothTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
 			}
 		}
 		return true;
@@ -308,7 +333,7 @@ void PhotoKitView::setRenderingSystem()
 		viewport = glw;
 		setCacheMode(QGraphicsView::CacheNone);
 		if (Config::verbose)
-			qDebug("- using OpenGL");
+			ezlog_debug("- using OpenGL");
 	} else // software rendering
 #endif
 	{
@@ -317,7 +342,7 @@ void PhotoKitView::setRenderingSystem()
 		viewport = new QWidget;
 		setCacheMode(QGraphicsView::CacheBackground);
 		if (Config::verbose)
-			qDebug("- using software rendering");
+			ezlog_debug("- using software rendering");
 	}
 
 	setViewport(viewport);

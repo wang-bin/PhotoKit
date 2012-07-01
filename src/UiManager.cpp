@@ -39,6 +39,7 @@
 #include "ThumbItem.h"
 #include "ThumbTask.h"
 #include "Config.h"
+#include "ezlog.h"
 
 namespace PhotoKit {
 
@@ -87,6 +88,8 @@ void UiManager::init(PhotoKitView *view)
 	mView = view;
 	mThumbPageRoot = new QGraphicsWidget;
 	mThumbPageRoot->setAcceptHoverEvents(true);
+	mThumbPageRoot->setPos(Config::contentHMargin, Config::contentVMargin);
+	mThumbPageRoot->setTransform(QTransform().scale(0.5, 0.5));
 	mView->scene()->addItem(mThumbPageRoot);
 	mPlayPageRoot = new SlideDisplay;
 	mPlayPageRoot->hide();
@@ -95,7 +98,8 @@ void UiManager::init(PhotoKitView *view)
 	mPlayPageRoot->setPlayControl(mPlayControl);
 
 	gotoPage(ThumbPage);
-
+	mView->setAnimationDuration(1618);
+	mView->smoothTransform(0, 0, 0.5, 1, 0, 0, 0, 0, 0);
 }
 
 QGraphicsItem* UiManager::thumbPageRootItem()
@@ -153,17 +157,27 @@ void UiManager::clearThumbs()
 
 void UiManager::addImages()
 {
-	QStringList paths = QFileDialog::getOpenFileNames(0, tr("Select images"), QDir::homePath(), Tools::imageNameFilters().join(" "));
+	QString dir = "/"; //QDir::homePath() is an invalid path on n900, why?
+	QStringList paths = QFileDialog::getOpenFileNames(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	if (paths.isEmpty())
 		return;
 	showImagesFromThumb(paths, true);
+}
+
+
+void UiManager::addImagesFromDir()
+{
+	QString dir = QFileDialog::getExistingDirectory(0, tr("Select a directory contains images"), "/");
+	if (!dir.isEmpty()) {
+		showImagesFromThumb(dir);
+	}
 }
 
 void UiManager::startSlide()
 {
 	mPlayControl->setDirection(SlidePlayControl::Forward);
 	mPlayControl->setCurrentImage(mPlayPageRoot->imagePath());
-	qDebug("slide begin: %s", qPrintable(mPlayPageRoot->imagePath()));
+	ezlog_debug("slide begin: %s", qPrintable(mPlayPageRoot->imagePath()));
 	mPlayControl->start();
 }
 
@@ -178,6 +192,7 @@ void UiManager::showCurrentImageInfo()
 	QString info(mPlayPageRoot->imagePath());
 	QImage image(mPlayPageRoot->imagePath());
 	info += "\n";
+	info += tr("Size") + ": " + QString::number(QFile(mPlayPageRoot->imagePath()).size()) + "byte\n";
 	info += tr("Depth") + ": " + QString::number(image.depth()) + "\n";
 	info += tr("Width") + ": " +  QString::number(image.width()) + "\n";
 	info += tr("Height") + ": " + QString::number(image.height()) + "\n";
@@ -210,18 +225,10 @@ void UiManager::showHelp()
 	QMessageBox::information(0, tr("Help"), help);
 }
 
-void UiManager::addImagesFromDir()
-{
-	QString dir = QFileDialog::getExistingDirectory();
-	if (!dir.isEmpty()) {
-		showImagesFromThumb(dir);
-	}
-}
-
 void UiManager::updateThumbItemAt(int index)
 {
 	int show_index = index + mThumbsCount;
-	qDebug("updateing thumb at %d. show on %d", index, show_index);
+	ezlog_debug("updateing thumb at %d. show on %d", index, show_index);
 	int col = show_index / Config::thumbRows;
 	int row = show_index % Config::thumbRows;
 
@@ -237,14 +244,14 @@ void UiManager::updateThumbItemAt(int index)
         new ReflectEffectItem(item, ReflectEffectItem::MirrorBottom);
     }
     //scene rect is importance.
-    mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
+	mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 }
 
 void UiManager::updateDisplayedThumbList()
 {
 	mPlayControl->setImages(ThumbRecorder::displayedThumbs()); //current record
 	mThumbsCount = ThumbRecorder::displayedThumbs().size();
-	qDebug("total %d", mThumbsCount);
+	ezlog_debug("total %d", mThumbsCount);
 }
 
 void UiManager::popupMenu(const QPoint& pos)
