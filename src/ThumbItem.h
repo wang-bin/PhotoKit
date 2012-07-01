@@ -40,7 +40,8 @@ public:
 
     qreal borderWidth() const;
     qreal marginWidth() const;
-    QImage thumbImage() const;
+	QImage thumbImage() const; //origin thumb
+	QImage scaledThumbImage() const; //thumb scaled to fit item size
 	void setThumbImage(const QImage& image);
 	virtual QRectF boundingRect() const; // overridden
 	void showGlow();
@@ -48,8 +49,11 @@ public:
 	void zoom(ZoomAction action);
 	qreal boundingWidth() const;
 	qreal boundingHeight() const;
+	qreal contentWidth() const;
+	qreal contentHeight() const;
 
 protected:
+	void prepair();
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option = 0, QWidget *widget = 0);
 
 	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
@@ -66,6 +70,7 @@ private:
 	//QImage origin;
 	OutlineGlowItem *mGlow;
 	ItemAnimation *mItemAnimation;
+	qreal mWidth, mHeight; //scaled thumb width, height
 	//ProgressItem
 	//TextItem *name
 };

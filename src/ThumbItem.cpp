@@ -26,6 +26,7 @@
 #include <QPainter>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QGraphicsSceneMouseEvent>
 #include "ItemAnimation.h"
 #include "OutlineGlowItem.h"
 #include "TransformMachine.h"
@@ -39,6 +40,8 @@ static const qreal zoom_max = 2.2;
 
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
 	QGraphicsItem(parent),mGlow(0),mItemAnimation(0)
+  ,mWidth(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
+  ,mHeight(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
 {
 	//setAcceptTouchEvents(true);
 	setAcceptHoverEvents(true); //default: false
@@ -48,8 +51,11 @@ ThumbItem::ThumbItem(QGraphicsItem *parent) :
 
 ThumbItem::ThumbItem(const QImage& image, QGraphicsItem *parent) :
 	QGraphicsItem(parent),thumb(image),mGlow(0),mItemAnimation(0)
+  ,mWidth(Config::thumbItemWidth - 2*(Config::thumbBorder + Config::thumbMargin))
+  ,mHeight(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
 {
 	setAcceptHoverEvents(true); //default: false
+	prepair();
 }
 
 ThumbItem::~ThumbItem()
@@ -76,26 +82,44 @@ QImage ThumbItem::thumbImage() const
     return thumb;
 }
 
+QImage ThumbItem::scaledThumbImage() const
+{
+	if (mWidth != thumb.width() || mHeight != thumb.height())
+		return thumb.scaled(mWidth, mHeight);
+	return thumb;
+}
+
 void ThumbItem::setThumbImage(const QImage& image)
 {
 	thumb = image;
+	prepair();
 	update(boundingRect());
 }
 //add mirror rect?
 QRectF ThumbItem::boundingRect() const
 {
-	return thumb.rect().adjusted(0, 0//-(Config::thumbMargin + Config::thumbBorder) , -(Config::thumbBorder + Config::thumbMargin)
+	return QRectF(0, 0, mWidth, mHeight).adjusted(0, 0//thumb.rect().adjusted(0, 0//-(Config::thumbMargin + Config::thumbBorder) , -(Config::thumbBorder + Config::thumbMargin)
 					, 2*(Config::thumbBorder + Config::thumbMargin), 2*(Config::thumbBorder + Config::thumbMargin));
 }
 
 qreal ThumbItem::boundingWidth() const
 {
-	return boundingRect().size().width();
+	return mWidth + 2*(Config::thumbBorder + Config::thumbMargin);
 }
 
 qreal ThumbItem::boundingHeight() const
 {
-	return boundingRect().size().height();
+	return mHeight + 2*(Config::thumbBorder + Config::thumbMargin);
+}
+
+qreal ThumbItem::contentWidth() const
+{
+	return mWidth;
+}
+
+qreal ThumbItem::contentHeight() const
+{
+	return mHeight;
 }
 
 void ThumbItem::showGlow()
@@ -109,7 +133,7 @@ void ThumbItem::showGlow()
 		mGlow->setGlowWidth(Config::thumbMargin);// + Config::thumbBorder);
 		QPainterPath image_shape;
 		image_shape.addRect(Config::thumbMargin, Config::thumbMargin//-Config::thumbBorder, -Config::thumbBorder
-					, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
+					, mWidth + 2*Config::thumbBorder, mHeight + 2*Config::thumbBorder);
 		mGlow->setShape(image_shape);
 		mGlow->render();
 	}
@@ -177,19 +201,41 @@ void ThumbItem::zoom(ZoomAction action)
 	mItemAnimation->start();//start(QAbstractAnimation::KeepWhenStopped);
 }
 
+//image must be in size(mWidth, mHeight)
+void ThumbItem::prepair()
+{
+	if (thumb.width() != mWidth || thumb.height() != mHeight) {
+		qreal k = qreal(thumb.width())/qreal(thumb.height());
+		qreal q = qreal(mWidth)/qreal(mHeight);
+		if (k > q) {
+			if (k > 1)
+				mHeight = qreal(mWidth)/k;
+		} else {
+			if (k < 1)
+				mWidth = mHeight * k;
+		}
+	}
+}
+
 void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	Q_UNUSED(option)
 	Q_UNUSED(widget)
 	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	//bool wasSmoothPixmapTransform = painter->testRenderHint(QPainter::SmoothPixmapTransform);
-    painter->save();
+	//QMatrix m = painter->worldMatrix();
+	//painter->setWorldMatrix(QMatrix());
+	painter->save();
 	painter->setPen(Qt::black);
-	painter->drawRect(Config::thumbMargin, Config::thumbMargin, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
+	painter->drawRect(Config::thumbMargin, Config::thumbMargin, mWidth + 2*Config::thumbBorder, mHeight + 2*Config::thumbBorder);
 	//painter->drawRect(-Config::thumbBorder, -Config::thumbBorder, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
-    painter->restore();
-	painter->drawImage(Config::thumbBorder + Config::thumbMargin, Config::thumbBorder + Config::thumbMargin, thumb);
+	painter->restore();
+	painter->save();
+	painter->translate(Config::thumbBorder + Config::thumbMargin,  Config::thumbBorder + Config::thumbMargin);
+	painter->drawImage(QRectF(0, 0, mWidth, mHeight), thumb);
+	//painter->drawImage(Config::thumbBorder + Config::thumbMargin, Config::thumbBorder + Config::thumbMargin, thumb);
 	//painter->drawImage(0, 0, thumb);
+	painter->restore();
 }
 
 void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
@@ -222,22 +268,25 @@ void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     //toggle zoom
 	ezlog_debug("last press: %#x", UiManager::lastHoverThumb);
-	if (UiManager::lastHoverThumb) {
-		ezlog_debug("zoom out");
-		UiManager::lastHoverThumb->zoom(ZoomOut);
-	}
-	if (UiManager::lastHoverThumb == this) {
-		UiManager::lastHoverThumb = 0;
-		return;
-	}
-	if (!mGlow || !mGlow->isVisible()) {//test !mGlow first. mGlow may be 0
-		ezlog_debug("zoom in");
-		zoom(ZoomIn);
-		showGlow();
-		ensureVisible();
-		//TODO: rewrite center on
-		//scene()->views().at(0)->centerOn(this); //too fast
-		UiManager::lastHoverThumb = this;
+	if (event->button() == Qt::LeftButton) {
+		if (UiManager::lastHoverThumb) {
+			ezlog_debug("zoom out");
+			UiManager::lastHoverThumb->zoom(ZoomOut);
+		}
+		if (UiManager::lastHoverThumb == this) {
+			UiManager::lastHoverThumb = 0;
+			return;
+		}
+		if (!mGlow || !mGlow->isVisible()) {//test !mGlow first. mGlow may be 0
+			ezlog_debug("zoom in");
+			zoom(ZoomIn);
+			showGlow();
+			ensureVisible(); //UiManager::tryMoveCenter(this);
+			//TODO: rewrite center on
+			//scene()->views().at(0)->centerOn(this); //too fast
+			UiManager::lastHoverThumb = this;
+		}
+		event->accept();
 	}
 	QGraphicsItem::mousePressEvent(event);
 }

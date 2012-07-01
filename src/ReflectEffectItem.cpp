@@ -11,7 +11,6 @@ ReflectEffectItem::ReflectEffectItem(ThumbItem* target, MirrorDirection directio
 {
 	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
 	setFlag(QGraphicsItem::ItemStacksBehindParent);
-    //setOpacity(0.618);
 }
 
 ReflectEffectItem::~ReflectEffectItem()
@@ -84,29 +83,28 @@ void ReflectEffectItem::drawReflect()
         delete mReflect;
         mReflect = 0;
     }
-    mReflect = new QImage(mTarget->thumbImage());
-    QLinearGradient g(QPointF(), QPointF(0, mReflect->height()));
+	QLinearGradient g(QPointF(), QPointF(0, mTarget->contentHeight()));
     if (mDirection == MirrorBottom) {
-        mReflect = new QImage(mTarget->thumbImage().mirrored(false, true));
+		mReflect = new QImage(mTarget->scaledThumbImage().mirrored(false, true));
         g.setColorAt(0, QColor(0, 0, 0, 100));
         g.setColorAt(1, Qt::transparent);
         mPos.setX(mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->boundingHeight() + mTarget->marginWidth() + mTarget->borderWidth() + 2*mMirrorDistance);
     } else if (mDirection == MirrorTop) {
-        mReflect = new QImage(mTarget->thumbImage().mirrored(false, true));
+		mReflect = new QImage(mTarget->scaledThumbImage().mirrored(false, true));
         g.setColorAt(1, QColor(0, 0, 0, 100));
         g.setColorAt(0, Qt::transparent);
         mPos.setX(mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(- mTarget->boundingHeight() + mTarget->marginWidth() + mTarget->borderWidth() - 2*mMirrorDistance);
     } else if (mDirection == MirrorLeft) {
-        mReflect = new QImage(mTarget->thumbImage().mirrored(true, false));
+		mReflect = new QImage(mTarget->scaledThumbImage().mirrored(true, false));
 		g.setFinalStop(QPointF(mReflect->width(), 0));
         g.setColorAt(1, QColor(0, 0, 0, 100));
         g.setColorAt(0, Qt::transparent);
         mPos.setX(-mTarget->boundingWidth() - 2*mMirrorDistance + mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->marginWidth() + mTarget->borderWidth());
     } else {
-        mReflect = new QImage(mTarget->thumbImage().mirrored(true, false));
+		mReflect = new QImage(mTarget->scaledThumbImage().mirrored(true, false));
 		g.setFinalStop(QPointF(mReflect->width(), 0));
         g.setColorAt(1, QColor(0, 0, 0, 100));
         g.setColorAt(1, Qt::transparent);
