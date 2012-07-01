@@ -36,7 +36,7 @@ namespace PhotoKit {
 WeiboDialog::WeiboDialog(QWidget *parent) :
     QDialog(parent)
 {
-	setWindowTitle(tr("Send weibo with image"));
+	setWindowTitle(tr("Send weibo with an image"));
 	mApi = new WeiboApi(this);
 	connect(mApi, SIGNAL(error(QString)), SLOT(doError(QString)));
 	connect(mApi, SIGNAL(loginOk()), SLOT(sendWeiboWithPicture()));
@@ -87,15 +87,16 @@ WeiboDialog::WeiboDialog(QWidget *parent) :
 	vb->addLayout(hb_user);
 	vb->addLayout(hb_pass);
 	//vb->addWidget(mContent);
-	vb->addLayout(hb);
+	//vb->addLayout(hb);
 
 	QWidget *content = new QWidget;
-	content->setMinimumWidth(width());
+	content->setMinimumWidth(width() - 40);
 	content->setLayout(vb);
 	QScrollArea *area = new QScrollArea;
 	area->setWidget(content);
 	QVBoxLayout *layout = new QVBoxLayout;
 	layout->addWidget(area);
+	layout->addLayout(hb);
 	setLayout(layout);
 }
 

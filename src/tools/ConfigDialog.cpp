@@ -39,8 +39,8 @@ class ConfigDialogPrivate {
 public:
 	void setupUi(ConfigDialog* dialog) {
 		dialog->setWindowTitle(QObject::tr("Setup"));
-		gl = new QCheckBox;
-		showTips = new QCheckBox;
+		gl = new QCheckBox(QObject::tr("OpenGL"));
+		showTips = new QCheckBox(QObject::tr("Show tips"));
 		marginH = new QSpinBox;
 		marginV = new QSpinBox;
 		thumbWidth = new QSpinBox;
@@ -72,11 +72,9 @@ public:
 
 		int r = 0;
 		QGridLayout *layout = new QGridLayout;
-		layout->addWidget(new QLabel(QObject::tr("OpenGL")), r, 0);
-		layout->addWidget(gl, r, 1);
+		layout->addWidget(gl, r, 0);
 		r++;
-		layout->addWidget(new QLabel(QObject::tr("Show tips")), r, 0);
-		layout->addWidget(showTips, r, 1);
+		layout->addWidget(showTips, r, 0);
 		r++;
 		layout->addWidget(new QLabel(QObject::tr("Horizontal margin")), r, 0);
 		layout->addWidget(marginH, r, 1);
@@ -102,16 +100,20 @@ public:
 		//layout->addWidget(back, r, 1);r++;
 		//layout->addWidget(glowColor, r, 0);
 		//layout->addWidget(glow, r, 1);r++;
-		layout->addWidget(cancel, r, 0);
-		layout->addWidget(ok, r, 1);
+		//layout->addWidget(cancel, r, 0);
+		//layout->addWidget(ok, r, 1);
 
 		QWidget *content = new QWidget;
-		content->setMinimumWidth(dialog->width());
+		content->setMinimumWidth(dialog->width() - 40);
 		content->setLayout(layout);
 		QScrollArea *area = new QScrollArea;
 		area->setWidget(content);
+		QHBoxLayout *hb = new QHBoxLayout;
+		hb->addWidget(cancel);
+		hb->addWidget(ok);
 		QVBoxLayout *vb = new QVBoxLayout;
 		vb->addWidget(area);
+		vb->addLayout(hb);
 		dialog->setLayout(vb);
 
 		QObject::connect(clearCache, SIGNAL(clicked()), dialog, SLOT(clearCache()));
