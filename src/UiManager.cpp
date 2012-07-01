@@ -88,7 +88,9 @@ void UiManager::init(PhotoKitView *view)
 	mView = view;
 	mThumbPageRoot = new QGraphicsWidget;
 	mThumbPageRoot->setAcceptHoverEvents(true);
-	mThumbPageRoot->setPos(Config::contentHMargin, Config::contentVMargin);
+	qreal y = (qreal)qApp->desktop()->height() - ((qreal)Config::thumbRows + 0.9)*((Config::thumbBorder
+			+ Config::thumbMargin)*2 + Config::thumbItemHeight);
+	mThumbPageRoot->setPos(Config::contentHMargin, qMin<qreal>(Config::thumbItemHeight, y));//contentVMargin); //TODO: ensure see the reflection
 	mThumbPageRoot->setTransform(QTransform().scale(0.5, 0.5));
 	mView->scene()->addItem(mThumbPageRoot);
 	mPlayPageRoot = new SlideDisplay;
@@ -228,7 +230,7 @@ void UiManager::showHelp()
 void UiManager::updateThumbItemAt(int index)
 {
 	int show_index = index + mThumbsCount;
-	ezlog_debug("updateing thumb at %d. show on %d", index, show_index);
+	//ezlog_debug("updateing thumb at %d. show on %d", index, show_index);
 	int col = show_index / Config::thumbRows;
 	int row = show_index % Config::thumbRows;
 
@@ -288,12 +290,12 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 						  "Move mouse to see moving effect\n"
 						  "Two finger touch to zoom all images"));
 
-		//mPlayPageRoot->hide();
+		mPlayPageRoot->smoothScale(1, 0.2, ItemAnimation::FadeOut);
 	} else if (page == PlayPage) {
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
 		mPlayPageRoot->smoothScale(4, 1, ItemAnimation::FadeIn);
-		mPlayPageRoot->show();
+		//mPlayPageRoot->show();
 		mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
 		Tools::showTip(tr("Right click to show menu.\n"
 						  "Double click to go back"));
@@ -302,7 +304,7 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 
 void UiManager::tryMoveCenter(QGraphicsItem *item)
 {
-	QPointF p0 = item->scenePos();
+	//QPointF p0 = item->scenePos();
 }
 
 } //namespace PhotoKit

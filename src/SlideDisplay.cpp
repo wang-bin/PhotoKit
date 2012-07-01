@@ -220,7 +220,6 @@ void SlideDisplay::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 	//go back to ThumbPage
 	if (mControl->isRunning())
 		mControl->stop();
-	smoothScale(1, 0.2, ItemAnimation::FadeOut);
 	UiManager::instance()->gotoPage(UiManager::ThumbPage);
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
