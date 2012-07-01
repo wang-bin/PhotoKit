@@ -44,6 +44,7 @@ void ItemAnimation::setTransform(const QTransform &m)
 		mItem->setOpacity(qMax<qreal>(1.0 - currentStep(), 0));
 		break;
 	case FadeIn:
+		mItem->setVisible(true);
 		mItem->setOpacity(currentStep());
 		break;
 	case None:
