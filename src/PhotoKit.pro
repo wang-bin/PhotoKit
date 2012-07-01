@@ -5,11 +5,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = PhotoKit
 TEMPLATE = app
-
+PROJECTROOT = $$PWD/..
 !include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
 !include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
-include(../common.pri)
+include($${PROJECTROOT}/common.pri)
 
 INCLUDEPATH += $$PWD
 SOURCES += main.cpp \

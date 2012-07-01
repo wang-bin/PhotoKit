@@ -1,5 +1,7 @@
 TEMPLATE = lib
 CONFIG += nexteffect-buildlib
+PROJECTROOT = $$PWD/..
+
 include(libNextEffect.pri)
 
 #src

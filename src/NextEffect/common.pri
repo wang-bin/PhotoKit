@@ -140,7 +140,7 @@ BUILD_DIR=$$PWD
 
 isEqual(TEMPLATE, app) {
 	DESTDIR = $$BUILD_DIR/bin
-	TARGET = $$qtLongName($$TARGET)
+	!isEqual(COMMON_PRI_INCLUDED, 1): TARGET = $$qtLongName($$TARGET)
 	EXE_EXT =
 	win32: EXE_EXT = .exe
 	CONFIG(release, debug|release):
@@ -155,6 +155,6 @@ RCC_DIR = $$BUILD_DIR/.rcc/$${QT_VERSION}
 UI_DIR  = $$BUILD_DIR/.ui/$${QT_VERSION}
 
 !build_pass:message(target: $$DESTDIR/$$TARGET)
-
+COMMON_PRI_INCLUDED = 1
 #before target name changed
 #TRANSLATIONS += i18n/$${TARGET}_zh-cn.ts #i18n/$${TARGET}_zh_CN.ts
