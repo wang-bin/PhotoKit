@@ -1,7 +1,7 @@
 Source: photokit
 Section: user/other
 Priority: optional
-Maintainer: LucasWang <lucaswang@unknown>
+Maintainer: LucasWang <wbsecg1@gmail.com>
 Build-Depends: debhelper (>= 5), libqt4-dev
 Standards-Version: 3.7.3
 Homepage: <insert the upstream URL, if relevant>
