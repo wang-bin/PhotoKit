@@ -23,24 +23,32 @@
 
 #include <QGraphicsWidget>
 namespace PhotoKit {
-class ToolTip : public QGraphicsWidget
+class ToolTip : public QGraphicsObject
 {
 	Q_OBJECT
 public:
 	//static void showText(const QPointF& pos, const QString text, int msec);
 
-	explicit ToolTip(QGraphicsItem *parent = 0);
+    explicit ToolTip(const QString& text, QGraphicsScene* scene, QGraphicsItem *parent = 0);
+    static void showText(const QString& text, QGraphicsScene* scene, int msshow = 8000);
+    virtual QRectF boundingRect() const;
 
+    void setText(const QString& text);
 protected:
-	void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 public slots:
-	void showText(const QString& text);
-
+    void done();
 private:
+    static ToolTip* instance;
 	bool mTextChanged;
+    QGraphicsScene *mScene;
 	QString mText;
-	QRectF mRect;
+    qreal mWidth, mHeight;
+    qreal mMargin;
+    int mTextFlag;
+    QFont mFont;
 };
 
 } //namespace PhotoKit

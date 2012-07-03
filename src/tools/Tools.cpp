@@ -1,10 +1,12 @@
 
 #include "Tools.h"
 
-#include <QToolTip>
 #include <QtGui/QImageReader>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QGraphicsView>
+#include "ToolTip.h"
+#include "UiManager.h"
 #include "Config.h"
 #include "ezlog.h"
 
@@ -12,10 +14,10 @@ namespace PhotoKit {
 
 namespace Tools {
 
-void showTip(const QString &text)
+void showTip(const QString &text, bool force, int msshow)
 {
-	if (Config::showTips) {
-		QToolTip::showText(qApp->desktop()->rect().center(), text);
+    if (Config::showTips || force) {
+        ToolTip::showText(text, UiManager::instance()->view()->scene(), 8000);
 		ezlog_debug("Tip: %s", qPrintable(text));
 	}
 

@@ -7,7 +7,7 @@ namespace PhotoKit {
 
 namespace Tools {
 
-void showTip(const QString& text);
+void showTip(const QString& text, bool force = false, int msshow = 8000);
 
 QStringList imageNameFilters();
 
