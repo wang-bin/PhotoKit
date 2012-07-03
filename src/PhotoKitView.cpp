@@ -34,6 +34,7 @@
 #include "PhotoKitScene.h"
 #include "SlideDisplay.h"
 #include "UiManager.h"
+#include "BaseAnimationItem.h"
 #include "Config.h"
 
 #include "ezlog.h"
@@ -98,6 +99,13 @@ void PhotoKitView::setAnimationDuration(int ms)
 	mMachine->timeLine()->setDuration(ms);
 }
 
+void PhotoKitView::setInitialPos(qreal x, qreal y)
+{
+    mX = x;
+    mY = y;
+    translate(x, y);
+}
+
 //params x, y and scale are the final value. final rotation and shear params are the values in animation, final values are 0
 void PhotoKitView::smartTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
 {
@@ -138,12 +146,21 @@ void PhotoKitView::doTransform(const QTransform& m)
 /*
 	if (UiManager::page == UiManager::PlayPage) {
 		ezlog_debug("slide page transform");
-		UiManager::instance()->playPageItem()->setTransform(m);
+        UiManager::instance()->currentPageRootItem()->setTransform(m);
 	} else if (UiManager::page == UiManager::ThumbPage) {
 		ezlog_debug("thumb page transform");*/
-	//UiManager::instance()->thumbPageRootItem()->setTransformOriginPoint(UiManager::instance()->thumbPageRootItem()->boundingRect().center());
-		UiManager::instance()->thumbPageRootItem()->setTransform(m);//, true); //combine?
-	//}
+    //UiManager::instance()->currentPageRootItem()->setTransformOriginPoint(UiManager::instance()->currentPageRootItem()->boundingRect().center());
+
+    QGraphicsItem *item = UiManager::instance()->currentPageRootItem();
+/*    qreal sx0 = item->transform().m11(), sy0 = item->transform().m22();
+    if (sx0 != m.m11() || sy0 != m.m22()) {
+        QRectF r = item->boundingRect();
+        item->setTransform(QTransform().translate(r.width()/2, r.height()/2)
+                           .scale(m.m11()/sx0, m.m22()/sy0)
+                           .translate(-r.width()/2, -r.height()/2), true);
+    } else {*/
+        item->setTransform(m);//, true); //combine?
+   // }
 }
 
 /*
@@ -204,54 +221,63 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 	if (mPressed) {
 		//setCursor(Qt::ClosedHandCursor);
 	}
-	if (UiManager::instance()->thumbPageRootItem()->isVisible()) {
 		QPointF delta = e->posF() - mMousePos;
 		if (mPressed) {
-			mX += delta.x() * 2;
-			mY += delta.y();
-			//TODO: move out visible area effect
-			mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
-			mX = qMin(mX, qreal(Config::contentHMargin));
-			mY = qMax(mY, qreal(0.0));
-			mY = qMin(mY, qreal(Config::contentVMargin));
-			//ezlog_debug("dx dy %d %d", delta.x(), delta.y());
-			qreal hs = delta.x()/100;
-			qreal vs = delta.y()/100;
-			qreal xrot = delta.x()/8, yrot = delta.x()/8;
-			if (delta.x() > 0) {
-				xrot = qMin(xrot, xrot_max);
-				hs = qMin(hs, xshear_max);
-			} else {
-				xrot = qMax(xrot, xrot_min);
-				hs = qMax(hs, xshear_min);
-			}
-			if (delta.y() > 0) {
-				yrot = qMin(yrot, yrot_max);
-				vs = qMin(vs, yshear_max);
-			} else {
-				yrot = qMax(yrot, yrot_min);
-				vs = qMax(vs, yshear_min);
-			}
-			//ezlog_debug("mX=%f my=%f", mX, mY);
-			//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-			setAnimationDuration(ani_duration);
-			smartTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
+            if (UiManager::page == UiManager::ThumbPage) {
+                mX += delta.x() * 4;
+                mY += delta.y();
+                //TODO: move out visible area effect
+                mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
+                mX = qMin(mX, qreal(Config::contentHMargin));
+                mY = qMax(mY, qreal(0.0));
+                mY = qMin(mY, qreal(Config::contentVMargin));
+                //ezlog_debug("dx dy %d %d", delta.x(), delta.y());
+                qreal hs = delta.x()/100;
+                qreal vs = delta.y()/100;
+                qreal xrot = delta.x()/6, yrot = delta.x()/6;
+                if (delta.x() > 0) {
+                    xrot = qMin(xrot, xrot_max);
+                    hs = qMin(hs, xshear_max);
+                } else {
+                    xrot = qMax(xrot, xrot_min);
+                    hs = qMax(hs, xshear_min);
+                }
+                if (delta.y() > 0) {
+                    yrot = qMin(yrot, yrot_max);
+                    vs = qMin(vs, yshear_max);
+                } else {
+                    yrot = qMax(yrot, yrot_min);
+                    vs = qMax(vs, yshear_min);
+                }
+                //ezlog_debug("mX=%f my=%f", mX, mY);
+                //moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
+                setAnimationDuration(ani_duration);
+                smartTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
+            } else if (UiManager::page == UiManager::PlayPage) {
+                UiManager::instance()->currentPageRootItem()->setTransform(QTransform().translate(delta.x(), delta.y()), true);
+            }
 			mMousePos = e->posF();
-		}
 		//ezlog_debug("move in view");
 		//e->accept();
 	}
-	e->accept(); //WARNING: item will not recive hover event if remove this
+    e->accept(); //WARNING: item will not recive hover event if remove this
 }
 
 void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
 {
-	if (UiManager::page != UiManager::ThumbPage) {
-
-	}
 	mPressed = false;
 	mMousePos = e->posF();
 	QGraphicsView::mouseReleaseEvent(e);
+}
+
+void PhotoKitView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (UiManager::page == UiManager::PlayPage) {
+        UiManager::instance()->gotoPage(UiManager::ThumbPage);
+        event->accept();
+    } else {
+        QGraphicsView::mouseDoubleClickEvent(event);
+    }
 }
 
 void PhotoKitView::wheelEvent(QWheelEvent *event)
@@ -259,16 +285,24 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 	int numDegrees = event->delta() / 8;
 	int numSteps = numDegrees / 15;
 	//ezlog_debug("wheel steps: %d", numSteps); //1
-	qreal scale0 = mScale;
-	if (numSteps > 0) {
-		mScale += 0.12;
-		mScale = qMin(scale_max, mScale);
-	} else {
-		mScale -= 0.12;
-		mScale = qMax(scale_min, mScale);
-	}
-	setAnimationDuration(ani_duration);
-	smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
+    if (UiManager::page == UiManager::ThumbPage) {
+        qreal scale0 = mScale;
+        if (numSteps > 0) {
+            mScale += 0.12;
+            mScale = qMin(scale_max, mScale);
+        } else {
+            mScale -= 0.12;
+            mScale = qMax(scale_min, mScale);
+        }
+        setAnimationDuration(ani_duration);
+        smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
+    } else if (UiManager::page == UiManager::PlayPage) {
+        QGraphicsItem *item =  UiManager::instance()->currentPageRootItem();
+        qreal s = numSteps > 0 ? 1.1:0.9;
+        QRectF r = item->boundingRect();
+        item->setTransform(QTransform().translate(r.width()/2, r.height()/2)
+                           .scale(s, s).translate(-r.width()/2, -r.height()/2), true);
+    }
 	//QGraphicsView::wheelEvent(event); //will scroll the content. centerOn will not work
 }
 
@@ -277,6 +311,10 @@ void PhotoKitView::resizeEvent(QResizeEvent *event)
 	//visibleSceneRect();
 	//ezlog_debug("resize: %dx%d", event->size().width(), event->size().height());
 	//UiManager::instance()->updateFixedItems();
+   /* this->resetMatrix();
+    this->scale(event->size().width() / 800.0, event->size().height() / 600.0); //?
+    QGraphicsView::resizeEvent(event);
+    BaseAnimationItem::setMatrix(this->matrix());*/
     QGraphicsView::resizeEvent(event);
 }
 
@@ -299,23 +337,32 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 					/ QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
 			if (touchEvent->touchPointStates() & Qt::TouchPointMoved
 					|| touchEvent->touchPointStates() & Qt::TouchPointReleased) {
-				qreal scale0 = mScale;
-				if (currentScaleFactor > 1) {
-					mScale += 0.12;
-					mScale = qMin(scale_max, mScale);
-				} else {
-					mScale -= 0.12;
-					mScale = qMax(scale_min, mScale);
-				}
-				setAnimationDuration(ani_duration);
-				smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
-			}
+                if (UiManager::page == UiManager::ThumbPage) {
+                    qreal scale0 = mScale;
+                    if (currentScaleFactor > 1) {
+                        mScale += 0.12;
+                        mScale = qMin(scale_max, mScale);
+                    } else {
+                        mScale -= 0.12;
+                        mScale = qMax(scale_min, mScale);
+                    }
+                    setAnimationDuration(ani_duration);
+                    smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0); //both thumbpage and playpage works
+                } else if (UiManager::page == UiManager::PlayPage) {
+                    QGraphicsItem *item =  UiManager::instance()->currentPageRootItem();
+                    qreal s0 = item->transform().m11();
+                    qreal s = currentScaleFactor > 1 ? 1.1:0.9;
+                    QRectF r = item->boundingRect();
+                    item->setTransform(QTransform().translate(r.width()/2, r.height()/2)
+                                       .scale(s, s).translate(-r.width()/2, -r.height()/2), true);
+                }
+            }
 		}
 		return true;
 	}
 	default:
 		break;
-	}
+    }
 	return QGraphicsView::viewportEvent(event);
 }
 

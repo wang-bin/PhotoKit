@@ -37,6 +37,7 @@ public:
 	explicit PhotoKitView(QWidget *parent = 0);
     QRectF visibleSceneRect() const;
 	void setAnimationDuration(int ms);
+    void setInitialPos(qreal x, qreal y);
 	void smartTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xRot, qreal yRot, qreal zRot, qreal xShear, qreal yShear);
 signals:
 
@@ -52,6 +53,7 @@ protected:
 	virtual void mousePressEvent(QMouseEvent *event);
 	virtual void mouseMoveEvent(QMouseEvent *event); //TODO:test rotate
 	virtual void mouseReleaseEvent(QMouseEvent *event);
+    virtual void mouseDoubleClickEvent(QMouseEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
 	virtual bool viewportEvent(QEvent *event);
 
