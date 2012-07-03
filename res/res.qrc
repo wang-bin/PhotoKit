@@ -21,5 +21,6 @@
         <file>images/m109.png</file>
         <file>images/m110.png</file>
         <file>images/milkyway_chart.png</file>
+        <file>i18n/PhotoKit_zh_CN.qm</file>
     </qresource>
 </RCC>

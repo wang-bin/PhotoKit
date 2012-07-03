@@ -32,7 +32,12 @@ SOURCES += main.cpp \
     network/weiboapi.cpp \
     network/qput.cpp \
     network/WeiboDialog.cpp \
-    tools/ConfigDialog.cpp
+    tools/ConfigDialog.cpp \
+    BaseAnimationItem.cpp \
+    Guide.cpp \
+    DemoItemAnimation.cpp \
+    tools/ToolTip.cpp \
+    network/ImageSearcher.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -54,7 +59,12 @@ HEADERS  += \
     network/weiboapi.h \
     network/qput.h \
     network/WeiboDialog.h \
-    tools/ConfigDialog.h
+    tools/ConfigDialog.h \
+    BaseAnimationItem.h \
+    Guide.h \
+    DemoItemAnimation.h \
+    tools/ToolTip.h \
+    network/ImageSearcher.h
 
 CONFIG += mobility
 MOBILITY = 
@@ -70,4 +80,16 @@ contains(MEEGO_EDITION,harmattan) {
 maemo5 {
     target.path = /opt/PhotoKit/bin
     INSTALLS += target
+}
+
+contains(MEEGO_EDITION,harmattan) {
+    desktopfile.files = PhotoKit.desktop
+    desktopfile.path = /usr/share/applications
+    INSTALLS += desktopfile
+}
+
+contains(MEEGO_EDITION,harmattan) {
+    icon.files = PhotoKit.png
+    icon.path = /usr/share/icons/hicolor/80x80/apps
+    INSTALLS += icon
 }
