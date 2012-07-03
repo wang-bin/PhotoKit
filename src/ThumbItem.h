@@ -23,7 +23,7 @@
 
 #include "PhotoKit_Global.h"
 #include <QGraphicsItem>
-
+#define NO_BASE
 class QGraphicsItemAnimation;
 namespace PhotoKit {
 class ItemAnimation;
@@ -43,8 +43,13 @@ public:
 	QImage thumbImage() const; //origin thumb
 	QImage scaledThumbImage() const; //thumb scaled to fit item size
 	void setThumbImage(const QImage& image);
-	virtual QRectF boundingRect() const; // overridden
-	void showGlow();
+#ifdef NO_BASE
+    virtual QRectF boundingRect() const; // overridden
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option = 0, QWidget *widget = 0);
+#else
+
+#endif //NO_BASE
+    void showGlow();
 	void hideGlow();
 	void zoom(ZoomAction action);
 	qreal boundingWidth() const;
@@ -53,15 +58,13 @@ public:
 	qreal contentHeight() const;
 
 protected:
-	void prepair();
-	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option = 0, QWidget *widget = 0);
+    void prepairSize();
+    virtual QImage* createImage(const QMatrix &) const;
 
 	virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 	virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-	//virtual QImage *createImage(const QMatrix &) const { return 0; }
-	//virtual bool collidesWithItem(const QGraphicsItem *, Qt::ItemSelectionMode) const { return false; }
     virtual bool sceneEvent(QEvent *event);
 
 private:
@@ -71,8 +74,12 @@ private:
 	OutlineGlowItem *mGlow;
 	ItemAnimation *mItemAnimation;
 	qreal mWidth, mHeight; //scaled thumb width, height
+    int maxWidth;
+    int maxHeight;
 	//ProgressItem
 	//TextItem *name
+    bool adjustSize;
+    float scale;
 };
 
 } //namespace PhotoKit

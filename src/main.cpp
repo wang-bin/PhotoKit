@@ -20,6 +20,7 @@
 #include <QtCore/QDir>
 #include <QApplication>
 #include <QtCore/QTranslator>
+#include <QtCore/QLocale>
 #include "ezlog.h"
 #include "OptionParser.h"
 #include "PhotoKitView.h"
@@ -36,15 +37,16 @@ int main(int argc, char *argv[])
     OptionParser::parseCmd(argc, argv);
 	QDir().mkpath(Config::thumbDir);
 
+    QString qm("PhotoKit_" + QLocale::system().name());
 	QTranslator translator;
-	translator.load("PhotoKit", ":/i18n");
+    translator.load(qm, ":/i18n");
 	a.installTranslator(&translator);
-
+    qDebug("qm: %s", qPrintable(qm));
     PhotoKitView view;
 	view.setFocus();
     UiManager::instance()->init(&view);
     //view.showFullScreen();
-    view.showMaximized();
+    view.showFullScreen();
 	if (OptionParser::images.isEmpty()) {
 		QStringList defalutimages = QDir(":/images").entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), ":/images/");
 		ezlog_debug("default images: %d", defalutimages.size());
