@@ -22,6 +22,7 @@
 #define UIMANAGER_H
 
 #include <QObject>
+class QGraphicsView;
 class QGraphicsWidget;
 class QGraphicsItem;
 class QMenu;
@@ -35,6 +36,7 @@ class ThumbTask;
 class ToolBar;
 class SlideDisplay;
 class SlidePlayControl;
+class BaseAnimationItem;
 class UiManager : public QObject
 {
 	Q_OBJECT
@@ -45,10 +47,11 @@ public:
 	static UiManager* instance();
     virtual ~UiManager();
 	void init(PhotoKitView *view);  //call createMenus
-	QGraphicsItem* thumbPageRootItem();
-	SlideDisplay* playPageItem() {return mPlayPageRoot;}
+    QGraphicsItem* currentPageRootItem();
+    BaseAnimationItem* thumbPageRootItem();
+    SlideDisplay* playPageItem() {return mPlayPageRoot;}
+    QGraphicsView *view();
 	bool isSliding() const;
-	//ToolTip* toolTipItem();
     void updateFixedItems();
 
     void showImagesFromThumb(const QString& dir, bool yes = true);
@@ -74,6 +77,7 @@ public slots:
 	void shareToWeibo();
 	void setup();
 	void showHelp();
+    void showAbout();
 
     void updateThumbItemAt(int index);
 	void updateDisplayedThumbList();
@@ -83,11 +87,11 @@ private:
 	void createMenus(); //called by init()
 
 	static UiManager *mInstance;
-	QGraphicsWidget *mThumbPageRoot; //mWallRoot
-	SlideDisplay *mPlayPageRoot;
+    QGraphicsItem *mCurrentPageRoot;
+    BaseAnimationItem *mThumbPageRoot; //mWallRoot
+    SlideDisplay *mPlayPageRoot;
 	SlidePlayControl *mPlayControl;
 	ToolBar *mBottomBar;
-	//ToolTip *mToolTip;
 	PhotoKitView *mView;
     ThumbTask *mThumbTask;
 	int mThumbsCount;
