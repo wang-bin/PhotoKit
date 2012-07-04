@@ -29,12 +29,14 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QAction>
-#include <QPushButton>
+#include "Button.h"
 #include "BaseItem.h"
+#include "DemoItemAnimation.h"
 #include "tools/ConfigDialog.h"
 #include "network/WeiboDialog.h"
 #include "PhotoKitView.h"
 #include "ReflectEffectItem.h"
+#include "score.h"
 #include "SlideDisplay.h"
 #include "SlidePlayControl.h"
 #include "tools/Tools.h"
@@ -49,9 +51,21 @@ static QString help;
 static QString thumbpage_help;
 static QString playpage_help;
 static QString about;
+static QString CLEAR;
+static QString ADDIMAGES;
+static QString ADDDIRS;
+static QString SETUP;
+static QString HELP;
+static QString QUIT;
 static qreal X0 = 0;
 static qreal Y0 = 0;
 static void initTranslation() {
+	CLEAR = QObject::tr("Clear");
+	ADDIMAGES = QObject::tr("Add images");
+	ADDDIRS = QObject::tr("Add dirs");
+	SETUP = QObject::tr("Setup");
+	HELP = QObject::tr("Help");
+	QUIT = QObject::tr("Quit");
     help = QObject::tr("PRESS ME TO HIDE\n"
                        "OR DISABLE TIPS IN SETUP WINDOW\n"
                                   "Right click(press and hold) to show menu.\n"
@@ -83,6 +97,7 @@ UiManager::UiManager(QObject *parent) :
     QObject(parent),mView(0),mThumbTask(new ThumbTask),mThumbsCount(0)
 {
     initTranslation();
+	score = new Score();
 	connect(mThumbTask->watcher(), SIGNAL(resultReadyAt(int)), this, SLOT(updateThumbItemAt(int)));
 	connect(mThumbTask->watcher(), SIGNAL(finished()), this, SLOT(updateDisplayedThumbList()));
 }
@@ -138,6 +153,9 @@ void UiManager::init(PhotoKitView *view)
     mView->setInitialPos(X0, Y0);
 	mView->setAnimationDuration(1618);
     mView->smartTransform(X0, Y0, 0.5, 1, 0, 0, 0, 0, 0);
+
+	createMenus();
+	showMenu("createLeftMenuTopInMovie");
 }
 
 QGraphicsItem* UiManager::currentPageRootItem()
@@ -350,5 +368,131 @@ void UiManager::tryMoveCenter(QGraphicsItem *item)
 	//QPointF p0 = item->scenePos();
 }
 
+//do animations and end other operations
+void UiManager::clickMenuItem()
+{
+	//common menu items
+	Button *button = qobject_cast<Button*>(sender());
+	ezlog_debug();
+	QString menuText(button->text()); //plain text
+	ezlog_debug();
+	if (menuText == tr("Quit")) {
+		qApp->quit();
+	} else if (menuText == tr("Setup")) {
+
+	}
+
+	//playReverse()
+	if (button->buttonType() == Button::ArrowUp) {
+		ezlog_debug();
+		score->queueMovie("createLeftMenuTopInMovie -out");
+		button->setButtonType(Button::ArrowDown);
+	} else if (button->buttonType() == Button::ArrowDown) {
+		score->queueMovie("createLeftMenuTopInMovie");
+		button->setButtonType(Button::ArrowUp);
+	} else {
+
+		score->queueMovie("createLeftMenuTopInMovie -shake");
+	}
+	if (score->hasQueuedMovies()){
+		score->playQue();
+	}
+	//page depended menu items
+	if (page == ThumbPage) {
+
+	} else if (page == PlayPage) {
+
+	}
+
+}
+
+void UiManager::createMenus()
+{
+	QStringList thumbPageMenuItems;
+	thumbPageMenuItems << CLEAR << ADDIMAGES << ADDDIRS << SETUP << HELP << QUIT;
+	Button *thumbPageMenuItem = 0;
+	for (int i = 0; i < thumbPageMenuItems.size(); ++i) {
+		thumbPageMenuItem = new Button("<p style='color:white;font-size:16px'>" + thumbPageMenuItems[i] + "</p>");
+		mView->scene()->addItem(thumbPageMenuItem);
+		connect(thumbPageMenuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+		createLeftMenuTopInMovie(thumbPageMenuItem, i);
+	}
+	thumbPageMenuItem = new Button(Button::ArrowUp, Button::RectShape);
+	connect(thumbPageMenuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+	mView->scene()->addItem(thumbPageMenuItem);
+	createLeftMenuTopInMovie(thumbPageMenuItem, thumbPageMenuItems.size() + 1);
+}
+
+void UiManager::createLeftMenuTopInMovie(Button *item, int i)
+{
+	int xOffset = 15;
+	int yOffset = 22;
+	//static
+	static Movie *movieIn = score->insertMovie("createLeftMenuTopInMovie");
+	static Movie *movieOut = score->insertMovie("createLeftMenuTopInMovie -out");
+	static Movie *movieShake = score->insertMovie("createLeftMenuTopInMovie -shake");
+
+	item->setVisible(false);
+	item->setZValue(10);
+	qreal ih = item->sceneBoundingRect().height();
+	qreal ihp = ih + 3;
+
+	// create in-animation:
+	DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
+	anim->setDuration(float(1000 + (i * 20)));
+	anim->setStartPos(QPointF(xOffset, -ih));
+	anim->setPosAt(0.20, QPointF(xOffset, -ih));
+	anim->setPosAt(0.50, QPointF(xOffset, (i * ihp) + yOffset + 22 + (10 * float(i / 4.0f))));
+	anim->setPosAt(0.60, QPointF(xOffset, (i * ihp) + yOffset + 22));
+	anim->setPosAt(0.70, QPointF(xOffset, (i * ihp) + yOffset + 22 + (5 * float(i / 4.0f))));
+	anim->setPosAt(0.80, QPointF(xOffset, (i * ihp) + yOffset + 22));
+	anim->setPosAt(0.90, QPointF(xOffset, (i * ihp) + yOffset + 22 + (2 * float(i / 4.0f))));
+	anim->setPosAt(1.00, QPointF(xOffset, (i * ihp) + yOffset + 22));
+	movieIn->append(anim);
+
+	// create out-animation:
+	anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
+	anim->setDuration(float(1000 + (i * 20)));
+	anim->setStartPos(QPointF(xOffset,  (i * ihp) + yOffset + 22));
+	anim->setPosAt(1.00, QPointF(xOffset, 0));
+	anim->setPosAt(0.90, QPointF(xOffset, (i * ihp) + yOffset + 22 + (10 * float(i / 4.0f))));
+	anim->setPosAt(0.80, QPointF(xOffset, (i * ihp) + yOffset + 22));
+	anim->setPosAt(0.70, QPointF(xOffset, (i * ihp) + yOffset + 22 + (5 * float(i / 4.0f))));
+	anim->setPosAt(0.60, QPointF(xOffset, (i * ihp) + yOffset + 22));
+	anim->setPosAt(0.50, QPointF(xOffset, (i * ihp) + yOffset + 22 + (2 * float(i / 4.0f))));
+	anim->setPosAt(0.20, QPointF(xOffset, (i * ihp) + yOffset + 22));
+	movieOut->append(anim);
+/*	anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
+	anim->hideOnFinished = true;
+	anim->setDuration((700 + (30 * i)));
+	anim->setStartPos(QPointF(xOffset, (i * ihp) + yOffset + 22));
+	anim->setPosAt(0.60, QPointF(xOffset, 600 - ih - ih));
+	anim->setPosAt(0.65, QPointF(xOffset + 20, 600 - ih));
+	anim->setPosAt(1.00, QPointF(sw + iw, 600 - ih));
+	movieOut->append(anim);
+*/
+	// create shake-animation:
+	anim = new DemoItemAnimation(item);
+	anim->setDuration(700 * 1);
+	anim->setStartPos(QPointF(xOffset, (i * ihp) + yOffset + 22));
+	anim->setPosAt(0.55, QPointF(xOffset, (i * ihp) + yOffset + 22 - i*2.0));
+	anim->setPosAt(0.70, QPointF(xOffset - 10, (i * ihp) + yOffset + 22 - i*1.5));
+	anim->setPosAt(0.80, QPointF(xOffset, (i * ihp) + yOffset + 22 - i*1.0));
+	anim->setPosAt(0.90, QPointF(xOffset - 2, (i * ihp) + yOffset + 22 - i*0.5));
+	anim->setPosAt(1.00, QPointF(xOffset, (i * ihp) + yOffset + 22));
+	movieShake->append(anim);
+}
+
+void UiManager::showMenu(const QString &menu)
+{
+	score->queueMovie(menu);
+	score->queueMovie(menu + " -out", Score::NEW_ANIMATION_ONLY);
+	score->queueMovie(menu + " -buttons -out", Score::NEW_ANIMATION_ONLY);
+	score->queueMovie("upndown -shake");
+	score->queueMovie(menu + " -shake");
+	if (score->hasQueuedMovies()){
+		score->playQue();
+	}
+}
 } //namespace PhotoKit
 

@@ -36,7 +36,9 @@ class ThumbTask;
 class ToolBar;
 class SlideDisplay;
 class SlidePlayControl;
-class BaseAnimationItem;
+class BaseItem;
+class Button;
+class Score;
 class UiManager : public QObject
 {
 	Q_OBJECT
@@ -48,7 +50,7 @@ public:
     virtual ~UiManager();
 	void init(PhotoKitView *view);  //call createMenus
     QGraphicsItem* currentPageRootItem();
-    BaseAnimationItem* thumbPageRootItem();
+    BaseItem* thumbPageRootItem();
     SlideDisplay* playPageItem() {return mPlayPageRoot;}
     QGraphicsView *view();
 	bool isSliding() const;
@@ -82,19 +84,27 @@ public slots:
     void updateThumbItemAt(int index);
 	void updateDisplayedThumbList();
 
+private slots:
+	void clickMenuItem(); //check sender's button text
 private:
 	explicit UiManager(QObject *parent = 0);
 	void createMenus(); //called by init()
+	void createMenuItemMovie(Button *item, int index);
+	void createLeftMenuTopInMovie(Button *item, int index);
+	void createLeftMenuLeftInOutMovie(Button *item, int index); //ok. cancel
+	void createRightMenuRightInOutMovie(Button *item, int index);
+	void showMenu(const QString& menu);
 
 	static UiManager *mInstance;
     QGraphicsItem *mCurrentPageRoot;
-    BaseAnimationItem *mThumbPageRoot; //mWallRoot
+    BaseItem *mThumbPageRoot; //mWallRoot
     SlideDisplay *mPlayPageRoot;
 	SlidePlayControl *mPlayControl;
 	ToolBar *mBottomBar;
 	PhotoKitView *mView;
     ThumbTask *mThumbTask;
 	int mThumbsCount;
+	Score *score;
 
 };
 } //namespace PhotoKit
