@@ -33,11 +33,15 @@ SOURCES += main.cpp \
     network/qput.cpp \
     network/WeiboDialog.cpp \
     tools/ConfigDialog.cpp \
-    BaseAnimationItem.cpp \
     Guide.cpp \
     DemoItemAnimation.cpp \
     tools/ToolTip.cpp \
-    network/ImageSearcher.cpp
+    network/ImageSearcher.cpp \
+    ToolBar.cpp \
+    Button.cpp \
+    ProgressBarItem.cpp \
+    score.cpp \
+    BaseItem.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -60,21 +64,25 @@ HEADERS  += \
     network/qput.h \
     network/WeiboDialog.h \
     tools/ConfigDialog.h \
-    BaseAnimationItem.h \
     Guide.h \
     DemoItemAnimation.h \
     tools/ToolTip.h \
-    network/ImageSearcher.h
+    network/ImageSearcher.h \
+    ToolBar.h \
+    Button.h \
+    ProgressBarItem.h \
+    score.h \
+    BaseItem.h
 
 CONFIG += mobility
 MOBILITY = 
 
 RESOURCES += \
-    ../res/res.qrc
+    ../res/res.qrc \
+    ../res/style.qrc
 
 contains(MEEGO_EDITION,harmattan) {
-    target.path = /opt/PhotoKit/bin
-    INSTALLS += target
+
 }
 
 maemo5 {
@@ -83,13 +91,14 @@ maemo5 {
 }
 
 contains(MEEGO_EDITION,harmattan) {
+    DEFINES += CACHE_APPDIR
+    target.path = /opt/PhotoKit/bin
     desktopfile.files = PhotoKit.desktop
     desktopfile.path = /usr/share/applications
-    INSTALLS += desktopfile
-}
-
-contains(MEEGO_EDITION,harmattan) {
     icon.files = PhotoKit.png
     icon.path = /usr/share/icons/hicolor/80x80/apps
-    INSTALLS += icon
+    INSTALLS += target desktopfile icon
 }
+
+OTHER_FILES += \
+    ../res/ui.css

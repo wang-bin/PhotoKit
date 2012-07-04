@@ -174,7 +174,8 @@ void ConfigDialog::selectGlowColor()
 void ConfigDialog::saveConfig()
 {
 	Q_D(ConfigDialog);
-	QSettings cfg(Config::configPath, QSettings::IniFormat);
+    Config::showTips = d->showTips->isChecked();
+    QSettings cfg(Config::configPath, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
 /*	cfg.setValue("backgroundColor", backgroundColor.rgb());
 	cfg.setValue("glowColor", glowColor.rgb());*/

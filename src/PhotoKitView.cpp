@@ -34,7 +34,7 @@
 #include "PhotoKitScene.h"
 #include "SlideDisplay.h"
 #include "UiManager.h"
-#include "BaseAnimationItem.h"
+#include "BaseItem.h"
 #include "Config.h"
 
 #include "ezlog.h"
@@ -50,8 +50,8 @@ namespace PhotoKit {
 
 static const qreal scale_max = 1.618;
 static const qreal scale_min = 0.618;
-static const qreal yrot_max = 45;
-static const qreal yrot_min = -45;
+static const qreal yrot_max = 35;
+static const qreal yrot_min = -35;
 static const qreal xrot_max = 8;
 static const qreal xrot_min = -8;
 static const qreal xshear_min = -0.2;
@@ -197,6 +197,12 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 		break;
 	case Qt::Key_Left:
 		break;
+    case Qt::Key_F:
+        if (isFullScreen())
+            showMaximized();
+        else
+            showFullScreen();
+        break;
 	default:
 		break;
 	}
@@ -206,11 +212,10 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 
 void PhotoKitView::mousePressEvent(QMouseEvent *e)
 {
-	if (UiManager::page != UiManager::ThumbPage) {
-
-	}
-	mPressed = true;
-	mMousePos = e->posF();
+    if (e->button() == Qt::LeftButton) {
+        mPressed = true;
+        mMousePos = e->posF();
+    }
 	//mPressTime.restart();
 	QGraphicsView::mousePressEvent(e);
 }
@@ -218,9 +223,6 @@ void PhotoKitView::mousePressEvent(QMouseEvent *e)
 //TODO: delta.y() to rotate around XAix and translate y. delta.x() rotate around YAix and translate x;
 void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 {
-	if (mPressed) {
-		//setCursor(Qt::ClosedHandCursor);
-	}
 		QPointF delta = e->posF() - mMousePos;
 		if (mPressed) {
             if (UiManager::page == UiManager::ThumbPage) {
@@ -260,7 +262,8 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 		//ezlog_debug("move in view");
 		//e->accept();
 	}
-    e->accept(); //WARNING: item will not recive hover event if remove this
+        QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
+    e->accept();
 }
 
 void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
@@ -314,7 +317,7 @@ void PhotoKitView::resizeEvent(QResizeEvent *event)
    /* this->resetMatrix();
     this->scale(event->size().width() / 800.0, event->size().height() / 600.0); //?
     QGraphicsView::resizeEvent(event);
-    BaseAnimationItem::setMatrix(this->matrix());*/
+    BaseItem::setMatrix(this->matrix());*/
     QGraphicsView::resizeEvent(event);
 }
 

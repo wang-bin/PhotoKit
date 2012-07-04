@@ -31,9 +31,11 @@ ItemAnimation::ItemAnimation(QGraphicsItem *item, QObject *parent) :
 	timer->setEasingCurve(QEasingCurve::OutQuad);
 	timer->setFrameRange(0, 100);
 	mMachine->setTimeLine(timer);
-	QObject::connect(mMachine, SIGNAL(transformChanged(QTransform)), this, SLOT(setTransform(QTransform)));
-	QObject::connect(mMachine, SIGNAL(zValueChanged(qreal)), this, SLOT(setZValue(qreal)));
-	QObject::connect(mMachine->timeLine(), SIGNAL(finished()), this, SLOT(tryHide()));
+	connect(mMachine, SIGNAL(transformChanged(QTransform)), this, SLOT(setTransform(QTransform)));
+	connect(mMachine, SIGNAL(zValueChanged(qreal)), this, SLOT(setZValue(qreal)));
+	connect(mMachine, SIGNAL(posChanged(QPointF)), this, SLOT(setItemPos(QPointF)));
+	connect(mMachine->timeLine(), SIGNAL(finished()), this, SLOT(tryHide()));
+	mMachine->setStartPos(item->pos()); //
 }
 
 void ItemAnimation::setTransform(const QTransform &m)
@@ -53,6 +55,11 @@ void ItemAnimation::setTransform(const QTransform &m)
 	default:
 		break;
 	}
+}
+
+void ItemAnimation::setItemPos(const QPointF &pos)
+{
+	mItem->setPos(pos);
 }
 
 void ItemAnimation::setZValue(qreal z)

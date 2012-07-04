@@ -26,7 +26,7 @@
 
 class QGraphicsItem;
 class QTransform;
-
+class QPointF;
 namespace PhotoKit {
 class TransformMachine;
 //We can use QGraphicsItemAnimation instead. but zValue can't be animated;
@@ -46,6 +46,7 @@ public:
 	void stop();
 public slots:
 	void setTransform(const QTransform& m);
+    void setItemPos(const QPointF& pos);
 	void setZValue(qreal z);
 	void tryHide();
 

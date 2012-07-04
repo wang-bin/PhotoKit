@@ -82,7 +82,7 @@ WeiboDialog::WeiboDialog(QWidget *parent) :
 
 	QVBoxLayout *vb = new QVBoxLayout;
 	vb->setSizeConstraint(QLayout::SetMaximumSize);
-	vb->addWidget(new QLabel(tr("New weibo")));
+    vb->addWidget(new QLabel(tr("New weibo (sina)")));
 	vb->addWidget(mStatusEdit);
 	vb->addLayout(hb_user);
 	vb->addLayout(hb_pass);
