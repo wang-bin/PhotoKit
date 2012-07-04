@@ -21,6 +21,8 @@
 #include <QApplication>
 #include <QtCore/QTranslator>
 #include <QtCore/QLocale>
+#include <QStyleFactory>
+#include <QtDebug>
 #include "ezlog.h"
 #include "OptionParser.h"
 #include "PhotoKitView.h"
@@ -33,20 +35,35 @@ using namespace PhotoKit;
 int main(int argc, char *argv[])
 {
 	ezlog_init_default();
+    ezlog_registerAppender(file_appender);
+    ezlog_add_logfile("/tmp/PhotoKit.ezlog", Append);
     QApplication a(argc, argv);
+#ifdef CACHE_APPDIR
+    //Config::setAppDir(QCoreApplication::applicationDirPath());
+#endif //CACHE_APPDIR
+    QDir().mkpath(Config::thumbDir);
+    ezlog_debug("appdir: %s, thumbdir: %s", qPrintable(QCoreApplication::applicationDirPath()), qPrintable(Config::thumbDir));
     OptionParser::parseCmd(argc, argv);
-	QDir().mkpath(Config::thumbDir);
 
     QString qm("PhotoKit_" + QLocale::system().name());
 	QTranslator translator;
     translator.load(qm, ":/i18n");
 	a.installTranslator(&translator);
     qDebug("qm: %s", qPrintable(qm));
+    qDebug() << QStyleFactory::keys(); //("Windows", "Motif", "CDE", "Plastique", "GTK+", "Cleanlooks")
+    //a.setStyle(QStyleFactory::create("Cleanlooks"));
+    /*QFile f(":/style/ui.css");
+    if (f.open(QIODevice::ReadOnly)) {
+        QTextStream qss(&f);
+        a.setStyleSheet(qss.readAll());
+    } else {
+        qDebug() << "Open ui.css error:" << f.errorString();
+    }*/
     PhotoKitView view;
 	view.setFocus();
     UiManager::instance()->init(&view);
-    //view.showFullScreen();
-    view.showFullScreen();
+	view.showFullScreen();
+	//view.showMaximized();
 	if (OptionParser::images.isEmpty()) {
 		QStringList defalutimages = QDir(":/images").entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), ":/images/");
 		ezlog_debug("default images: %d", defalutimages.size());
