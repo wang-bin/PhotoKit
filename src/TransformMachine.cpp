@@ -39,6 +39,7 @@ public:
 public:
 	QPointer<QTimeLine> timeLine;
 
+    QPointF startPos;
 	QTransform startTransform;
 
 	qreal step;
@@ -159,6 +160,47 @@ void TransformMachine::setTimeLine(QTimeLine *timeLine)
 		return;
 	d->timeLine = timeLine;
 	connect(timeLine, SIGNAL(valueChanged(qreal)), this, SLOT(setStep(qreal)));
+}
+
+void TransformMachine::setStartPos(const QPointF &pos)
+{
+    d->startPos = pos;
+}
+
+QPointF TransformMachine::posAt(qreal step) const
+{
+    if (step < 0.0 || step > 1.0)
+        qWarning("QGraphicsItemAnimation::posAt: invalid step = %f", step);
+
+    return QPointF(d->linearValueForStep(step, &d->xPosition, d->startPos.x()),
+                   d->linearValueForStep(step, &d->yPosition, d->startPos.y()));
+}
+
+/*!
+  \fn void QGraphicsItemAnimation::setPosAt(qreal step, const QPointF &point)
+
+  Sets the position of the item at the given \a step value to the \a point specified.
+
+  \sa posAt()
+*/
+void TransformMachine::setPosAt(qreal step, const QPointF &pos)
+{
+    d->insertUniquePair(step, pos.x(), &d->xPosition, "setPosAt");
+    d->insertUniquePair(step, pos.y(), &d->yPosition, "setPosAt");
+}
+
+/*!
+  Returns all explicitly inserted positions.
+
+  \sa posAt(), setPosAt()
+*/
+QList<QPair<qreal, QPointF> > TransformMachine::posList() const
+{
+    QList<QPair<qreal, QPointF> > list;
+    for (int i = 0; i < d->xPosition.size(); ++i)
+        list << QPair<qreal, QPointF>(d->xPosition.at(i).step, QPointF(d->xPosition.at(i).value, d->yPosition.at(i).value));
+
+    return list;
 }
 
 /*!
@@ -425,6 +467,8 @@ void TransformMachine::setStep(qreal x)
 	if (!d->zValue.isEmpty()) {
 		emit zValueChanged(zValueAt(x));
 	}
+    if (!d->xPosition.isEmpty() || !d->yPosition.isEmpty())
+        emit posChanged(posAt(x));
 	afterAnimationStep(x);
 }
 
@@ -437,6 +481,7 @@ void TransformMachine::setStep(qreal x)
 */
 void TransformMachine::reset()
 {
+    d->startPos = QPointF();
 	d->startTransform = QTransform();
 }
 
