@@ -21,7 +21,7 @@
 #include "Guide.h"
 #include <QLineF>
 
-#include "BaseAnimationItem.h"
+#include "BaseItem.h"
 
 namespace PhotoKit {
 Guide::Guide(Guide *follows)
@@ -92,7 +92,7 @@ float Guide::lengthAll()
     return len;
 }
 
-void Guide::move(BaseAnimationItem *item, QPointF &dest, float moveSpeed)
+void Guide::move(BaseItem *item, QPointF &dest, float moveSpeed)
 {
     QLineF walkLine(item->getGuidedPos(), dest);
     if (moveSpeed >= 0 && walkLine.length() > moveSpeed){

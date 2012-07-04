@@ -22,13 +22,13 @@
 
 #include <QtCore/QTimeLine>
 #include <QtCore/QTimer>
-#include "BaseAnimationItem.h"
+#include "BaseItem.h"
 #include "Config.h"
-
+#include "ezlog.h"
 namespace PhotoKit {
 
 
-DemoItemAnimation::DemoItemAnimation(BaseAnimationItem *item, INOROUT inOrOut)
+DemoItemAnimation::DemoItemAnimation(BaseItem *item, INOROUT inOrOut)
 {
     this->opacityAt0 = 1.0;
     this->opacityAt1 = 1.0;
@@ -79,7 +79,7 @@ bool DemoItemAnimation::notOwnerOfItem()
 
 void DemoItemAnimation::play(bool fromStart, bool force)
 {
-    this->fromStart = fromStart;
+	this->fromStart = fromStart;
     this->forcePlay = force;
 
     QPointF currPos = this->baseAnimationItem()->pos();
@@ -108,8 +108,7 @@ void DemoItemAnimation::play(bool fromStart, bool force)
             this->baseAnimationItem()->setPos(this->posAt(0));
         }
     }
-
-    if (this->inOrOut == ANIM_IN)
+	if (this->inOrOut == ANIM_IN)
         this->baseAnimationItem()->setRecursiveVisible(true);
 
     if (this->startDelay){
@@ -161,9 +160,9 @@ void DemoItemAnimation::lockItem(bool state)
     this->baseAnimationItem()->locked = state;
 }
 
-BaseAnimationItem *DemoItemAnimation::baseAnimationItem()
+BaseItem *DemoItemAnimation::baseAnimationItem()
 {
-    return (BaseAnimationItem *) this->item();
+    return (BaseItem *) this->item();
 }
 
 void DemoItemAnimation::setOpacityAt0(qreal opacity)
@@ -178,7 +177,7 @@ void DemoItemAnimation::setOpacityAt1(qreal opacity)
 
 void DemoItemAnimation::setOpacity(qreal step)
 {
-    BaseAnimationItem *baseAnimationItem = (BaseAnimationItem *) item();
+    BaseItem *baseAnimationItem = (BaseItem *) item();
     baseAnimationItem->opacity = this->opacityAt0 + step * step * step * (this->opacityAt1 - this->opacityAt0);
 }
 

@@ -24,15 +24,15 @@
 #include <QtCore/QRectF>
 
 namespace PhotoKit {
-class BaseAnimationItem;
+class BaseItem;
 class Guide
 {
 public:
     Guide(Guide *follows = 0);
     virtual ~Guide();
 
-    virtual void guide(BaseAnimationItem *item, float moveSpeed) = 0;
-    void move(BaseAnimationItem *item, QPointF &dest, float moveSpeed);
+    virtual void guide(BaseItem *item, float moveSpeed) = 0;
+    void move(BaseItem *item, QPointF &dest, float moveSpeed);
     virtual QPointF startPos(){ return QPointF(0, 0); }
     virtual QPointF endPos(){ return QPointF(0, 0); }
     virtual float length(){ return 1; }

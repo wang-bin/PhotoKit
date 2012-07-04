@@ -24,7 +24,7 @@
 #include <QGraphicsItemAnimation>
 #include <QPointF>
 namespace PhotoKit {
-class BaseAnimationItem;
+class BaseItem;
 class DemoItemAnimation : public QGraphicsItemAnimation
 {
     Q_OBJECT
@@ -32,7 +32,7 @@ class DemoItemAnimation : public QGraphicsItemAnimation
 public:
     enum INOROUT {ANIM_IN, ANIM_OUT, ANIM_UNSPECIFIED};
 
-    DemoItemAnimation(BaseAnimationItem *item, INOROUT inOrOut = ANIM_UNSPECIFIED);
+    DemoItemAnimation(BaseItem *item, INOROUT inOrOut = ANIM_UNSPECIFIED);
     virtual ~DemoItemAnimation();
 
     virtual void play(bool fromStart = true, bool force = false);
@@ -54,7 +54,7 @@ public:
     void lockItem(bool state);
     void prepare();
 
-    BaseAnimationItem *baseAnimationItem();
+    BaseItem *baseAnimationItem();
 
     virtual void afterAnimationStep(qreal step); // overridden
 
