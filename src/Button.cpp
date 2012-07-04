@@ -56,7 +56,7 @@ protected:
     {
         QRect scaledRect;
         scaledRect = matrix.mapRect(QRect(0, 0, logicalSize.width(), logicalSize.height()));
-        qDebug("w=%d h=%d %d %d", scaledRect.width(), scaledRect.height(), highlighted, pressed);
+		qDebug("type=%d w=%d h=%d %d %d", type, scaledRect.width(), scaledRect.height(), highlighted, pressed);
         QImage *image = new QImage(scaledRect.width(), scaledRect.height(), QImage::Format_ARGB32_Premultiplied);
         image->fill(QColor(0, 0, 0, 0).rgba());
         QPainter painter(image);
@@ -76,7 +76,7 @@ protected:
 
         if (this->mShape == Button::RectShape){
             normal1 = QColor(200, 170, 160, 50);
-            normal2 = QColor(50, 10, 0, 50);
+			normal2 = QColor(100, 40, 0, 50);//  (50, 10, 0, 50);
         }
 
         if (pressed) {
@@ -94,15 +94,16 @@ protected:
         }
         painter.setBrush(brush);
 
-        if (this->mShape == Button::RectShape)
+		if (mShape == Button::RectShape)
             painter.drawRect(0, 0, scaledRect.width(), scaledRect.height());
         else
             painter.drawRoundedRect(0, 0, scaledRect.width(), scaledRect.height(), 10, 90, Qt::RelativeSize);
 
-        if (type == Button::Text || Button::Icon)
+		if (type == Button::Text || type == Button::Icon)
             return image;
 
-        if (type == Button::ArrowUp || type == Button::ArrowDown) {
+		if (type == Button::ArrowUp || type == Button::ArrowDown) {
+
             float xOff = scaledRect.width() / 2;
             float yOff = scaledRect.height() / 2;
             float sizex = 3.0f * matrix.m11();
@@ -130,30 +131,31 @@ void Button::init()
     mBgOff = 0;
     mBgHighlight = 0;
     mBgDisabled = 0;
+	mGlow = 0;
     mTextItem = 0;
     mIconItem = 0;
 
     setAcceptsHoverEvents(true);
     //setCursor(Qt::PointingHandCursor);
-
 	resize(QSizeF(180, 22));
+
 }
 
 Button::Button(ButtonType type, Shape shape, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
-	QGraphicsWidget(parent, wFlags),prepared(false),mType(type),mShape(shape),mState(OFF)
+	QObject(0),BaseItem(parent),prepared(false),mType(type),mShape(shape),mState(OFF)
 {
     init();
 }
 
 Button::Button(const QString& text, Shape shape, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
-	QGraphicsWidget(parent, wFlags),prepared(false),mType(Text),mShape(shape),mState(OFF)
+	QObject(0),BaseItem(parent),prepared(false),mType(Text),mShape(shape),mState(OFF)
 {
     init();
     setText(text);
 }
 
 Button::Button(const QPixmap& icon, Shape shape, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
-	QGraphicsWidget(parent, wFlags),prepared(false),mType(Icon),mShape(shape),mState(OFF)
+	QObject(0),BaseItem(parent),prepared(false),mType(Icon),mShape(shape),mState(OFF)
 {
     init();
     setIcon(icon);
@@ -165,6 +167,17 @@ Button::~Button()
 		delete d_ptr;
 		d_ptr = 0;
 	}
+}
+
+Button::ButtonType Button::buttonType() const
+{
+	return mType;
+}
+
+void Button::setButtonType(ButtonType type)
+{
+	mType = type;
+	prepairBackgrounds();
 }
 
 void Button::setCheckable(bool checkable)
@@ -253,15 +266,16 @@ bool Button::isDown() const
 	Q_D(const Button);
 	return d->down;
 }
-/*
+
 void Button::resize(const QSizeF &size)
 {
-    if (mShape == RoundedRectShape)
+	//if (mShape == RoundedRectShape)
         logicalSize = QSize(size.width(), size.height());
-    else
-        logicalSize = QSize(int((size.width() / 2.0f) - 5), int(size.height() * 1.5f));
-    prepairBackgrounds();
-    setText(mText);
+	//else
+	//    logicalSize = QSize(int((size.width() / 2.0f) - 5), int(size.height() * 1.5f));
+
+	prepairBackgrounds();
+	setText(mText);
     //setIcon(mIcon);
 }
 
@@ -269,13 +283,13 @@ void Button::resize(qreal width, qreal height)
 {
     resize(QSizeF(width, height));
 }
-*/
+
 void Button::setText(const QString &text)
 {
     if (text.isEmpty())
         return;
     if (mTextItem) {
-        if (mText != text)
+		if (mText != text)
             mTextItem->setHtml(mText);
         QSizeF s = mTextItem->document()->size();
         qreal x = qMax<qreal>((logicalSize.width() - s.width())/2, 2);
@@ -291,11 +305,14 @@ void Button::setText(const QString &text)
     qreal y = qMax<qreal>((logicalSize.height() - s.height())/2, 2);
     mTextItem->setPos(x, y);
     mTextItem->setZValue(zValue() + 2);
+
 }
 
 QString Button::text() const
 {
-    return mText;
+	if (mText.isEmpty())
+		return "";
+	return mTextItem->document()->toPlainText(); //NOT HTML
 }
 
 void Button::setIcon(const QIcon &icon)
@@ -340,25 +357,25 @@ void Button::prepairBackgrounds()
         delete mBgOn;
         mBgOn = 0;
     }
-    if (mBgOff) {
+	if (mBgOff) {
         delete mBgOff;
         mBgOff = 0;
     }
-    if (mBgHighlight) {
+	if (mBgHighlight) {
         delete mBgHighlight;
         mBgHighlight = 0;
     }
-    if (mBgDisabled) {
+	if (mBgDisabled) {
         delete mBgDisabled;
         mBgDisabled = 0;
     }
-    if (mGlow) {
+	if (mGlow) {
         delete mGlow;
         mGlow = 0;
     }
-    mBgOn = new ButtonBackground(mType, mShape, true, true, logicalSize, this);
-    mBgOff = new ButtonBackground(mType, mShape, false, false, logicalSize, this);
-    mBgHighlight = new ButtonBackground(mType, mShape, true, false, logicalSize, this);
+	mBgOn = new ButtonBackground(mType, mShape, true, true, logicalSize, this);
+	mBgOff = new ButtonBackground(mType, mShape, false, false, logicalSize, this);
+	mBgHighlight = new ButtonBackground(mType, mShape, true, false, logicalSize, this);
     mBgDisabled = new ButtonBackground(mType, mShape, true, true, logicalSize, this);
     setState(OFF);
 
@@ -399,7 +416,7 @@ void Button::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void Button::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    ezlog_debug();
+
     if (mState == ON)
         setState(OFF);
     mGlow->hide();
@@ -414,7 +431,7 @@ void Button::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Button::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-    ezlog_debug();
+
 
     if (mState == DISABLED)
         return;
@@ -425,13 +442,13 @@ void Button::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 
 void Button::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    ezlog_debug();
+
     event->accept();
 }
 
 void Button::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-    ezlog_debug();
+
 
     if (mState == DISABLED)
         return;

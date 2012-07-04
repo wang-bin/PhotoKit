@@ -2,12 +2,12 @@
 #define BUTTON_H
 
 #include <QGraphicsWidget>
-
+#include "BaseItem.h"
 namespace PhotoKit {
 class OutlineGlowItem;
 class ButtonBackground;
 class ButtonPrivate;
-class Button : public QGraphicsWidget
+class Button : public QObject, public BaseItem
 {
     Q_OBJECT
 	Q_DECLARE_PRIVATE(Button)
@@ -15,10 +15,16 @@ public:
     enum ButtonType { Text, Icon, CloseButton, PlayButton, PauseButton, StopButton, ArrowUp, ArrowDown, ArrowLeft, ArrowRight}; //use mirrored image
     enum State {ON = 1, OFF = 2, HIGHLIGHT = 4, DISABLED = 8};
     enum Shape { RectShape, RoundedRectShape};
-	explicit Button(ButtonType type, Shape shape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
-	explicit Button(const QString& text, Shape shape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
-	explicit Button(const QPixmap& text, Shape shape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+	explicit Button(ButtonType type, Shape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+	explicit Button(const QString& text, Shape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+	explicit Button(const QPixmap& text, Shape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
 	virtual ~Button();
+
+	ButtonType buttonType() const;
+	void setButtonType(ButtonType type);
+
+	void resize(const QSizeF& size);
+	void resize(qreal width, qreal height);
 
 	void setCheckable(bool);
 	bool isCheckable() const;
@@ -30,7 +36,7 @@ public:
 	bool isDown() const;
 
     void setText(const QString& text);
-    QString text() const;
+	QString text() const; //plainText();
     void setIcon(const QIcon& icon);
     QPixmap icon() const;
     void setColor(const QColor& color);
