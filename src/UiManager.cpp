@@ -29,7 +29,8 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QAction>
-#include "BaseAnimationItem.h"
+#include <QPushButton>
+#include "BaseItem.h"
 #include "tools/ConfigDialog.h"
 #include "network/WeiboDialog.h"
 #include "PhotoKitView.h"
@@ -114,11 +115,11 @@ UiManager::~UiManager()
 void UiManager::init(PhotoKitView *view)
 {
 	mView = view;
-    mThumbPageRoot = new BaseAnimationItem;
+    mThumbPageRoot = new BaseItem;
     mCurrentPageRoot = mThumbPageRoot;
 	mThumbPageRoot->setAcceptHoverEvents(true);
-    X0 = qMin<qreal>(qMax<qreal>(qApp->desktop()->width() - 3*(2*(Config::thumbMargin + Config::thumbBorder) + Config::thumbSpacing + Config::thumbItemWidth), 0), Config::contentHMargin);
-    Y0 = qMin<qreal>(qMax<qreal>((qreal)qApp->desktop()->height() - ((qreal)Config::thumbRows + 0.9)*((Config::thumbBorder
+	X0 = qMin<qreal>(qMax<qreal>(qApp->desktop()->width() - 3*(2*(Config::thumbMargin + Config::thumbBorder) + Config::thumbSpacing + Config::thumbItemWidth), 0.5*Config::thumbItemWidth), Config::contentHMargin);
+	Y0 = qMin<qreal>(qMax<qreal>((qreal)qApp->desktop()->height() - ((qreal)Config::thumbRows + 1)*((Config::thumbBorder
             + Config::thumbMargin)*2 + Config::thumbSpacing + Config::thumbItemHeight), - 0.5*Config::thumbItemHeight), Config::contentVMargin);
     qDebug("************%f, %f", X0, Y0);
     //content can't move if setPos?
@@ -132,7 +133,7 @@ void UiManager::init(PhotoKitView *view)
 	mPlayControl = new SlidePlayControl(this);
 	mPlayPageRoot->setPlayControl(mPlayControl);
 
-	gotoPage(ThumbPage);
+    gotoPage(ThumbPage);
     Tools::showTip(thumbpage_help);
     mView->setInitialPos(X0, Y0);
 	mView->setAnimationDuration(1618);
@@ -144,7 +145,7 @@ QGraphicsItem* UiManager::currentPageRootItem()
     return mCurrentPageRoot;
 }
 
-BaseAnimationItem* UiManager::thumbPageRootItem()
+BaseItem* UiManager::thumbPageRootItem()
 {
 	return mThumbPageRoot;
 }
@@ -337,6 +338,7 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
 		mPlayPageRoot->smoothScale(4, 1, ItemAnimation::FadeIn);
+        mPlayPageRoot->setPos(mView->mapToScene(QPoint())); //keep it center.
 		//mPlayPageRoot->show();
 		mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
         Tools::showTip(playpage_help);
