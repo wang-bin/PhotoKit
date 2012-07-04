@@ -34,11 +34,13 @@
 namespace PhotoKit {
 
 SlideDisplay::SlideDisplay(QGraphicsItem *parent)
-	:QGraphicsItem(parent),mMode(SingleImage)
+    :QGraphicsItem(parent),mMode(SingleImage)
 {
 	mSlideEffect = 0;
-	mWidth = (qreal)qApp->desktop()->width();
-	mHeight = (qreal)qApp->desktop()->height();
+    mMaxWidth = (qreal)qApp->desktop()->width();
+    mMaxHeight = (qreal)qApp->desktop()->height();
+    mWidth = mMaxWidth;
+    mHeight = mMaxHeight;
 	setAcceptTouchEvents(true);
 	setAcceptDrops(true);
 
@@ -75,12 +77,15 @@ void SlideDisplay::setEffect(NextEffect *effect)
 
 QSize SlideDisplay::size()
 {
-	return QSize(mWidth, mHeight);
+    return QSize(mMaxWidth, mMaxHeight);
 }
 
 QRectF SlideDisplay::boundingRect() const
-{
-	return QRectF(0, 0, mWidth, mHeight);
+{/*
+    if (mImage.isNull()) {
+        prepairImage();
+    }*/
+    return QRectF(0, 0, mMaxWidth, mMaxHeight);
 }
 
 void SlideDisplay::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -93,6 +98,7 @@ void SlideDisplay::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 			prepairImage();
 		painter->drawImage(boundingRect(), mImage);
 	} else {
+
 		painter->drawImage(boundingRect(), *mSlideEffect->currentFrame());
 	}
 }
@@ -128,6 +134,21 @@ void SlideDisplay::smoothScale(qreal s0, qreal s, ItemAnimation::Fade fade)
 void SlideDisplay::prepairImage()
 {
 	mImage.load(mPath);
+    //scale width, height 1 by 1
+#if 0
+    mWidth = mImage.width();
+    mHeight = mImage.height();
+    if (mWidth > mMaxWidth) {
+        mHeight = mMaxWidth * mHeight/mWidth; //set image width to mMaxWidth;
+        mWidth = mMaxWidth;
+    }
+    if (mHeight > mMaxHeight) {
+        mWidth = mMaxHeight * mWidth/mHeight; //set image height to mMaxHeight;
+        mHeight = mMaxHeight;
+    }
+    setTransform(mWidth/mImage.width(), mHeight/mImage.height());
+#else
+    //scale to fit screen
 	if (mImage.size() != size()) {
 		if (Config::keepAspectRatio) {
 			mImage = mImage.scaled(size(), Qt::KeepAspectRatio);
@@ -141,7 +162,8 @@ void SlideDisplay::prepairImage()
 		} else {
 			mImage = mImage.scaled(size(), Qt::IgnoreAspectRatio);
 		}
-	}
+    }
+#endif
 }
 
 void SlideDisplay::keyPressEvent(QKeyEvent *event)
@@ -165,6 +187,7 @@ void SlideDisplay::keyPressEvent(QKeyEvent *event)
 	SingleImage: move to move image.
 	SlideImage
 */
+/*
 void SlideDisplay::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 	ezlog_debug("Slide  pressed");
@@ -177,15 +200,15 @@ void SlideDisplay::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	}
 	QGraphicsItem::mousePressEvent(event);
 }
-
+*//*
 void SlideDisplay::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-	ezlog_debug("elapsed: %d", mMouseOnTime.elapsed());
+    ezlog_debug("elapsed: %d", mMouseOnTime.elapsed());*/
 	/*if (mMode != SingleImage) {
 		QGraphicsItem::mouseReleaseEvent(event);
 		return;
 	}*/
-
+/*
 	if (mMouseOnTime.elapsed() < 200) {
 		QPointF delta = (event->pos() - mMousePos);
 		if (delta.x() > 0) {
@@ -214,7 +237,7 @@ void SlideDisplay::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	}
 	QGraphicsItem::mouseMoveEvent(event);
 }
-
+*/
 void SlideDisplay::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
 	//go back to ThumbPage
@@ -223,11 +246,11 @@ void SlideDisplay::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 	UiManager::instance()->gotoPage(UiManager::ThumbPage);
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
-
+/*
 bool SlideDisplay::sceneEvent(QEvent *event)
 {
 	return QGraphicsItem::sceneEvent(event);
 }
-
+*/
 }
 

@@ -65,7 +65,7 @@ protected:
 	virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
 	virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-    virtual bool sceneEvent(QEvent *event);
+    //virtual bool sceneEvent(QEvent *event);
 
 private:
 	QString origin_image_path;

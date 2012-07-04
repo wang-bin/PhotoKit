@@ -33,16 +33,22 @@
 #include "UiManager.h"
 #include "Config.h"
 #include "ezlog.h"
+
+#define ZOOM_ON_HOVER 0
 namespace PhotoKit {
 
 //TODO: calculate to fit screen
 static const qreal zoom_max = 2.2;
 
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
-	QGraphicsItem(parent),mGlow(0),mItemAnimation(0)
+    QGraphicsItem(parent),mGlow(0),mItemAnimation(0)
   ,mWidth(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
   ,mHeight(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
 {
+    maxWidth = Config::thumbItemWidth;
+    maxHeight = Config::thumbItemHeight;
+    adjustSize = true;
+    scale = 1.0f;
 	//setAcceptTouchEvents(true);
 	setAcceptHoverEvents(true); //default: false
 	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
@@ -50,12 +56,16 @@ ThumbItem::ThumbItem(QGraphicsItem *parent) :
 }
 
 ThumbItem::ThumbItem(const QImage& image, QGraphicsItem *parent) :
-	QGraphicsItem(parent),thumb(image),mGlow(0),mItemAnimation(0)
+    QGraphicsItem(parent),thumb(image),mGlow(0),mItemAnimation(0)
   ,mWidth(Config::thumbItemWidth - 2*(Config::thumbBorder + Config::thumbMargin))
   ,mHeight(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
 {
+    maxWidth = Config::thumbItemWidth;
+    maxHeight = Config::thumbItemHeight;
+    adjustSize = true;
+    scale = 1.0f;
 	setAcceptHoverEvents(true); //default: false
-	prepair();
+    prepairSize();
 }
 
 ThumbItem::~ThumbItem()
@@ -92,34 +102,35 @@ QImage ThumbItem::scaledThumbImage() const
 void ThumbItem::setThumbImage(const QImage& image)
 {
 	thumb = image;
-	prepair();
+    prepairSize();
 	update(boundingRect());
 }
 //add mirror rect?
+#ifdef NO_BASE
 QRectF ThumbItem::boundingRect() const
 {
 	return QRectF(0, 0, mWidth, mHeight).adjusted(0, 0//thumb.rect().adjusted(0, 0//-(Config::thumbMargin + Config::thumbBorder) , -(Config::thumbBorder + Config::thumbMargin)
 					, 2*(Config::thumbBorder + Config::thumbMargin), 2*(Config::thumbBorder + Config::thumbMargin));
 }
-
+#endif //NO_BASE
 qreal ThumbItem::boundingWidth() const
 {
-	return mWidth + 2*(Config::thumbBorder + Config::thumbMargin);
+    return boundingRect().width();
 }
 
 qreal ThumbItem::boundingHeight() const
 {
-	return mHeight + 2*(Config::thumbBorder + Config::thumbMargin);
+    return boundingRect().height();
 }
 
 qreal ThumbItem::contentWidth() const
 {
-	return mWidth;
+    return mWidth;// * currentMatrix().m11(); //TODO
 }
 
 qreal ThumbItem::contentHeight() const
 {
-	return mHeight;
+    return mHeight;// * currentMatrix().m22(); //TODO
 }
 
 void ThumbItem::showGlow()
@@ -132,8 +143,14 @@ void ThumbItem::showGlow()
 		mGlow->setSize(QSize((int)s.width(), (int)s.height()));
 		mGlow->setGlowWidth(Config::thumbMargin);// + Config::thumbBorder);
 		QPainterPath image_shape;
-		image_shape.addRect(Config::thumbMargin, Config::thumbMargin//-Config::thumbBorder, -Config::thumbBorder
-					, mWidth + 2*Config::thumbBorder, mHeight + 2*Config::thumbBorder);
+#ifdef NO_BASE
+        qreal hs = 1.0, vs = 1.0;
+#else
+        qreal hs = currentMatrix().m11();
+        qreal vs = currentMatrix().m22();
+#endif //NO_BASE
+        image_shape.addRect(Config::thumbMargin * hs, Config::thumbMargin * vs//-Config::thumbBorder, -Config::thumbBorder
+                            ,( mWidth + 2*Config::thumbBorder) * hs, (mHeight + 2*Config::thumbBorder) * vs);
 		mGlow->setShape(image_shape);
 		mGlow->render();
 	}
@@ -202,7 +219,7 @@ void ThumbItem::zoom(ZoomAction action)
 }
 
 //image must be in size(mWidth, mHeight)
-void ThumbItem::prepair()
+void ThumbItem::prepairSize()
 {
 	if (thumb.width() != mWidth || thumb.height() != mHeight) {
 		qreal k = qreal(thumb.width())/qreal(thumb.height());
@@ -217,6 +234,85 @@ void ThumbItem::prepair()
 	}
 }
 
+
+QImage *ThumbItem::createImage(const QMatrix &matrix) const
+{/*
+    QImage *original = new QImage(thumb);
+    if (original->isNull()){
+        return original; // nothing we can do about it...
+    }*/
+
+    QPoint size = matrix.map(QPoint(this->maxWidth, this->maxHeight));
+    float w = size.x(); // x, y is the used as width, height
+    float h = size.y();
+    QImage *image = new QImage(w, h, QImage::Format_ARGB32_Premultiplied);
+   // QImage *image = new QImage(Config::thumbItemWidth, Config::thumbItemHeight, QImage::Format_ARGB32_Premultiplied);
+    image->fill(Qt::transparent);
+    qreal hs = matrix.m11(), vs = matrix.m11();
+    QPainter painter(image);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    painter.translate((Config::thumbItemWidth - mWidth - Config::thumbBorder)*0.5*hs
+                      , (Config::thumbItemHeight - mHeight - Config::thumbBorder)*0.5*vs);
+    painter.save();
+    QPen pen(Qt::black);
+    pen.setWidthF(qreal(Config::thumbBorder));
+    painter.setPen(pen);
+    painter.drawRect(0, 0, (mWidth + 2*Config::thumbBorder)*hs, (mHeight + 2*Config::thumbBorder)*vs);
+    //painter->drawRect(-Config::thumbBorder, -Config::thumbBorder, thumb.width() + 2*Config::thumbBorder, thumb.height() + 2*Config::thumbBorder);
+    painter.restore();
+    painter.translate(Config::thumbBorder*hs,  Config::thumbBorder*vs);
+    painter.drawImage(QRectF(0, 0, mWidth*hs, mHeight*vs), thumb);
+/*
+    // Optimization: if thumb is smaller than maximum allowed size, just return the loaded thumb
+    if (original->size().height() <= h && original->size().width() <= w && !this->adjustSize && this->scale == 1)
+        return original;
+
+    // Calculate what the size of the final thumb will be:
+    w = qMin(w, float(original->size().width()) * this->scale);
+    h = qMin(h, float(original->size().height()) * this->scale);
+
+    float adjustx = 1.0f;
+    float adjusty = 1.0f;
+    if (this->adjustSize){
+        adjustx = qMin(matrix.m11(), matrix.m22());
+        adjusty = matrix.m22() < adjustx ? adjustx : matrix.m22();
+        w *= adjustx;
+        h *= adjusty;
+    }
+
+    // Create a new thumb with correct size, and draw original on it
+    QImage *thumb = new QImage(int(w+2), int(h+2), QImage::Format_ARGB32_Premultiplied);
+    thumb->fill(QColor(0, 0, 0, 0).rgba());
+    QPainter painter(thumb);
+    painter.setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    if (this->adjustSize)
+        painter.scale(adjustx, adjusty);
+    if (this->scale != 1)
+       painter.scale(this->scale, this->scale);
+    painter.drawImage(0, 0, *original);*/
+/*
+    if (!this->adjustSize){
+       // Blur out edges
+       int blur = 30;
+       if (h < original->height()){
+           QLinearGradient brush1(0, h - blur, 0, h);
+           brush1.setSpread(QGradient::PadSpread);
+           brush1.setColorAt(0.0, QColor(0, 0, 0, 0));
+           brush1.setColorAt(1.0, Qt::gray);
+           painter.fillRect(0, int(h) - blur, original->width(), int(h), brush1);
+       }
+       if (w < original->width()){
+           QLinearGradient brush2(w - blur, 0, w, 0);
+           brush2.setSpread(QGradient::PadSpread);
+           brush2.setColorAt(0.0, QColor(0, 0, 0, 0));
+           brush2.setColorAt(1.0, Qt::gray);
+           painter.fillRect(int(w) - blur, 0, int(w), original->height(), brush2);
+       }
+    }*/
+    //delete original;
+    return image;
+}
+#ifdef NO_BASE
 void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	Q_UNUSED(option)
@@ -237,7 +333,7 @@ void ThumbItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 	//painter->drawImage(0, 0, thumb);
 	painter->restore();
 }
-
+#endif //NO_BASE
 void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
 #if ZOOM_ON_HOVER
@@ -267,7 +363,6 @@ void ThumbItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     //toggle zoom
-	ezlog_debug("last press: %#x", UiManager::lastHoverThumb);
 	if (event->button() == Qt::LeftButton) {
 		if (UiManager::lastHoverThumb) {
 			ezlog_debug("zoom out");
@@ -296,7 +391,7 @@ void ThumbItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 	UiManager::instance()->gotoPage(UiManager::PlayPage, origin_image_path);
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
-
+/*
 bool ThumbItem::sceneEvent(QEvent *event)
 {
 	switch (event->type()) {
@@ -323,5 +418,5 @@ bool ThumbItem::sceneEvent(QEvent *event)
 	}
 	return true;
 }
-
+*/
 } //namespace PhotoKit

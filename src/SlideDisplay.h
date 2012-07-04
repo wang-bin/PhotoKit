@@ -21,9 +21,9 @@
 #ifndef PHOTOKIT_SLIDEDISPLAY_H
 #define PHOTOKIT_SLIDEDISPLAY_H
 
-#include <QGraphicsItem>
 #include <QtCore/QDateTime>
 #include "ItemAnimation.h"
+#include <QGraphicsItem>
 class NextEffect;
 
 namespace PhotoKit {
@@ -50,17 +50,18 @@ protected:
 	void prepairImage();
 	//depends on mode
 	virtual void keyPressEvent(QKeyEvent *event);
-	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
-	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event); //next pre
+//	virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+//	virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+//	virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event); //next pre
 	virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event); //go back to ThumbPage
-	virtual bool sceneEvent(QEvent *event); //touch
+//	virtual bool sceneEvent(QEvent *event); //touch
 
 protected:
 	ViewMode mMode;
 	NextEffect *mSlideEffect;
 	SlidePlayControl *mControl;
-	qreal mWidth, mHeight;
+    qreal mWidth, mHeight; //scaled size
+    qreal mMaxWidth, mMaxHeight; //desktop
 	QPointF mMousePos;
 	QTime mMouseOnTime;
 	QString mPath;
