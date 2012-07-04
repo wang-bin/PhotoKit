@@ -30,6 +30,7 @@ namespace PhotoKit {
 class Config
 {
 public:
+    static void setAppDir(const QString& dir);
 	static bool read(const QString& cfg=configPath);
 	static bool save(const QString& cfg=configPath);
 
@@ -56,7 +57,9 @@ public:
 	static bool useEightBitPalette;
 	static bool fullscreen;
 	static bool showBoundingRect;
+    static float animSpeed;
 	static bool showFps;
+    static int fps;
 	static bool adapted;
 	static bool verbose;
 

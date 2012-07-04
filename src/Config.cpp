@@ -22,6 +22,8 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QSettings>
+#include <QtCore/QFileInfo>
+#include <QDateTime>
 #include <QtDebug>
 #ifndef QT_NO_OPENGL
 	#include <QGLWidget>
@@ -47,7 +49,9 @@ bool Config::fullscreen = false;
 bool Config::usePixmaps = false;
 bool Config::useLoop = false;
 bool Config::showBoundingRect = false;
+float Config::animSpeed = 1.0;
 bool Config::showFps = false;
+int Config::fps = 60;
 bool Config::noAdapt = false;
 bool Config::noWindowMask = true;
 bool Config::useEightBitPalette = false;
@@ -67,7 +71,7 @@ int Config::contentVMargin = 120;
 
 QString Config::thumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs.qds";
 QString Config::displayedThumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs_show.qds";
-int Config::thumbRows = 3; //TODO: 2 for mobile
+int Config::thumbRows = 2; //TODO: 2 for mobile
 int Config::thumbSpacing = 4;
 int Config::thumbMargin = 4;
 int Config::thumbBorder = 1;
@@ -80,8 +84,20 @@ bool Config::keepAspectRatio = true;
 QString Config::weiboUser;
 QString Config::weiboPasswd;
 
+void Config::setAppDir(const QString &dir)
+{
+    Config::configPath = dir + "/.PhotoKit/config.ini";
+    Config::thumbRecordFile = dir + "/.PhotoKit/thumbs.qds";
+    Config::displayedThumbRecordFile = dir + "/.PhotoKit/thumbs_show.qds";
+    Config::thumbDir = dir + "/.PhotoKit/thumb";
+    QDir().mkpath(Config::thumbDir);
+}
+
 bool Config::read(const QString& ini)
 {
+    //TODO: version check
+    if (QFileInfo(ini).created() < QDateTime(QDate(2012, 7, 4))) //remove old version configuration
+        QFile(ini).remove();
 	QSettings cfg(ini, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
 	cfg.setValue("configPath", ini);
@@ -97,7 +113,7 @@ bool Config::read(const QString& ini)
 
 	contentHMargin = cfg.value("contentHMargin", 666).toInt();
 	contentVMargin = cfg.value("contentVMargin", 88).toInt();
-	thumbRows = cfg.value("thumbRows", 3).toInt();
+    thumbRows = cfg.value("thumbRows", 2).toInt();
 	thumbSpacing = cfg.value("thumbSpacing", 4).toInt();
 	thumbMargin = cfg.value("thumbMargin", 4).toInt();
 	thumbBorder = cfg.value("thumbBorder", 1).toInt();
@@ -136,6 +152,7 @@ void Config::setLowSettings()
 	Config::openGlRendering = false;
 	Config::softwareRendering = true;
 	Config::noTicker = true;
+    Config::fps = 30;
 	Config::usePixmaps = true;
 	Config::noAnimations = true;
 	Config::noBlending = true;
