@@ -22,6 +22,7 @@
 #define UIMANAGER_H
 
 #include <QObject>
+#include "score.h"
 class QGraphicsView;
 class QGraphicsWidget;
 class QGraphicsItem;
@@ -90,10 +91,11 @@ private:
 	explicit UiManager(QObject *parent = 0);
 	void createMenus(); //called by init()
 	void createMenuItemMovie(Button *item, int index);
-	void createLeftMenuTopInMovie(Button *item, int index);
+    void createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinished, Movie* movieIn, Movie *movieCollapse, Movie* movieOut, Movie *movieShake = 0);
 	void createLeftMenuLeftInOutMovie(Button *item, int index); //ok. cancel
 	void createRightMenuRightInOutMovie(Button *item, int index);
 	void showMenu(const QString& menu);
+    void hideMenu(const QString& menu);
 
 	static UiManager *mInstance;
     QGraphicsItem *mCurrentPageRoot;

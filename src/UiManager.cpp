@@ -51,43 +51,57 @@ static QString help;
 static QString thumbpage_help;
 static QString playpage_help;
 static QString about;
+static QString CLEAR_CACHE;
 static QString CLEAR;
 static QString ADDIMAGES;
 static QString ADDDIRS;
 static QString SETUP;
 static QString HELP;
 static QString QUIT;
+static QString START_STOP_SLIDE;
+static QString STOP_SLIDE;
+static QString WEIBO_SHARE;
+static QString BACK;
+static QString HELP_TEXT;
 static qreal X0 = 0;
 static qreal Y0 = 0;
+static const QString THUMB_PAGE_MENU("thumbPageMenu");
+static const QString PLAY_PAGE_MENU("playPageMenu");
+static const QString OK_CANCEL_MENU("OkCancel");
+
 static void initTranslation() {
-	CLEAR = QObject::tr("Clear");
+    WEIBO_SHARE = QObject::tr("Weibo share");
+    BACK = QObject::tr("Back");
+    START_STOP_SLIDE = QObject::tr("Play/Stop slide");
+    STOP_SLIDE = QObject::tr("Stop slide");
+    CLEAR_CACHE = QObject::tr("Clear cache");
+    CLEAR = QObject::tr("Clear");
 	ADDIMAGES = QObject::tr("Add images");
 	ADDDIRS = QObject::tr("Add dirs");
 	SETUP = QObject::tr("Setup");
 	HELP = QObject::tr("Help");
 	QUIT = QObject::tr("Quit");
     help = QObject::tr("PRESS ME TO HIDE\n"
-                       "OR DISABLE TIPS IN SETUP WINDOW\n"
-                                  "Right click(press and hold) to show menu.\n"
                                   "Press a picture to zoom\n"
                                   "Double click a picture to show large image and double click aagin to go back\n"
                                   "Move mouse to see moving effect\n"
                                   "Two finger touch to zoom(NOT TESTED)");
     thumbpage_help = QObject::tr("PRESS ME TO HIDE\n"
-                                 "OR DISABLE TIPS IN SETUP WINDOW\n"
-                                            "Right click(press and hold) to show menu.\n"
                                             "Press a picture to zoom\n"
                                             "Double click a picture to show large image"
                                             "Move mouse to see moving effect\n"
                                             "Two finger touch to zoom(NOT TESTED)");
     playpage_help = QObject::tr("PRESS ME TO HIDE\n"
-                                "OR DISABLE TIPS IN SETUP WINDOW\n"
-                                           "Right click(press and hold) to show menu.\n"
                                            "You can share the current picture to sina weibo\n"
                                            "Double click to go back\n"
                                            "Two finger touch to zoom(NOT TESTED)");
 
-    about = QObject::tr("Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>");
+    about = QObject::tr("Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>\n");
+    HELP_TEXT = about + "\n" + QObject::tr("PRESS ME TO HIDE\n"
+                                           "Press a picture to zoom\n"
+                                           "Double click a picture to show large image and double click aagin to go back\n"
+                                           "You can share the current picture to sina weibo\n"
+                                           "Two finger touch to zoom(NOT TESTED)");
 }
 UiManager* UiManager::mInstance = 0;
 ThumbItem* UiManager::lastHoverThumb = 0;
@@ -143,19 +157,20 @@ void UiManager::init(PhotoKitView *view)
     mThumbPageRoot->setTransform(QTransform().scale(0.5, 0.5));
 	mView->scene()->addItem(mThumbPageRoot);
 	mPlayPageRoot = new SlideDisplay;
+    //mPlayPageRoot->setPos(0, 0);
 	mPlayPageRoot->hide();
 	mView->scene()->addItem(mPlayPageRoot);
 	mPlayControl = new SlidePlayControl(this);
 	mPlayPageRoot->setPlayControl(mPlayControl);
 
+    createMenus(); //before gotoPage
+    showMenu(THUMB_PAGE_MENU);
+
     gotoPage(ThumbPage);
-    Tools::showTip(thumbpage_help);
     mView->setInitialPos(X0, Y0);
 	mView->setAnimationDuration(1618);
     mView->smartTransform(X0, Y0, 0.5, 1, 0, 0, 0, 0, 0);
 
-	createMenus();
-	showMenu("createLeftMenuTopInMovie");
 }
 
 QGraphicsItem* UiManager::currentPageRootItem()
@@ -278,7 +293,7 @@ void UiManager::setup()
 
 void UiManager::showHelp()
 {
-    Tools::showTip(help, true);
+    Tools::showTip(HELP_TEXT, true);
 }
 
 void UiManager::showAbout()
@@ -348,19 +363,22 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
         mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect()
                 .adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin)
             );
-        Tools::showTip(thumbpage_help);
-
+        if (mPlayControl->isRunning()) {
+            mPlayControl->stop();
+        }
 		mPlayPageRoot->smoothScale(1, 0.2, ItemAnimation::FadeOut);
+        hideMenu(PLAY_PAGE_MENU);
+        showMenu(THUMB_PAGE_MENU);
 	} else if (page == PlayPage) {
         mCurrentPageRoot = mPlayPageRoot;
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
-		mPlayPageRoot->smoothScale(4, 1, ItemAnimation::FadeIn);
-        mPlayPageRoot->setPos(mView->mapToScene(QPoint())); //keep it center.
-		//mPlayPageRoot->show();
-		mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
-        Tools::showTip(playpage_help);
-	}
+        mPlayPageRoot->smoothScale(4, 1, ItemAnimation::FadeIn);
+        //mPlayPageRoot->setPos(mView->mapToScene(QPoint())); //keep it center.
+        hideMenu(THUMB_PAGE_MENU);
+        showMenu(PLAY_PAGE_MENU);
+        mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
+    }
 }
 
 void UiManager::tryMoveCenter(QGraphicsItem *item)
@@ -376,61 +394,120 @@ void UiManager::clickMenuItem()
 	ezlog_debug();
 	QString menuText(button->text()); //plain text
 	ezlog_debug();
-	if (menuText == tr("Quit")) {
+    if (menuText == QUIT) {
 		qApp->quit();
-	} else if (menuText == tr("Setup")) {
+    } else if (menuText == SETUP) {
 
-	}
+    } else if (menuText == CLEAR_CACHE) {
+        QDir thumbDir(Config::thumbDir);
+        QStringList files = thumbDir.entryList(QDir::Files | QDir::Hidden);
+        foreach(QString f, files) {
+            QFile::remove(thumbDir.filePath(f));
+        }
+        QFile::remove(Config::thumbRecordFile);
+        return;
+    }
 
-	//playReverse()
-	if (button->buttonType() == Button::ArrowUp) {
-		ezlog_debug();
-		score->queueMovie("createLeftMenuTopInMovie -out");
-		button->setButtonType(Button::ArrowDown);
-	} else if (button->buttonType() == Button::ArrowDown) {
-		score->queueMovie("createLeftMenuTopInMovie");
-		button->setButtonType(Button::ArrowUp);
-	} else {
 
-		score->queueMovie("createLeftMenuTopInMovie -shake");
-	}
-	if (score->hasQueuedMovies()){
-		score->playQue();
-	}
+
 	//page depended menu items
 	if (page == ThumbPage) {
-
+        //playReverse()
+        if (button->buttonType() == Button::ArrowUp) {
+            score->queueMovie(THUMB_PAGE_MENU + " -collapse");
+            button->setButtonType(Button::ArrowDown);
+        } else if (button->buttonType() == Button::ArrowDown) {
+            score->queueMovie(THUMB_PAGE_MENU);
+            button->setButtonType(Button::ArrowUp);
+        } else if (menuText == ADDIMAGES) {
+            addImages();
+        } else if (menuText == ADDDIRS) {
+            addImagesFromDir();
+        } else if (menuText == CLEAR) {
+            clearThumbs();
+        } else if (menuText == HELP) {
+            showHelp();
+        }
+        else {
+            score->queueMovie(THUMB_PAGE_MENU + " -shake");
+        }
 	} else if (page == PlayPage) {
-
+        if (menuText == BACK) {
+            gotoPage(ThumbPage);
+            return;
+        } else if (menuText == START_STOP_SLIDE) {
+            if (mPlayControl->isRunning())
+                stopSlide();
+            else
+                startSlide();
+        } else if (menuText == WEIBO_SHARE) {
+            shareToWeibo();
+        }
+        //playReverse()
+        if (button->buttonType() == Button::ArrowUp) {
+            score->queueMovie(PLAY_PAGE_MENU + " -collapse");
+            button->setButtonType(Button::ArrowDown);
+        } else if (button->buttonType() == Button::ArrowDown) {
+            score->queueMovie(PLAY_PAGE_MENU);
+            button->setButtonType(Button::ArrowUp);
+        } else {
+            score->queueMovie(PLAY_PAGE_MENU + " -shake");
+        }
 	}
+
+    if (score->hasQueuedMovies()){
+        score->playQue();
+    }
 
 }
 
 void UiManager::createMenus()
 {
+    //thumb page menus
+    static Movie *thumbPageMenuMovieIn = score->insertMovie(THUMB_PAGE_MENU);
+    static Movie *thumbPageMenuCollapse = score->insertMovie(THUMB_PAGE_MENU + " -collapse");
+    static Movie *thumbPageMovieOut = score->insertMovie(THUMB_PAGE_MENU + " -out");
+    static Movie *thumbPageMovieShake = score->insertMovie(THUMB_PAGE_MENU + " -shake");
 	QStringList thumbPageMenuItems;
-	thumbPageMenuItems << CLEAR << ADDIMAGES << ADDDIRS << SETUP << HELP << QUIT;
-	Button *thumbPageMenuItem = 0;
+    thumbPageMenuItems << CLEAR_CACHE << SETUP << HELP << CLEAR << ADDIMAGES << ADDDIRS << QUIT;
+    Button *menuItem = 0;
 	for (int i = 0; i < thumbPageMenuItems.size(); ++i) {
-		thumbPageMenuItem = new Button("<p style='color:white;font-size:16px'>" + thumbPageMenuItems[i] + "</p>");
-		mView->scene()->addItem(thumbPageMenuItem);
-		connect(thumbPageMenuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
-		createLeftMenuTopInMovie(thumbPageMenuItem, i);
+        menuItem = new Button("<p style='color:white;font-size:16px'>" + thumbPageMenuItems[i] + "</p>");
+        mView->scene()->addItem(menuItem);
+        connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+        createLeftMenuTopInMovie(menuItem, i, true, thumbPageMenuMovieIn, thumbPageMenuCollapse, thumbPageMovieOut, thumbPageMovieShake);
 	}
-	thumbPageMenuItem = new Button(Button::ArrowUp, Button::RectShape);
-	connect(thumbPageMenuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
-	mView->scene()->addItem(thumbPageMenuItem);
-	createLeftMenuTopInMovie(thumbPageMenuItem, thumbPageMenuItems.size() + 1);
+    menuItem = new Button(Button::ArrowUp, Button::RectShape);
+    connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+    mView->scene()->addItem(menuItem);
+    createLeftMenuTopInMovie(menuItem, thumbPageMenuItems.size() + 1, false , thumbPageMenuMovieIn, thumbPageMenuCollapse, thumbPageMovieOut, thumbPageMovieShake);
+
+    //play page menus
+    static Movie *playPageMenuMovieIn = score->insertMovie(PLAY_PAGE_MENU);
+    static Movie *playPageMovieCollapse = score->insertMovie(PLAY_PAGE_MENU + " -collapse");
+    static Movie *playPageMovieOut = score->insertMovie(PLAY_PAGE_MENU + " -out");
+    static Movie *playPageMovieShake = score->insertMovie(PLAY_PAGE_MENU + " -shake");
+    QStringList playPageMenuItems;
+    playPageMenuItems << CLEAR_CACHE << SETUP << HELP << START_STOP_SLIDE << WEIBO_SHARE << BACK << QUIT;
+    menuItem = 0;
+    for (int i = 0; i < playPageMenuItems.size(); ++i) {
+        menuItem = new Button("<p style='color:white;font-size:16px'>" + playPageMenuItems[i] + "</p>");
+        mView->scene()->addItem(menuItem);
+        connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+        createLeftMenuTopInMovie(menuItem, i, true, playPageMenuMovieIn, playPageMovieCollapse, playPageMovieOut, playPageMovieShake);
+    }
+    menuItem = new Button(Button::ArrowUp, Button::RectShape);
+    connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+    mView->scene()->addItem(menuItem);
+    createLeftMenuTopInMovie(menuItem, thumbPageMenuItems.size() + 1, false , playPageMenuMovieIn, playPageMovieCollapse, playPageMovieOut, playPageMovieShake);
 }
 
-void UiManager::createLeftMenuTopInMovie(Button *item, int i)
+void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinished, Movie *movieIn, Movie *movieCollapse, Movie *movieOut, Movie *movieShake)
 {
-	int xOffset = 15;
-	int yOffset = 22;
+    int xOffset = 40;
+    int yOffset = 24;
 	//static
-	static Movie *movieIn = score->insertMovie("createLeftMenuTopInMovie");
-	static Movie *movieOut = score->insertMovie("createLeftMenuTopInMovie -out");
-	static Movie *movieShake = score->insertMovie("createLeftMenuTopInMovie -shake");
+
 
 	item->setVisible(false);
 	item->setZValue(10);
@@ -438,7 +515,7 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i)
 	qreal ihp = ih + 3;
 
 	// create in-animation:
-	DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
+    DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
 	anim->setDuration(float(1000 + (i * 20)));
 	anim->setStartPos(QPointF(xOffset, -ih));
 	anim->setPosAt(0.20, QPointF(xOffset, -ih));
@@ -450,19 +527,22 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i)
 	anim->setPosAt(1.00, QPointF(xOffset, (i * ihp) + yOffset + 22));
 	movieIn->append(anim);
 
-	// create out-animation:
-	anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
+    // create collapse-animation:
+    anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT, hideOnFinished);
 	anim->setDuration(float(1000 + (i * 20)));
 	anim->setStartPos(QPointF(xOffset,  (i * ihp) + yOffset + 22));
-	anim->setPosAt(1.00, QPointF(xOffset, 0));
+    anim->setPosAt(1.00, QPointF(xOffset, yOffset));
 	anim->setPosAt(0.90, QPointF(xOffset, (i * ihp) + yOffset + 22 + (10 * float(i / 4.0f))));
 	anim->setPosAt(0.80, QPointF(xOffset, (i * ihp) + yOffset + 22));
 	anim->setPosAt(0.70, QPointF(xOffset, (i * ihp) + yOffset + 22 + (5 * float(i / 4.0f))));
 	anim->setPosAt(0.60, QPointF(xOffset, (i * ihp) + yOffset + 22));
 	anim->setPosAt(0.50, QPointF(xOffset, (i * ihp) + yOffset + 22 + (2 * float(i / 4.0f))));
 	anim->setPosAt(0.20, QPointF(xOffset, (i * ihp) + yOffset + 22));
-	movieOut->append(anim);
-/*	anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
+    movieCollapse->append(anim);
+
+    qreal sw = mView->width();
+    qreal iw = item->sceneBoundingRect().width();
+    anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
 	anim->hideOnFinished = true;
 	anim->setDuration((700 + (30 * i)));
 	anim->setStartPos(QPointF(xOffset, (i * ihp) + yOffset + 22));
@@ -470,7 +550,7 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i)
 	anim->setPosAt(0.65, QPointF(xOffset + 20, 600 - ih));
 	anim->setPosAt(1.00, QPointF(sw + iw, 600 - ih));
 	movieOut->append(anim);
-*/
+
 	// create shake-animation:
 	anim = new DemoItemAnimation(item);
 	anim->setDuration(700 * 1);
@@ -485,14 +565,23 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i)
 
 void UiManager::showMenu(const QString &menu)
 {
+    ezlog_debug();
 	score->queueMovie(menu);
-	score->queueMovie(menu + " -out", Score::NEW_ANIMATION_ONLY);
-	score->queueMovie(menu + " -buttons -out", Score::NEW_ANIMATION_ONLY);
-	score->queueMovie("upndown -shake");
+    //score->queueMovie(menu + " -out", Score::NEW_ANIMATION_ONLY);
+    //score->queueMovie(menu + " -buttons -out", Score::NEW_ANIMATION_ONLY);
+    //score->queueMovie("upndown -shake");
 	score->queueMovie(menu + " -shake");
 	if (score->hasQueuedMovies()){
 		score->playQue();
 	}
+}
+
+void UiManager::hideMenu(const QString &menu)
+{
+    score->queueMovie(menu + " -out", Score::NEW_ANIMATION_ONLY);
+    if (score->hasQueuedMovies()){
+        score->playQue();
+    }
 }
 } //namespace PhotoKit
 

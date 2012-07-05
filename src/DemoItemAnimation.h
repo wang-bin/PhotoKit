@@ -32,7 +32,7 @@ class DemoItemAnimation : public QGraphicsItemAnimation
 public:
     enum INOROUT {ANIM_IN, ANIM_OUT, ANIM_UNSPECIFIED};
 
-    DemoItemAnimation(BaseItem *item, INOROUT inOrOut = ANIM_UNSPECIFIED);
+    DemoItemAnimation(BaseItem *item, INOROUT inOrOut = ANIM_UNSPECIFIED, bool hideOnFinished = false);
     virtual ~DemoItemAnimation();
 
     virtual void play(bool fromStart = true, bool force = false);

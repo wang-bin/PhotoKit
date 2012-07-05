@@ -28,13 +28,13 @@
 namespace PhotoKit {
 
 
-DemoItemAnimation::DemoItemAnimation(BaseItem *item, INOROUT inOrOut)
+DemoItemAnimation::DemoItemAnimation(BaseItem *item, INOROUT inOrOut, bool hideOnFinished)
 {
     this->opacityAt0 = 1.0;
     this->opacityAt1 = 1.0;
     this->startDelay = 0;
     this->inOrOut = inOrOut;
-    this->hideOnFinished = false;
+    this->hideOnFinished = hideOnFinished;
     this->forcePlay = false;
     this->timeline = new QTimeLine(5000);
     this->timeline->setFrameRange(0, 2000);
@@ -185,9 +185,9 @@ void DemoItemAnimation::afterAnimationStep(qreal step)
 {
     if (step == 1.0f){
         if (this->timeline->loopCount() > 0){
-            // animation finished.
-            if (this->hideOnFinished)
+            if (this->hideOnFinished) {// && inOrOut == ANIM_OUT) {
                 this->baseAnimationItem()->setRecursiveVisible(false);
+            }
             this->baseAnimationItem()->animationStopped(this->inOrOut);
         }
     } else if (Config::noAnimations && !this->forcePlay){
