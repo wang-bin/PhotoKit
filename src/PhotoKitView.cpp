@@ -67,8 +67,8 @@ PhotoKitView::PhotoKitView(QWidget *parent) :
     //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     setResizeAnchor(QGraphicsView::AnchorUnderMouse);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn); //TODO: always on when debug.
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     //setBackgroundBrush(QBrush(Qt::gray));
 	mScene = new PhotoKitScene(this);
 
@@ -180,18 +180,15 @@ void PhotoKitView::dragMoveEvent(QDragMoveEvent *event)
 	event->accept();
 }
 */
-
+/*
 void PhotoKitView::contextMenuEvent(QContextMenuEvent *event)
 {
 	ezlog_debug("PhotoKitView::contextMenuEvent");
 	UiManager::instance()->popupMenu(mapToGlobal(event->pos()));
-}
+}*/
 
 void PhotoKitView::keyPressEvent(QKeyEvent *e)
 {ezlog_debug("key %d", e->key());
-	if (UiManager::page != UiManager::ThumbPage) {
-
-	}
 	switch(e->key()) {
 	case Qt::Key_Right:
 		break;
@@ -206,6 +203,7 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 	default:
 		break;
 	}
+    QGraphicsView::keyPressEvent(e); //TODO: enable textitem editable. Filter
 	//e->accept(); //accept then scene with move if arrow keys pressed
 }
 
@@ -255,7 +253,8 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
                 //moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
                 setAnimationDuration(ani_duration);
                 smartTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
-            } else if (UiManager::page == UiManager::PlayPage) {
+			} else if (UiManager::page == UiManager::PlayPage) {
+				//TODO: animation, don't move out of the viewport
                 UiManager::instance()->currentPageRootItem()->setTransform(QTransform().translate(delta.x(), delta.y()), true);
             }
 			mMousePos = e->posF();
@@ -331,7 +330,7 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 		//only do these in picture wall mode
 		QTouchEvent *touchEvent = static_cast<QTouchEvent *>(event);
 		QList<QTouchEvent::TouchPoint> touchPoints = touchEvent->touchPoints();
-		if (touchPoints.count() == 2) {
+		if (touchPoints.count() == 2) {//TODO: next/pre in PlayPage
 			// determine scale factor
 			const QTouchEvent::TouchPoint &touchPoint0 = touchPoints.first();
 			const QTouchEvent::TouchPoint &touchPoint1 = touchPoints.last();
