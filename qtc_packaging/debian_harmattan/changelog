@@ -1,3 +1,14 @@
+photokit (0.2.6) unstable; urgency=low
+  * Fix large image page place center error
+  * Add graphics buttons with animation
+
+ -- LucasWang <wbsecg1@gmail.com>  Thu, 05 Jul 2012 11:08:23 +0800
+
+photokit (0.2.4) unstable; urgency=low
+  * <Add change description here>
+
+ -- LucasWang <wbsecg1@gmail.com>  Thu, 05 Jul 2012 11:08:09 +0800
+
 photokit (0.2.0) unstable; urgency=low
   * Zooming and moving support when viewing a single image
   * Startup animation
