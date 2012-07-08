@@ -137,6 +137,11 @@ void ThumbRecorder::addDisplayedThumb(const QString &path)
 	display.append(path);
 }
 
+void ThumbRecorder::clearDisplay()
+{
+	display.clear();
+}
+
 void ThumbRecorder::save()
 {
 	QFile f(Config::thumbRecordFile);
@@ -169,6 +174,7 @@ ThumbTask::~ThumbTask()
 		delete mThumbsWatcher;
 		mThumbsWatcher = 0;
 	}
+	ThumbRecorder::instance()->save();
 }
 
 QFutureWatcher<ThumbInfo>* ThumbTask::watcher()
@@ -223,6 +229,12 @@ QImage ThumbTask::thumbAt(int index)
 ThumbInfo ThumbTask::thumbInfoAt(int index)
 {
     return mThumbsWatcher->resultAt(index);
+}
+
+void ThumbTask::stop()
+{
+	if (mThumbsWatcher->isRunning())
+		mThumbsWatcher->cancel();
 }
 
 } //namespace PhotoKit

@@ -44,6 +44,8 @@ public:
 	static ThumbHash* thumbHash();
 	static QStringList displayedThumbs();
 	static void addDisplayedThumb(const QString& path);
+
+	void clearDisplay();
 public slots:
 	void save();
 private:
@@ -66,6 +68,8 @@ public:
 
     QImage thumbAt(int index);
     ThumbInfo thumbInfoAt(int index);
+
+	void stop();
 private:
 #ifdef QT_NO_CONCURRENT
 
