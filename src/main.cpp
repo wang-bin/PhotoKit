@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 {
 	ezlog_init_default();
     ezlog_registerAppender(file_appender);
-    ezlog_add_logfile("/tmp/PhotoKit.ezlog", Append);
+    ezlog_add_logfile("/tmp/PhotoKit.ezlog", New);
     QApplication a(argc, argv);
 #ifdef CACHE_APPDIR
     //Config::setAppDir(QCoreApplication::applicationDirPath());
@@ -65,8 +65,25 @@ int main(int argc, char *argv[])
 	view.showFullScreen();
 	//view.showMaximized();
 	if (OptionParser::images.isEmpty()) {
-		QStringList defalutimages = QDir(":/images").entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), ":/images/");
+		QString mpath(":/images/"); //ends with '/'
+		QStringList defalutimages = QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
 		ezlog_debug("default images: %d", defalutimages.size());
+		//TODO: other image path
+		mpath = QDir::homePath() + "/MyDocs/Pictures/"; //Meego
+		if (QDir(mpath).exists())
+			defalutimages << QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
+		mpath = QDir::homePath() + "/MyDocs/DCIM/"; //Maemo5
+		if (QDir(mpath).exists())
+			defalutimages << QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
+
+		mpath = QDir::homePath() + "/MyDocs/.images/"; //Maemo5
+		if (QDir(mpath).exists())
+			defalutimages << QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
+
+		mpath = QDir::homePath() + "/Pictures/"; //
+		if (QDir(mpath).exists())
+			defalutimages << QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
+
 		UiManager::instance()->showImagesFromThumb(defalutimages);
 	} else {
 		UiManager::instance()->showImagesFromThumb(OptionParser::images);
