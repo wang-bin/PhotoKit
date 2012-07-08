@@ -29,9 +29,12 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QAction>
+#include <QGraphicsTextItem>
+#include "tools/ImageInfoDialog.h"
 #include "Button.h"
 #include "BaseItem.h"
 #include "DemoItemAnimation.h"
+#include "tools/ExifReader.h"
 #include "tools/ConfigDialog.h"
 #include "network/WeiboDialog.h"
 #include "PhotoKitView.h"
@@ -63,6 +66,7 @@ static QString STOP_SLIDE;
 static QString WEIBO_SHARE;
 static QString BACK;
 static QString HELP_TEXT;
+static QString IMAGE_INFO;
 static qreal X0 = 0;
 static qreal Y0 = 0;
 static const QString THUMB_PAGE_MENU("thumbPageMenu");
@@ -81,6 +85,7 @@ static void initTranslation() {
 	SETUP = QObject::tr("Setup");
 	HELP = QObject::tr("Help");
 	QUIT = QObject::tr("Quit");
+	IMAGE_INFO = QObject::tr("Image info");
     help = QObject::tr("PRESS ME TO HIDE\n"
                                   "Press a picture to zoom\n"
                                   "Double click a picture to show large image and double click aagin to go back\n"
@@ -227,7 +232,8 @@ void UiManager::clearThumbs()
 	foreach(QGraphicsItem* c, cs)
 		mView->scene()->removeItem(c);
     mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect());
-	ThumbRecorder::displayedThumbs().clear();
+	ThumbRecorder::instance()->clearDisplay();
+	ThumbRecorder::instance()->save(); //
 	mThumbsCount = 0;
 }
 
@@ -264,16 +270,56 @@ void UiManager::stopSlide()
 
 void UiManager::showCurrentImageInfo()
 {
-	//TODO: flip to show backside
+	//TODO: flip to show backside. line height
+	ImageInfoDialog m(mView->scene());
+	m.resize(qApp->desktop()->size()/2);
+	m.setWindowTitle(tr("Image infomation"));
+	//m.setText(info);
+
 	QString info(mPlayPageRoot->imagePath());
 	QImage image(mPlayPageRoot->imagePath());
-	info += "\n";
-	info += tr("Size") + ": " + QString::number(QFile(mPlayPageRoot->imagePath()).size()) + "byte\n";
-	info += tr("Depth") + ": " + QString::number(image.depth()) + "\n";
-	info += tr("Width") + ": " +  QString::number(image.width()) + "\n";
-	info += tr("Height") + ": " + QString::number(image.height()) + "\n";
+	info += "<p><span style='font-weight:bold;color:black'>" + tr("Size") + ": </span>" + QString::number(QFile(mPlayPageRoot->imagePath()).size()) + "byte</p>";
+	info += "<p><span style='font-weight:bold;color:black'>" + tr("Depth") + ": </span>" + QString::number(image.depth()) + "</p>";
+	info += "<p><span style='font-weight:bold;color:black'>" + tr("Width") + ": </span>" +  QString::number(image.width()) + "</p>";
+	info += "<p><span style='font-weight:bold;color:black'>" + tr("Height") + ": </span>" + QString::number(image.height()) + "</p>";
 
-	QMessageBox::information(0, tr("Image infomation"), info);
+	m.setBaseImageInfo(info);
+
+	ExifReader exif;
+	exif.loadFile(mPlayPageRoot->imagePath());
+	if (exif.hasData()) {
+		info = "";
+		ExifReader::TagInfo tags = exif.getIFD0Brief();
+		if (exif.hasIFD0()) {
+			QMap<QString, QString>::ConstIterator it;
+			for (it = tags.begin(); it != tags.end(); ++it) {
+				info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + it.key() + ": </span>" + it.value() + "</p>";
+			}
+		}
+		if (exif.hasIFDExif()) {
+			tags = exif.getExifBrief();
+			QMap<QString, QString>::ConstIterator it;
+			for (it = tags.begin(); it != tags.end(); ++it) {
+				info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + it.key() + ": </span>" + it.value() + "</p>";
+			}
+		}
+		m.setExifInfo(info);
+
+		if (exif.hasIFDGPS()) {
+			info = "";
+			tags = exif.getGpsBrief();
+			QMap<QString, QString>::ConstIterator it;
+			for (it = tags.begin(); it != tags.end(); ++it) {
+				info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + it.key() + ": </span>" + it.value() + "</p>";
+			}
+			m.setGPSInfo(info);
+		}
+	}
+
+	m.setPos(qApp->desktop()->width()/2, 2);
+	m.showBaseInfo();
+	m.exec();
+	//QMessageBox::information(0, tr("Image infomation"), info);
 }
 
 void UiManager::shareToWeibo()
@@ -374,10 +420,11 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
         mPlayPageRoot->smoothScale(4, 1, ItemAnimation::FadeIn);
-        //mPlayPageRoot->setPos(mView->mapToScene(QPoint())); //keep it center.
         hideMenu(THUMB_PAGE_MENU);
         showMenu(PLAY_PAGE_MENU);
-        mView->scene()->setSceneRect(mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
+        //mPlayPageRoot->setPos(mView->mapToScene(QPoint())); //keep it center.
+        //the following line will let it keep center. why?
+		mView->scene()->setSceneRect(qApp->desktop()->rect());//mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
     }
 }
 
@@ -395,6 +442,8 @@ void UiManager::clickMenuItem()
 	QString menuText(button->text()); //plain text
 	ezlog_debug();
     if (menuText == QUIT) {
+		mThumbTask->stop();
+		ThumbRecorder::instance()->save();
 		qApp->quit();
     } else if (menuText == SETUP) {
 
@@ -406,10 +455,9 @@ void UiManager::clickMenuItem()
         }
         QFile::remove(Config::thumbRecordFile);
         return;
-    }
-
-
-
+	} else if (menuText == HELP) {
+		showHelp();
+	}
 	//page depended menu items
 	if (page == ThumbPage) {
         //playReverse()
@@ -425,9 +473,7 @@ void UiManager::clickMenuItem()
             addImagesFromDir();
         } else if (menuText == CLEAR) {
             clearThumbs();
-        } else if (menuText == HELP) {
-            showHelp();
-        }
+		}
         else {
             score->queueMovie(THUMB_PAGE_MENU + " -shake");
         }
@@ -442,7 +488,9 @@ void UiManager::clickMenuItem()
                 startSlide();
         } else if (menuText == WEIBO_SHARE) {
             shareToWeibo();
-        }
+		} else if (menuText == IMAGE_INFO) {
+			showCurrentImageInfo();
+		}
         //playReverse()
         if (button->buttonType() == Button::ArrowUp) {
             score->queueMovie(PLAY_PAGE_MENU + " -collapse");
@@ -460,7 +508,7 @@ void UiManager::clickMenuItem()
     }
 
 }
-
+//TODO: setData() data()
 void UiManager::createMenus()
 {
     //thumb page menus
@@ -472,13 +520,14 @@ void UiManager::createMenus()
     thumbPageMenuItems << CLEAR_CACHE << SETUP << HELP << CLEAR << ADDIMAGES << ADDDIRS << QUIT;
     Button *menuItem = 0;
 	for (int i = 0; i < thumbPageMenuItems.size(); ++i) {
-        menuItem = new Button("<p style='color:white;font-size:16px'>" + thumbPageMenuItems[i] + "</p>");
+		menuItem = new Button("<p style='color:white;font-size:18px'>" + thumbPageMenuItems[i] + "</p>");
         mView->scene()->addItem(menuItem);
         connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
         createLeftMenuTopInMovie(menuItem, i, true, thumbPageMenuMovieIn, thumbPageMenuCollapse, thumbPageMovieOut, thumbPageMovieShake);
 	}
     menuItem = new Button(Button::ArrowUp, Button::RectShape);
-    connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+	menuItem->setColor(Qt::blue);
+	connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
     mView->scene()->addItem(menuItem);
     createLeftMenuTopInMovie(menuItem, thumbPageMenuItems.size() + 1, false , thumbPageMenuMovieIn, thumbPageMenuCollapse, thumbPageMovieOut, thumbPageMovieShake);
 
@@ -488,15 +537,16 @@ void UiManager::createMenus()
     static Movie *playPageMovieOut = score->insertMovie(PLAY_PAGE_MENU + " -out");
     static Movie *playPageMovieShake = score->insertMovie(PLAY_PAGE_MENU + " -shake");
     QStringList playPageMenuItems;
-    playPageMenuItems << CLEAR_CACHE << SETUP << HELP << START_STOP_SLIDE << WEIBO_SHARE << BACK << QUIT;
+	playPageMenuItems << CLEAR_CACHE << SETUP << HELP << IMAGE_INFO << START_STOP_SLIDE << WEIBO_SHARE << BACK << QUIT;
     menuItem = 0;
     for (int i = 0; i < playPageMenuItems.size(); ++i) {
-        menuItem = new Button("<p style='color:white;font-size:16px'>" + playPageMenuItems[i] + "</p>");
+		menuItem = new Button("<p style='color:white;font-size:18px'>" + playPageMenuItems[i] + "</p>");
         mView->scene()->addItem(menuItem);
         connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
         createLeftMenuTopInMovie(menuItem, i, true, playPageMenuMovieIn, playPageMovieCollapse, playPageMovieOut, playPageMovieShake);
     }
     menuItem = new Button(Button::ArrowUp, Button::RectShape);
+	menuItem->setColor(Qt::blue);
     connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
     mView->scene()->addItem(menuItem);
     createLeftMenuTopInMovie(menuItem, thumbPageMenuItems.size() + 1, false , playPageMenuMovieIn, playPageMovieCollapse, playPageMovieOut, playPageMovieShake);
@@ -516,12 +566,12 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinishe
 
 	// create in-animation:
     DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
-	anim->setDuration(float(1000 + (i * 20)));
+    anim->setDuration(float(600 + (i * 20)));
 	anim->setStartPos(QPointF(xOffset, -ih));
 	anim->setPosAt(0.20, QPointF(xOffset, -ih));
-	anim->setPosAt(0.50, QPointF(xOffset, (i * ihp) + yOffset + 22 + (10 * float(i / 4.0f))));
+	//anim->setPosAt(0.50, QPointF(xOffset, (i * ihp) + yOffset + 22 + (10 * float(i / 4.0f))));
 	anim->setPosAt(0.60, QPointF(xOffset, (i * ihp) + yOffset + 22));
-	anim->setPosAt(0.70, QPointF(xOffset, (i * ihp) + yOffset + 22 + (5 * float(i / 4.0f))));
+	//anim->setPosAt(0.70, QPointF(xOffset, (i * ihp) + yOffset + 22 + (5 * float(i / 4.0f))));
 	anim->setPosAt(0.80, QPointF(xOffset, (i * ihp) + yOffset + 22));
 	anim->setPosAt(0.90, QPointF(xOffset, (i * ihp) + yOffset + 22 + (2 * float(i / 4.0f))));
 	anim->setPosAt(1.00, QPointF(xOffset, (i * ihp) + yOffset + 22));
@@ -529,31 +579,33 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinishe
 
     // create collapse-animation:
     anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT, hideOnFinished);
-	anim->setDuration(float(1000 + (i * 20)));
+    anim->setDuration(float(600 + (i * 20)));
 	anim->setStartPos(QPointF(xOffset,  (i * ihp) + yOffset + 22));
     anim->setPosAt(1.00, QPointF(xOffset, yOffset));
 	anim->setPosAt(0.90, QPointF(xOffset, (i * ihp) + yOffset + 22 + (10 * float(i / 4.0f))));
 	anim->setPosAt(0.80, QPointF(xOffset, (i * ihp) + yOffset + 22));
-	anim->setPosAt(0.70, QPointF(xOffset, (i * ihp) + yOffset + 22 + (5 * float(i / 4.0f))));
+	//anim->setPosAt(0.70, QPointF(xOffset, (i * ihp) + yOffset + 22 + (5 * float(i / 4.0f))));
 	anim->setPosAt(0.60, QPointF(xOffset, (i * ihp) + yOffset + 22));
-	anim->setPosAt(0.50, QPointF(xOffset, (i * ihp) + yOffset + 22 + (2 * float(i / 4.0f))));
+	//anim->setPosAt(0.50, QPointF(xOffset, (i * ihp) + yOffset + 22 + (2 * float(i / 4.0f))));
 	anim->setPosAt(0.20, QPointF(xOffset, (i * ihp) + yOffset + 22));
     movieCollapse->append(anim);
 
-    qreal sw = mView->width();
+    QPointF p(qApp->desktop()->rect().bottomRight());//(mView->mapToScene(mView->rect().bottomRight())); //view's rect not ready?
+    qreal sw = p.x();
+    qreal sh = p.y();
     qreal iw = item->sceneBoundingRect().width();
     anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
 	anim->hideOnFinished = true;
-	anim->setDuration((700 + (30 * i)));
+    anim->setDuration((600 + (30 * i)));
 	anim->setStartPos(QPointF(xOffset, (i * ihp) + yOffset + 22));
-	anim->setPosAt(0.60, QPointF(xOffset, 600 - ih - ih));
-	anim->setPosAt(0.65, QPointF(xOffset + 20, 600 - ih));
-	anim->setPosAt(1.00, QPointF(sw + iw, 600 - ih));
+    anim->setPosAt(0.60, QPointF(xOffset, sh - ih - ih));
+    anim->setPosAt(0.65, QPointF(xOffset + 20, sh - ih));
+    anim->setPosAt(1.00, QPointF(sw + iw, sh - ih));
 	movieOut->append(anim);
 
 	// create shake-animation:
 	anim = new DemoItemAnimation(item);
-	anim->setDuration(700 * 1);
+    anim->setDuration(600);
 	anim->setStartPos(QPointF(xOffset, (i * ihp) + yOffset + 22));
 	anim->setPosAt(0.55, QPointF(xOffset, (i * ihp) + yOffset + 22 - i*2.0));
 	anim->setPosAt(0.70, QPointF(xOffset - 10, (i * ihp) + yOffset + 22 - i*1.5));
