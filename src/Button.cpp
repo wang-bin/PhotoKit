@@ -32,26 +32,92 @@ class ButtonBackground : public BaseItem
 {
 public:
     Button::ButtonType type;
-    Button::Shape mShape;
+	Button::ButtonShape mShape;
     bool highlighted;
     bool pressed;
     QSize logicalSize;
+	Button *button;
 
-    ButtonBackground(Button::ButtonType type, Button::Shape shape, bool highlighted, bool pressed, QSize logicalSize, QGraphicsItem *parent):
-        BaseItem(parent)
+	ButtonBackground(Button::ButtonType type, Button::ButtonShape shape, bool highlighted, bool pressed, QSize logicalSize, Button *parent):
+		BaseItem(parent),button(parent)
     {
-        setFlag(QGraphicsItem::ItemIgnoresTransformations);
+		//keep parent transform
+		//setFlag(QGraphicsItem::ItemIgnoresTransformations);
         setFlag(QGraphicsItem::ItemClipsChildrenToShape);
         mShape = shape;
         this->type = type;
         this->highlighted = highlighted;
         this->pressed = pressed;
         this->logicalSize = logicalSize;
-        useSharedImage(QString(__FILE__) + "type" + static_cast<int>(type)
-                       + "shape" + static_cast<int>(shape) + "hi" + highlighted + pressed + + "w" + logicalSize.width() + +"h" + logicalSize.height());
+		useSharedImage(QString(__FILE__) + "color" + button->color().rgb() + "type" + static_cast<int>(type)
+					   + "shape" + static_cast<int>(shape) + "hi" + highlighted + pressed + + "w" + logicalSize.width() + +"h" + logicalSize.height());
     }
 
 protected:
+#if 0
+	virtual QRectF boundingRect() const {return button->boundingRect();}
+	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+	{
+		painter->setRenderHint(QPainter::SmoothPixmapTransform);
+		painter->setRenderHint(QPainter::Antialiasing);
+		painter->setPen(Qt::NoPen);
+
+		QRectF scaledRect = boundingRect();
+		QColor c = button->color();
+		QLinearGradient outlinebrush(0, 0, 0, scaledRect.height());
+		QLinearGradient brush(0, 0, 0, scaledRect.height());
+		brush.setSpread(QLinearGradient::PadSpread);
+		QColor highlight(245, 245, 245, 168);
+		QColor shadow(0, 0, 0, 123);
+		QColor sunken(c.red() - 33, c.green() -33, c.blue() -40, 66);//(220, 220, 220, 99);
+		QColor normal1(c.red(), c.green(), c.blue(), 123);  //(255, 255, 245, 123);
+		QColor normal2(c.red() - 3, c.green() -5, c.blue() -10, 66);//(255, 255, 235, 66);
+/*
+		if (this->mShape == Button::RectShape){
+			normal1 = QColor(200, 170, 160, 121);
+			normal2 = QColor(100, 40, 0, 121);//  (50, 10, 0, 50);
+		}
+*/
+		if (pressed) {
+			outlinebrush.setColorAt(0.0f, shadow);
+			outlinebrush.setColorAt(1.0f, highlight);
+			brush.setColorAt(0.0f, sunken);
+			painter->setPen(Qt::NoPen);
+		} else {
+			outlinebrush.setColorAt(1.0f, shadow);
+			outlinebrush.setColorAt(0.0f, highlight);
+			brush.setColorAt(0.0f, normal1);
+			if (!this->highlighted)
+				brush.setColorAt(1.0f, normal2);
+			painter->setPen(QPen(outlinebrush, 1));
+		}
+		painter->setBrush(brush);
+
+		if (button->buttonShape() == Button::RectShape)
+			painter->drawRect(0, 0, scaledRect.width(), scaledRect.height());
+		else
+			painter->drawRoundedRect(0, 0, scaledRect.width(), scaledRect.height(), 10, 90, Qt::RelativeSize);
+
+		if (button->type() == Button::Text || button->type() == Button::Icon)
+			return;
+
+		if (button->buttonType() == Button::ArrowUp || button->buttonType() == Button::ArrowDown) {
+			float xOff = scaledRect.width() / 2;
+			float yOff = scaledRect.height() / 2;
+			float sizey = 1.5;//scaledRect.height() - 10;// * matrix.m22();
+			float sizex = 3;// * sizey;// * matrix.m11();
+			if (button->type() == Button::ArrowUp)
+				sizey *= -1;
+			QPainterPath path;
+			path.moveTo(xOff, yOff + (5 * sizey));
+			path.lineTo(xOff - (4 * sizex), yOff - (3 * sizey));
+			path.lineTo(xOff + (4 * sizex), yOff - (3 * sizey));
+			path.lineTo(xOff, yOff + (5 * sizey));
+			painter->drawPath(path);
+		}
+	}
+
+#else
     QImage *createImage(const QMatrix &matrix) const
     {
         QRect scaledRect;
@@ -65,20 +131,22 @@ protected:
         painter.setPen(Qt::NoPen);
 
 
+		QColor c = button->color().lighter();
+
         QLinearGradient outlinebrush(0, 0, 0, scaledRect.height());
         QLinearGradient brush(0, 0, 0, scaledRect.height());
         brush.setSpread(QLinearGradient::PadSpread);
-        QColor highlight(255, 255, 255, 70);
-        QColor shadow(0, 0, 0, 70);
-        QColor sunken(220, 220, 220, 30);
-        QColor normal1(255, 255, 245, 60);
-        QColor normal2(255, 255, 235, 10);
-
+		QColor highlight(245, 245, 245, 168);
+		QColor shadow(0, 0, 0, 123);
+		QColor sunken(c.red() - 33, c.green() -33, c.blue() -40, 66);//(220, 220, 220, 99);
+		QColor normal1(c.red(), c.green(), c.blue(), 123);  //(255, 255, 245, 123);
+		QColor normal2(c.red() - 3, c.green() -5, c.blue() -10, 66);//(255, 255, 235, 66);
+/*
         if (this->mShape == Button::RectShape){
-            normal1 = QColor(200, 170, 160, 50);
-			normal2 = QColor(100, 40, 0, 50);//  (50, 10, 0, 50);
+			normal1 = QColor(200, 170, 160, 121);
+			normal2 = QColor(100, 40, 0, 121);//  (50, 10, 0, 50);
         }
-
+*/
         if (pressed) {
             outlinebrush.setColorAt(0.0f, shadow);
             outlinebrush.setColorAt(1.0f, highlight);
@@ -119,6 +187,7 @@ protected:
         }
         return image;
     }
+#endif
 };
 
 
@@ -134,27 +203,28 @@ void Button::init()
 	mGlow = 0;
     mTextItem = 0;
     mIconItem = 0;
+	mColor = QColor(88, 88, 88);
 
     setAcceptsHoverEvents(true);
     //setCursor(Qt::PointingHandCursor);
-	resize(QSizeF(180, 22));
+	resize(QSizeF(180, 33));
 
 }
 
-Button::Button(ButtonType type, Shape shape, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
+Button::Button(ButtonType type, ButtonShape shape, QGraphicsItem * parent, Qt::WindowFlags) :
 	QObject(0),BaseItem(parent),prepared(false),mType(type),mShape(shape),mState(OFF)
 {
     init();
 }
 
-Button::Button(const QString& text, Shape shape, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
+Button::Button(const QString& text, ButtonShape shape, QGraphicsItem * parent, Qt::WindowFlags) :
 	QObject(0),BaseItem(parent),prepared(false),mType(Text),mShape(shape),mState(OFF)
 {
     init();
     setText(text);
 }
 
-Button::Button(const QPixmap& icon, Shape shape, QGraphicsItem * parent, Qt::WindowFlags wFlags) :
+Button::Button(const QPixmap& icon, ButtonShape shape, QGraphicsItem * parent, Qt::WindowFlags) :
 	QObject(0),BaseItem(parent),prepared(false),mType(Icon),mShape(shape),mState(OFF)
 {
     init();
@@ -284,6 +354,16 @@ void Button::resize(qreal width, qreal height)
     resize(QSizeF(width, height));
 }
 
+qreal Button::width() const
+{
+	return logicalSize.width();
+}
+
+qreal Button::height() const
+{
+	return logicalSize.height();
+}
+
 void Button::setText(const QString &text)
 {
     if (text.isEmpty())
@@ -329,7 +409,8 @@ QPixmap Button::icon() const
 
 void Button::setColor(const QColor &color)
 {
-
+	mColor = color;
+	prepairBackgrounds();
 }
 
 QColor Button::color() const
@@ -355,37 +436,58 @@ void Button::prepairBackgrounds()
 {
     if (mBgOn) {
         delete mBgOn;
-        mBgOn = 0;
-    }
+		mBgOn = 0;
+	}
 	if (mBgOff) {
         delete mBgOff;
-        mBgOff = 0;
-    }
+		mBgOff = 0;
+	}
 	if (mBgHighlight) {
         delete mBgHighlight;
-        mBgHighlight = 0;
-    }
+		mBgHighlight = 0;
+	}
 	if (mBgDisabled) {
         delete mBgDisabled;
-        mBgDisabled = 0;
-    }
+		mBgDisabled = 0;
+	}
 	if (mGlow) {
-        delete mGlow;
-        mGlow = 0;
-    }
-	mBgOn = new ButtonBackground(mType, mShape, true, true, logicalSize, this);
-	mBgOff = new ButtonBackground(mType, mShape, false, false, logicalSize, this);
-	mBgHighlight = new ButtonBackground(mType, mShape, true, false, logicalSize, this);
-    mBgDisabled = new ButtonBackground(mType, mShape, true, true, logicalSize, this);
-    setState(OFF);
-
+		delete mGlow;
+		mGlow = 0;
+	}
+	if (!mBgOn)
+		mBgOn = new ButtonBackground(mType, mShape, true, true, logicalSize, this);
+	if (!mBgOff)
+		mBgOff = new ButtonBackground(mType, mShape, false, false, logicalSize, this);
+	if (!mBgHighlight)
+		mBgHighlight = new ButtonBackground(mType, mShape, true, false, logicalSize, this);
+	if (!mBgDisabled)
+		mBgDisabled = new ButtonBackground(mType, mShape, true, true, logicalSize, this);
+/*
+	mBgOn->type = mType;
+	mBgOn->mShape = mShape;
+	mBgOn->logicalSize = logicalSize;
+	mBgOff->type = mType;
+	mBgOff->mShape = mShape;
+	mBgOff->logicalSize = logicalSize;
+	mBgHighlight->type = mType;
+	mBgHighlight->mShape = mShape;
+	mBgHighlight->logicalSize = logicalSize;
+	mBgDisabled->type = mType;
+	mBgDisabled->mShape = mShape;
+	mBgDisabled->logicalSize = logicalSize;
+	mBgOn->update();
+	mBgOff->update();
+	mBgHighlight->update();
+	mBgDisabled->update();*/
+	setState(OFF);
+/*
     mGlow = new OutlineGlowItem(this);
     //mGlow->setZValue(zValue() + 1);
     QSizeF s = boundingRect().size();
     mGlow->setSize(QSize((int)s.width(), (int)s.height()));
     mGlow->setShape(mBgOn->shape());
     mGlow->setGlowWidth(8);
-    mGlow->setColor(QColor(Qt::green).lighter(134));
+	mGlow->setColor(QColor(Qt::green).lighter(134));*/
 }
 
 void Button::resizeEvent(QGraphicsSceneResizeEvent *event)
@@ -408,7 +510,7 @@ void Button::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	//setDown(true);
 	if (mState == HIGHLIGHT || mState == OFF)
 		setState(ON);
-    mGlow->show();
+   // mGlow->show();
     //update();
     event->accept();
 	emit pressed();
@@ -416,10 +518,9 @@ void Button::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void Button::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-
     if (mState == ON)
         setState(OFF);
-    mGlow->hide();
+   // mGlow->hide();
     event->accept();
 	emit clicked();
 }
@@ -431,8 +532,6 @@ void Button::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void Button::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
-
-
     if (mState == DISABLED)
         return;
     if (mState == OFF)
@@ -442,14 +541,11 @@ void Button::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 
 void Button::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-
     event->accept();
 }
 
 void Button::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
-
-
     if (mState == DISABLED)
         return;
     setState(OFF);

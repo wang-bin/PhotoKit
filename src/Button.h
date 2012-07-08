@@ -3,6 +3,7 @@
 
 #include <QGraphicsWidget>
 #include "BaseItem.h"
+//TODO: fit text width.
 namespace PhotoKit {
 class OutlineGlowItem;
 class ButtonBackground;
@@ -12,19 +13,22 @@ class Button : public QObject, public BaseItem
     Q_OBJECT
 	Q_DECLARE_PRIVATE(Button)
 public:
-    enum ButtonType { Text, Icon, CloseButton, PlayButton, PauseButton, StopButton, ArrowUp, ArrowDown, ArrowLeft, ArrowRight}; //use mirrored image
+	enum ButtonType { Text, Icon, CloseButton, PlayButton, PauseButton, StopButton, ArrowUp, ArrowDown, ArrowLeft, ArrowRight}; //use mirrored image
     enum State {ON = 1, OFF = 2, HIGHLIGHT = 4, DISABLED = 8};
-    enum Shape { RectShape, RoundedRectShape};
-	explicit Button(ButtonType type, Shape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
-	explicit Button(const QString& text, Shape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
-	explicit Button(const QPixmap& text, Shape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+	enum ButtonShape { RectShape, RoundedRectShape};
+	explicit Button(ButtonType type, ButtonShape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+	explicit Button(const QString& text, ButtonShape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+	explicit Button(const QPixmap& text, ButtonShape shape = RoundedRectShape, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
 	virtual ~Button();
 
 	ButtonType buttonType() const;
+	ButtonShape buttonShape() const {return mShape;}
 	void setButtonType(ButtonType type);
 
 	void resize(const QSizeF& size);
 	void resize(qreal width, qreal height);
+	qreal width() const;
+	qreal height() const;
 
 	void setCheckable(bool);
 	bool isCheckable() const;
@@ -72,7 +76,7 @@ protected:
 private:
     bool prepared;
     ButtonType mType;
-    Shape mShape;
+	ButtonShape mShape;
     State mState;
     QString mText;
     QPixmap mIcon;
