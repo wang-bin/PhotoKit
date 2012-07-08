@@ -35,6 +35,8 @@ class PhotoKitView : public QGraphicsView
 public:
 	enum ZoomAction { ZoomIn, ZoomOut};
 	explicit PhotoKitView(QWidget *parent = 0);
+	bool canTransform() const;
+	void setCanTransform(bool can);
     QRectF visibleSceneRect() const;
 	void setAnimationDuration(int ms);
     void setInitialPos(qreal x, qreal y);
@@ -72,6 +74,7 @@ private:
 	//QTime mPressTime; //not required. use movement distance is enough
 
 	TransformMachine *mMachine;
+	bool mCanTransform;
 };
 
 } //namespace PhotoKit

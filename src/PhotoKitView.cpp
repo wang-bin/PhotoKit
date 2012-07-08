@@ -54,13 +54,13 @@ static const qreal yrot_max = 35;
 static const qreal yrot_min = -35;
 static const qreal xrot_max = 8;
 static const qreal xrot_min = -8;
-static const qreal xshear_min = -0.2;
-static const qreal xshear_max = 0.2;
-static const qreal yshear_min = -0.2;
-static const qreal yshear_max = 0.2;
+static const qreal xshear_min = -0.1;
+static const qreal xshear_max = 0.1;
+static const qreal yshear_min = -0.1;
+static const qreal yshear_max = 0.1;
 static const int ani_duration = 1400;
 PhotoKitView::PhotoKitView(QWidget *parent) :
-	QGraphicsView(parent),mPressed(false),mScale(1.0),mX(0),mY(0),mMachine(0)
+	QGraphicsView(parent),mPressed(false),mScale(1.0),mX(0),mY(0),mMachine(0),mCanTransform(true)
 {
 	//setDragMode(QGraphicsView::NoDrag);
     //setAlignment(Qt::AlignBottom);
@@ -261,8 +261,8 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 		//ezlog_debug("move in view");
 		//e->accept();
 	}
-        QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
-    e->accept();
+	QGraphicsView::mouseMoveEvent(e); //WARNING: item will not recive hover event if remove this
+	//e->accept();
 }
 
 void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
@@ -352,7 +352,7 @@ bool PhotoKitView::viewportEvent(QEvent *event)
                     smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0); //both thumbpage and playpage works
                 } else if (UiManager::page == UiManager::PlayPage) {
                     QGraphicsItem *item =  UiManager::instance()->currentPageRootItem();
-                    qreal s0 = item->transform().m11();
+					//qreal s0 = item->transform().m11();
                     qreal s = currentScaleFactor > 1 ? 1.1:0.9;
                     QRectF r = item->boundingRect();
                     item->setTransform(QTransform().translate(r.width()/2, r.height()/2)

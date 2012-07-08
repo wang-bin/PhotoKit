@@ -43,6 +43,7 @@ SlideDisplay::SlideDisplay(QGraphicsItem *parent)
     mHeight = mMaxHeight;
 	setAcceptTouchEvents(true);
 	setAcceptDrops(true);
+    //setFlag(QGraphicsItem::ItemIgnoresTransformations); //zoom origin will be bottom right, why?
 
 	mItemAnimation = new ItemAnimation(this);
 	//mMachine->setItem(this);
@@ -91,8 +92,8 @@ QRectF SlideDisplay::boundingRect() const
 void SlideDisplay::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	Q_UNUSED(option);
-	Q_UNUSED(widget);
-	painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    Q_UNUSED(widget);
+    painter->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
 	if (!mControl->isRunning()) {
 		if (mImage.isNull())
 			prepairImage();
