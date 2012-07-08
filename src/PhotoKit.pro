@@ -5,6 +5,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = PhotoKit
 TEMPLATE = app
+LIBS += -lexif
 PROJECTROOT = $$PWD/..
 TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$${TARGET}_zh_CN.ts
 !include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
@@ -41,7 +42,11 @@ SOURCES += main.cpp \
     Button.cpp \
     ProgressBarItem.cpp \
     score.cpp \
-    BaseItem.cpp
+    BaseItem.cpp \
+    FlipAnimation.cpp \
+    tools/ExifReader.cpp \
+    Dialog.cpp \
+    tools/ImageInfoDialog.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -72,7 +77,12 @@ HEADERS  += \
     Button.h \
     ProgressBarItem.h \
     score.h \
-    BaseItem.h
+    BaseItem.h \
+    FlipAnimation.h \
+    tools/ExifReader.h \
+    Dialog.h \
+    tools/ImageInfoDialog.h \
+    Dialog_p.h
 
 CONFIG += mobility
 MOBILITY = 
