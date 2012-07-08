@@ -135,7 +135,7 @@ qreal ThumbItem::contentHeight() const
 
 void ThumbItem::showGlow()
 {
-	if (!mGlow) {
+	if (Q_UNLIKELY(!mGlow)) {
 		ezlog_debug();
 		mGlow = new OutlineGlowItem(this);
 		//mGlow->setZValue(zValue() + 1);
