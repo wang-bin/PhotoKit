@@ -49,6 +49,7 @@ private:
     qreal mMargin;
     int mTextFlag;
     QFont mFont;
+	QGraphicsTextItem *mTextItem;
 };
 
 } //namespace PhotoKit

@@ -29,13 +29,20 @@
 #include <QDateTime>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QTextDocument>
+
 namespace PhotoKit {
 //TODO: add glow
 static int count = 0;
 ToolTip* ToolTip::instance = 0;
 ToolTip::ToolTip(const QString& text, QGraphicsScene* scene, QGraphicsItem *parent) :
-    QGraphicsObject(parent),mTextChanged(false),mScene(scene)
+	QGraphicsObject(parent),mTextChanged(false),mScene(scene)
 {
+	mMargin = 16;
+	mTextItem = new QGraphicsTextItem(this);
+	mTextItem->document()->setTextWidth(qApp->desktop()->width()/2);
+	mTextItem->setDefaultTextColor(Qt::white);
+	mTextItem->document()->setDocumentMargin(mMargin);
 	setFlag(QGraphicsItem::ItemIgnoresTransformations);
     setZValue(100);
     mScene->addItem(this);
@@ -48,18 +55,21 @@ QRectF ToolTip::boundingRect() const
 }
 
 void ToolTip::setText(const QString &text)
-{
+{/*
     mText = text;
     //mFont.setFamily(mFontName);
     mFont.setPixelSize(16);
     mFont.setWeight(QFont::Black);
-
     QFontMetrics fm(mFont);
     mTextFlag = Qt::AlignLeft | Qt::TextExpandTabs;
     QSize textsize = fm.size(mTextFlag, text);
-    mMargin = 16;
+
     mWidth = textsize.width();
     mHeight = textsize.height();
+*/
+	mTextItem->setPlainText(text);
+	mWidth = mTextItem->document()->size().width();
+	mHeight = mTextItem->document()->size().height();
 }
 
 void ToolTip::showText(const QString &text, QGraphicsScene* scene, int msshow)
@@ -89,19 +99,19 @@ void ToolTip::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 	Q_UNUSED(widget);
     QLinearGradient g(0, 0, 0, mHeight + 2*mMargin);
     g.setSpread(QLinearGradient::PadSpread);
-    g.setColorAt(0, QColor(144, 144, 66, 144));
+	g.setColorAt(0, QColor(168, 168, 77, 168));
     g.setColorAt(0.618, QColor(255, 255, 22, 111));
-    g.setColorAt(1, QColor(123, 123, 66, 123));
+	g.setColorAt(1, QColor(168, 168, 66, 168));
     painter->setPen(QPen(Qt::gray, 1));
     painter->setBrush(g);
 	painter->setClipRect(boundingRect());
     painter->drawRoundedRect(boundingRect(), 10, 80, Qt::RelativeSize);
-
+/*
 	if (mText.isEmpty())
 		return;
     painter->setPen(QColor(Qt::white).dark(2));
     painter->setFont(mFont);
-    painter->drawText(QRectF(mMargin, mMargin, mWidth, mHeight), mTextFlag, mText);
+	painter->drawText(QRectF(mMargin, mMargin, mWidth, mHeight), mTextFlag, mText);*/
 }
 
 void ToolTip::mousePressEvent(QGraphicsSceneMouseEvent *event)
