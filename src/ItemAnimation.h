@@ -35,7 +35,9 @@ class ItemAnimation : public QObject
 	Q_OBJECT
 public:
 	enum Fade {FadeIn, FadeOut, None};
-	ItemAnimation(QGraphicsItem *item, QObject *parent = 0);
+	ItemAnimation(QGraphicsItem *item = 0, QObject *parent = 0);
+	void setItem(QGraphicsItem *item);
+	void setDuration(int duration);
 	void setAutoHide(bool hide);
 	void setFade(Fade fade);
 	TransformMachine* transformMachine();

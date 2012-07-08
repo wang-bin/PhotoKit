@@ -24,7 +24,7 @@
 namespace PhotoKit {
 
 ItemAnimation::ItemAnimation(QGraphicsItem *item, QObject *parent) :
-	QObject(parent),mItem(item),mHide(false),mFade(None)
+	QObject(parent),mHide(false),mFade(None)
 {
 	mMachine = new TransformMachine;//QGraphicsItemAnimation;
 	QTimeLine *timer = new QTimeLine(1000);
@@ -35,7 +35,21 @@ ItemAnimation::ItemAnimation(QGraphicsItem *item, QObject *parent) :
 	connect(mMachine, SIGNAL(zValueChanged(qreal)), this, SLOT(setZValue(qreal)));
 	connect(mMachine, SIGNAL(posChanged(QPointF)), this, SLOT(setItemPos(QPointF)));
 	connect(mMachine->timeLine(), SIGNAL(finished()), this, SLOT(tryHide()));
-	mMachine->setStartPos(item->pos()); //
+
+	setItem(item);
+}
+
+void ItemAnimation::setItem(QGraphicsItem *item)
+{
+	if (item) {
+		mItem = item;
+		mMachine->setStartPos(item->pos()); //
+	}
+}
+
+void ItemAnimation::setDuration(int duration)
+{
+	mMachine->timeLine()->setDuration(duration);
 }
 
 void ItemAnimation::setTransform(const QTransform &m)
