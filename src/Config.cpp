@@ -96,8 +96,10 @@ void Config::setAppDir(const QString &dir)
 bool Config::read(const QString& ini)
 {
     //TODO: version check
-    if (QFileInfo(ini).created() < QDateTime(QDate(2012, 7, 4))) //remove old version configuration
+	if (QFileInfo(ini).created() < QDateTime(QDate(2012, 7, 8))) { //remove old version configuration
         QFile(ini).remove();
+        QFile(Config::displayedThumbRecordFile).remove();
+    }
 	QSettings cfg(ini, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
 	cfg.setValue("configPath", ini);
