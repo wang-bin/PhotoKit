@@ -29,14 +29,14 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <QAction>
-#include <QGraphicsTextItem>
+#include "TextEdit.h"
 #include "tools/ImageInfoDialog.h"
 #include "Button.h"
 #include "BaseItem.h"
 #include "DemoItemAnimation.h"
 #include "tools/ExifReader.h"
 #include "tools/ConfigDialog.h"
-#include "network/WeiboDialog.h"
+#include "network/WeiboBox.h"
 #include "PhotoKitView.h"
 #include "ReflectEffectItem.h"
 #include "score.h"
@@ -167,7 +167,14 @@ void UiManager::init(PhotoKitView *view)
 	mView->scene()->addItem(mPlayPageRoot);
 	mPlayControl = new SlidePlayControl(this);
 	mPlayPageRoot->setPlayControl(mPlayControl);
-
+/*
+	TextEdit *edit = new TextEdit;
+	edit->setDefaultTextColor(Qt::yellow);
+	edit->resize(300, 200);
+	edit->setPlainText("Hello world");
+	edit->setPos(200, 100);
+	mView->scene()->addItem(edit);
+*/
     createMenus(); //before gotoPage
     showMenu(THUMB_PAGE_MENU);
 
@@ -209,21 +216,19 @@ void UiManager::updateFixedItems()
 void UiManager::showImagesFromThumb(const QString &dir, bool yes)
 {
     //ThumbTask or direct show
-    if (yes) {
-        mThumbTask->createThumbsFromDirs(QStringList() << dir);
-    }
+	mThumbTask->createThumbsFromDirs(QStringList() << dir, yes);
+
 }
 
 void UiManager::showImagesFromThumb(const QStringList &paths, bool yes)
 {
     //ThumbTask or direct show
-    if (yes) {
-        mThumbTask->createThumbs(paths);
-    }
+	mThumbTask->createThumbs(paths, yes);
 }
 
 void UiManager::clearThumbs()
 {
+	//TODO: custume message box
 	QMessageBox::StandardButton res = QMessageBox::question(0, "", tr("Clear will not delete the image. Continue?"), QMessageBox::Ok | QMessageBox::No);
 	if (res != QMessageBox::Ok)
 		return;
@@ -245,6 +250,7 @@ void UiManager::addImages()
 	QStringList paths;
 	QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	d->setFileMode(QFileDialog::ExistingFiles);
+	//d->setOption(QFileDialog::DontUseNativeDialog, false);
 	if (d->exec() == QDialog::Accepted) {
 		paths = d->selectedFiles();
 		delete d;
@@ -294,6 +300,7 @@ void UiManager::stopSlide()
 
 void UiManager::showCurrentImageInfo()
 {
+	mView->setCanTransform(false);
 	//TODO: flip to show backside. line height
 	ImageInfoDialog m(mView->scene());
 	m.setPos(qApp->desktop()->width()/2, 2);
@@ -303,13 +310,12 @@ void UiManager::showCurrentImageInfo()
 
 	QString info(mPlayPageRoot->imagePath());
 	QImage image(mPlayPageRoot->imagePath());
-	info += "<p><span style='font-weight:bold;color:black'>" + tr("Size") + ": </span>" + QString::number(QFile(mPlayPageRoot->imagePath()).size()) + "byte</p>";
-	info += "<p><span style='font-weight:bold;color:black'>" + tr("Depth") + ": </span>" + QString::number(image.depth()) + "</p>";
-	info += "<p><span style='font-weight:bold;color:black'>" + tr("Width") + ": </span>" +  QString::number(image.width()) + "</p>";
-	info += "<p><span style='font-weight:bold;color:black'>" + tr("Height") + ": </span>" + QString::number(image.height()) + "</p>";
+	info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + tr("Size") + ": </span>" + QString::number(QFile(mPlayPageRoot->imagePath()).size()) + "byte</p>";
+	info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + tr("Depth") + ": </span>" + QString::number(image.depth()) + "</p>";
+	info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + tr("Width") + ": </span>" +  QString::number(image.width()) + "</p>";
+	info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + tr("Height") + ": </span>" + QString::number(image.height()) + "</p>";
 
 	m.setBaseImageInfo(info);
-	m.showBaseInfo();
 
 	ExifReader exif;
 	exif.loadFile(mPlayPageRoot->imagePath());
@@ -343,17 +349,25 @@ void UiManager::showCurrentImageInfo()
 	}
 
 
+	m.showBaseInfo();
 	m.exec();
 	//QMessageBox::information(0, tr("Image infomation"), info);
+	mView->setCanTransform(true);
 }
 
 void UiManager::shareToWeibo()
 {
-	WeiboDialog w;
+	mView->setCanTransform(false);
+	WeiboBox w(mView->scene());
+	w.setPos(qApp->desktop()->width()/2, 2);
 	w.setImage(mPlayPageRoot->imagePath());
 	w.setUser(Config::weiboUser);
 	w.setPassword(Config::weiboPasswd);
+	connect(mOk, SIGNAL(clicked()), &w, SLOT(loginOrSend()));
+	connect(mCancel, SIGNAL(clicked()), &w, SLOT(reject()));
+	connect(&w, SIGNAL(finished(int)), this, SLOT(okCancelFinish()));
 	w.exec();
+	mView->setCanTransform(true);
 }
 
 void UiManager::setup()
@@ -396,8 +410,8 @@ void UiManager::updateThumbItemAt(int index)
 
 void UiManager::updateDisplayedThumbList()
 {
-	mPlayControl->setImages(ThumbRecorder::displayedThumbs()); //current record
-	mThumbsCount = ThumbRecorder::displayedThumbs().size();
+	mPlayControl->setImages(*ThumbRecorder::displayedThumbs()); //current record
+	mThumbsCount = ThumbRecorder::displayedThumbs()->size();
 	ezlog_debug("total %d", mThumbsCount);
 }
 
@@ -512,6 +526,8 @@ void UiManager::clickMenuItem()
             else
                 startSlide();
         } else if (menuText == WEIBO_SHARE) {
+			hideMenu(PLAY_PAGE_MENU);
+			showMenu(OK_CANCEL_MENU); //reverse when dialog is done
             shareToWeibo();
 		} else if (menuText == IMAGE_INFO) {
 			showCurrentImageInfo();
@@ -533,6 +549,17 @@ void UiManager::clickMenuItem()
     }
 
 }
+
+void UiManager::okCancelFinish()
+{
+	hideMenu(OK_CANCEL_MENU);
+	if (page == PlayPage) {
+		showMenu(PLAY_PAGE_MENU);
+	} else if (page == ThumbPage) {
+		showMenu(THUMB_PAGE_MENU);
+	}
+}
+
 //TODO: setData() data()
 void UiManager::createMenus()
 {
@@ -575,14 +602,27 @@ void UiManager::createMenus()
     connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
     mView->scene()->addItem(menuItem);
     createLeftMenuTopInMovie(menuItem, thumbPageMenuItems.size() + 1, false , playPageMenuMovieIn, playPageMovieCollapse, playPageMovieOut, playPageMovieShake);
+
+
+	static Movie *okCancelMenuMovieIn = score->insertMovie(OK_CANCEL_MENU);
+	static Movie *okCancelMenuMovieOut = score->insertMovie(OK_CANCEL_MENU + " -out");
+	mOk = new Button("<p style='color:white;font-size:24px'>" + tr("Ok") + "</p>");
+	mOk->setColor(Qt::blue);
+	mOk->resize(222, 55);
+	mView->scene()->addItem(mOk);
+	mCancel = new Button("<p style='color:white;font-size:24px'>" + tr("Cancel") + "</p>");
+	mCancel->setColor(Qt::blue);
+	mCancel->resize(222, 55);
+	mView->scene()->addItem(mCancel);
+
+	createOkCancelMovie(mOk, 0, okCancelMenuMovieIn, okCancelMenuMovieOut);
+	createOkCancelMovie(mCancel, 1, okCancelMenuMovieIn, okCancelMenuMovieOut);
 }
 
 void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinished, Movie *movieIn, Movie *movieCollapse, Movie *movieOut, Movie *movieShake)
 {
     int xOffset = 40;
     int yOffset = 24;
-	//static
-
 
 	item->setVisible(false);
 	item->setZValue(10);
@@ -638,6 +678,46 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinishe
 	anim->setPosAt(0.90, QPointF(xOffset - 2, (i * ihp) + yOffset + 22 - i*0.5));
 	anim->setPosAt(1.00, QPointF(xOffset, (i * ihp) + yOffset + 22));
 	movieShake->append(anim);
+}
+
+void UiManager::createOkCancelMovie(Button *item, int index, Movie *movieIn, Movie *movieOut)
+{
+	if (index > 1)
+		return;
+	item->hide();
+	item->setZValue(12);
+
+	int xOffset = 40;
+	qreal space = 24;
+	qreal mh = qApp->desktop()->height()/2;
+	qreal x0 = -item->width() -11;
+	qreal y0 = index == 0 ? qMax<qreal>(mh - 4 * item->height() - space/2, 44) : qMin(mh + space/2 + 3*item->height(), 2*mh - 44);
+	DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
+	anim->setDuration(600);
+	anim->setStartPos(QPointF(x0, y0));
+	anim->setPosAt(0.20, QPointF(xOffset, y0));
+	if (index == 0) {
+		anim->setPosAt(0.90, QPointF(xOffset, qMax<qreal>(mh - item->height()*2, 44)));
+		anim->setPosAt(1.00, QPointF(xOffset, mh - item->height() - space/2));
+	} else {
+		anim->setPosAt(0.90, QPointF(xOffset, qMin(mh + item->height(), 2*mh - 44)));
+		anim->setPosAt(1.00, QPointF(xOffset, mh + space/2));
+	}
+	movieIn->append(anim);
+
+	anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
+	anim->setDuration(600);
+
+	qreal y1 = index == 0 ? mh - item->height() - space/2 : mh + space/2;
+	anim->setStartPos(QPointF(xOffset, y1));
+	/*if (index == 0) {
+		anim->setPosAt(0.20, QPointF(xOffset, qMax<qreal>(mh - item->height()*2, 44)));
+	} else {
+		anim->setPosAt(0.20, QPointF(xOffset, qMin(mh + item->height(), 2*mh - 44)));
+	}*/
+	anim->setPosAt(0.314, QPointF(xOffset, y0));
+	anim->setPosAt(1.00, QPointF(x0, y0));
+	movieOut->append(anim);
 }
 
 void UiManager::showMenu(const QString &menu)
