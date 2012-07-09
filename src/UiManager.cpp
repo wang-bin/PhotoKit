@@ -227,6 +227,7 @@ void UiManager::clearThumbs()
 	QMessageBox::StandardButton res = QMessageBox::question(0, "", tr("Clear will not delete the image. Continue?"), QMessageBox::Ok | QMessageBox::No);
 	if (res != QMessageBox::Ok)
 		return;
+	mThumbTask->stop();
 	//mView->scene()->removeItem(mThumbPageRoot);
 	QList<QGraphicsItem*> cs = mThumbPageRoot->childItems();
 	foreach(QGraphicsItem* c, cs)
@@ -237,19 +238,42 @@ void UiManager::clearThumbs()
 	mThumbsCount = 0;
 }
 
+//DO NOT use QFileDialog's static member. creating thumbs will block the screen after seleting. we must delete the dialog immediatly
 void UiManager::addImages()
 {
 	QString dir = "/"; //QDir::homePath() is an invalid path on n900, why?
-	QStringList paths = QFileDialog::getOpenFileNames(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
+	QStringList paths;
+	QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
+	d->setFileMode(QFileDialog::ExistingFiles);
+	if (d->exec() == QDialog::Accepted) {
+		paths = d->selectedFiles();
+		delete d;
+	} else {
+		delete d;
+		return;
+	}
+
+	//QStringList paths = QFileDialog::getOpenFileNames(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	if (paths.isEmpty())
 		return;
 	showImagesFromThumb(paths, true);
 }
 
-
+//DO NOT use QFileDialog's static member. creating thumbs will block the screen after seleting. we must delete the dialog immediatly
 void UiManager::addImagesFromDir()
 {
-	QString dir = QFileDialog::getExistingDirectory(0, tr("Select a directory contains images"), "/");
+	QString dir;
+	QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
+	//d->setOption(QFileDialog::ShowDirsOnly);
+	d->setFileMode(QFileDialog::DirectoryOnly);
+	if (d->exec() == QDialog::Accepted) {
+		dir = d->directory().absolutePath();
+		delete d;
+	} else {
+		delete d;
+		return;
+	}
+	//QString dir = QFileDialog::getExistingDirectory(0, tr("Select a directory contains images"), "/");
 	if (!dir.isEmpty()) {
 		showImagesFromThumb(dir);
 	}
@@ -272,6 +296,7 @@ void UiManager::showCurrentImageInfo()
 {
 	//TODO: flip to show backside. line height
 	ImageInfoDialog m(mView->scene());
+	m.setPos(qApp->desktop()->width()/2, 2);
 	m.resize(qApp->desktop()->size()/2);
 	m.setWindowTitle(tr("Image infomation"));
 	//m.setText(info);
@@ -284,6 +309,7 @@ void UiManager::showCurrentImageInfo()
 	info += "<p><span style='font-weight:bold;color:black'>" + tr("Height") + ": </span>" + QString::number(image.height()) + "</p>";
 
 	m.setBaseImageInfo(info);
+	m.showBaseInfo();
 
 	ExifReader exif;
 	exif.loadFile(mPlayPageRoot->imagePath());
@@ -316,8 +342,7 @@ void UiManager::showCurrentImageInfo()
 		}
 	}
 
-	m.setPos(qApp->desktop()->width()/2, 2);
-	m.showBaseInfo();
+
 	m.exec();
 	//QMessageBox::information(0, tr("Image infomation"), info);
 }
