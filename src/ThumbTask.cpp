@@ -51,7 +51,6 @@ static ThumbInfo createThumb(const QString& path)
 		md5sum.addData(f.read(8192));
 	}
 	QString md5(md5sum.result().toHex());
-	bool ok = false;
 	if (ThumbRecorder::thumbHash()->contains(path)) {
 		QString thumb_path = ThumbRecorder::thumbHash()->value(path);
 		if (thumb_path.endsWith(md5)) {
@@ -67,14 +66,23 @@ static ThumbInfo createThumb(const QString& path)
 		ThumbRecorder::thumbHash()->remove(path);
 		QFile::remove(thumb_path);
 	}
+	ThumbInfo thumb;
 	QImage image(path);
+	if (image.isNull()) {
+		ThumbRecorder::displayedThumbs()->removeOne(path);
+		return thumb;
+	}
 	QSize s = image.size();
 	qreal k = qreal(s.width())/qreal(s.height());
 	qreal q = qreal(Config::thumbItemWidth)/qreal(Config::thumbItemHeight);
 	if (k > q) {
-        image = image.scaledToWidth(Config::thumbItemWidth, Qt::SmoothTransformation);
-    } else {
-        image = image.scaledToHeight(Config::thumbItemHeight, Qt::SmoothTransformation);
+		image = image.scaledToWidth(Config::thumbItemWidth);// << 2).scaledToWidth(Config::thumbItemWidth, Qt::SmoothTransformation);
+		//image = image.scaledToWidth(Config::thumbItemWidth, Qt::SmoothTransformation);
+		//image = image.scaledToWidth(Config::thumbItemWidth << 2).scaledToWidth(Config::thumbItemWidth, Qt::SmoothTransformation);
+	} else {
+		image = image.scaledToHeight(Config::thumbItemHeight);// << 2).scaledToHeight(Config::thumbItemHeight, Qt::SmoothTransformation);
+		//image = image.scaledToHeight(Config::thumbItemHeight, Qt::SmoothTransformation);
+		//image = image.scaledToHeight(Config::thumbItemHeight << 2).scaledToHeight(Config::thumbItemHeight, Qt::SmoothTransformation);
 	}
 
 	//save thumb to file. use imagewriter and setKey() update hash with
@@ -82,7 +90,6 @@ static ThumbInfo createThumb(const QString& path)
 	ThumbRecorder::thumbHash()->insert(path, thumbPath);
 	ThumbRecorder::addDisplayedThumb(path);
 	image.save(thumbPath, "PNG");
-	ThumbInfo thumb;
 	thumb.thumb = image;
 	thumb.path = path;
 	return thumb;
@@ -123,11 +130,11 @@ ThumbHash *ThumbRecorder::thumbHash()
 	return &ThumbRecorder::thumbs;
 }
 
-QStringList ThumbRecorder::displayedThumbs()
+QStringList* ThumbRecorder::displayedThumbs()
 {
 	if (!self)
 		new ThumbRecorder;
-	return ThumbRecorder::display;
+	return &ThumbRecorder::display;
 }
 
 void ThumbRecorder::addDisplayedThumb(const QString &path)

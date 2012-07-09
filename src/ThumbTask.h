@@ -42,7 +42,7 @@ class ThumbRecorder : public QObject
 public:
 	static ThumbRecorder* instance();
 	static ThumbHash* thumbHash();
-	static QStringList displayedThumbs();
+	static QStringList* displayedThumbs();
 	static void addDisplayedThumb(const QString& path);
 
 	void clearDisplay();
