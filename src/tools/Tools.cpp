@@ -17,10 +17,27 @@ namespace Tools {
 void showTip(const QString &text, bool force, int msshow)
 {
     if (Config::showTips || force) {
-        ToolTip::showText(text, UiManager::instance()->view()->scene(), 8000);
+		ToolTip::showText(text, UiManager::instance()->view()->scene(), msshow);
 		ezlog_debug("Tip: %s", qPrintable(text));
 	}
 
+}
+
+void showTip(const QImage &image, bool force, int msshow)
+{
+	if (Config::showTips || force) {
+		ToolTip::showImage(image, UiManager::instance()->view()->scene(), msshow);
+	}
+}
+
+void showOk(int msshow)
+{
+	ToolTip::showImage(QImage(":/icons/ok.png"), UiManager::instance()->view()->scene(), msshow);
+}
+
+void showError(int msshow)
+{
+	ToolTip::showImage(QImage(":/icons/close.png"), UiManager::instance()->view()->scene(), msshow);
 }
 
 QStringList imageNameFilters()

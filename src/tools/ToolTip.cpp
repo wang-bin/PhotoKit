@@ -49,6 +49,15 @@ ToolTip::ToolTip(const QString& text, QGraphicsScene* scene, QGraphicsItem *pare
     setText(text);
 }
 
+ToolTip::ToolTip(const QImage& image, QGraphicsScene* scene, QGraphicsItem *parent) :
+	QGraphicsObject(parent),mTextChanged(false),mScene(scene)
+{
+	setFlag(QGraphicsItem::ItemIgnoresTransformations);
+	setZValue(100);
+	mScene->addItem(this);
+	setImage(image);
+}
+
 QRectF ToolTip::boundingRect() const
 {
     return QRectF(0, 0, mWidth + 2*mMargin, mHeight + 2*mMargin);
@@ -72,12 +81,20 @@ void ToolTip::setText(const QString &text)
 	mHeight = mTextItem->document()->size().height();
 }
 
+void ToolTip::setImage(const QImage &image)
+{
+	mImage = image;
+	mWidth = image.width();
+	mHeight = image.height();
+}
+
 void ToolTip::showText(const QString &text, QGraphicsScene* scene, int msshow)
 {
     if (!instance) {
         instance = new ToolTip(text, scene); //more then one scene?
     } else {
-        instance->hide();
+		instance->hide(); //count--?
+		count--;
         instance->setText(text);
     }
 
@@ -93,8 +110,29 @@ void ToolTip::showText(const QString &text, QGraphicsScene* scene, int msshow)
     count++;
 }
 
+void ToolTip::showImage(const QImage &image, QGraphicsScene *scene, int msshow)
+{
+	if (!instance) {
+		instance = new ToolTip(image, scene); //more then one scene?
+	} else {
+		instance->hide(); //count--?
+		count--;
+		instance->setImage(image);
+	}
+
+	int w = qApp->desktop()->width(), h = qApp->desktop()->height();
+	instance->setPos((w - image.width())/2, (h - image.height())/2); //TODO: random
+	instance->show();
+	QTimer::singleShot(msshow, instance, SLOT(done()));
+	count++;
+}
+
 void ToolTip::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+	if (!mImage.isNull()) {
+		painter->drawImage(QPointF(), mImage);
+		return;
+	}
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
     QLinearGradient g(0, 0, 0, mHeight + 2*mMargin);
@@ -105,7 +143,7 @@ void ToolTip::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
     painter->setPen(QPen(Qt::gray, 1));
     painter->setBrush(g);
 	painter->setClipRect(boundingRect());
-    painter->drawRoundedRect(boundingRect(), 10, 80, Qt::RelativeSize);
+	painter->drawRoundedRect(boundingRect(), 20, 20, Qt::AbsoluteSize);
 /*
 	if (mText.isEmpty())
 		return;

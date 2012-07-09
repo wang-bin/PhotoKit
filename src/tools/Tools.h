@@ -3,11 +3,15 @@
 
 class QString;
 class QStringList;
+class QImage;
 namespace PhotoKit {
 
 namespace Tools {
 
 void showTip(const QString& text, bool force = false, int msshow = 8000);
+void showTip(const QImage &image, bool force = false, int msshow = 8000);
+void showOk(int msshow = 8000);
+void showError(int msshow = 8000);
 
 QStringList imageNameFilters();
 

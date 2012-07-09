@@ -22,6 +22,7 @@
 #define TOOLTIP_H
 
 #include <QGraphicsWidget>
+//TODO: fadein/out
 namespace PhotoKit {
 class ToolTip : public QGraphicsObject
 {
@@ -29,11 +30,14 @@ class ToolTip : public QGraphicsObject
 public:
 	//static void showText(const QPointF& pos, const QString text, int msec);
 
-    explicit ToolTip(const QString& text, QGraphicsScene* scene, QGraphicsItem *parent = 0);
-    static void showText(const QString& text, QGraphicsScene* scene, int msshow = 8000);
+	explicit ToolTip(const QString& text, QGraphicsScene* scene, QGraphicsItem *parent = 0);
+	explicit ToolTip(const QImage& image, QGraphicsScene* scene, QGraphicsItem *parent = 0);
+	static void showText(const QString& text, QGraphicsScene* scene, int msshow = 8000);
+	static void showImage(const QImage& image, QGraphicsScene* scene, int msshow = 8000);
     virtual QRectF boundingRect() const;
 
     void setText(const QString& text);
+	void setImage(const QImage& image);
 protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -45,6 +49,7 @@ private:
 	bool mTextChanged;
     QGraphicsScene *mScene;
 	QString mText;
+	QImage mImage;
     qreal mWidth, mHeight;
     qreal mMargin;
     int mTextFlag;
