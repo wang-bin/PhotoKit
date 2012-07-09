@@ -85,6 +85,16 @@ PhotoKitView::PhotoKitView(QWidget *parent) :
 	mMachine->setTimeLine(timer);
 }
 
+bool PhotoKitView::canTransform() const
+{
+	return mCanTransform;
+}
+
+void PhotoKitView::setCanTransform(bool can)
+{
+	mCanTransform = can;
+}
+
 //http://stackoverflow.com/questions/1355446/get-visible-rectangle-of-qgraphicsview
 QRectF PhotoKitView::visibleSceneRect() const
 {
@@ -194,7 +204,7 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 		break;
 	case Qt::Key_Left:
 		break;
-    case Qt::Key_F:
+	case Qt::Key_F11:
         if (isFullScreen())
             showMaximized();
         else
@@ -210,6 +220,10 @@ void PhotoKitView::keyPressEvent(QKeyEvent *e)
 
 void PhotoKitView::mousePressEvent(QMouseEvent *e)
 {
+	if (!mCanTransform) {
+		QGraphicsView::mousePressEvent(e);
+		return;
+	}
     if (e->button() == Qt::LeftButton) {
         mPressed = true;
         mMousePos = e->posF();
@@ -221,43 +235,47 @@ void PhotoKitView::mousePressEvent(QMouseEvent *e)
 //TODO: delta.y() to rotate around XAix and translate y. delta.x() rotate around YAix and translate x;
 void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 {
-		QPointF delta = e->posF() - mMousePos;
-		if (mPressed) {
-            if (UiManager::page == UiManager::ThumbPage) {
-                mX += delta.x() * 4;
-                mY += delta.y();
-                //TODO: move out visible area effect
-                mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
-                mX = qMin(mX, qreal(Config::contentHMargin));
-                mY = qMax(mY, qreal(0.0));
-                mY = qMin(mY, qreal(Config::contentVMargin));
-                //ezlog_debug("dx dy %d %d", delta.x(), delta.y());
-                qreal hs = delta.x()/100;
-                qreal vs = delta.y()/100;
-                qreal xrot = delta.x()/6, yrot = delta.x()/6;
-                if (delta.x() > 0) {
-                    xrot = qMin(xrot, xrot_max);
-                    hs = qMin(hs, xshear_max);
-                } else {
-                    xrot = qMax(xrot, xrot_min);
-                    hs = qMax(hs, xshear_min);
-                }
-                if (delta.y() > 0) {
-                    yrot = qMin(yrot, yrot_max);
-                    vs = qMin(vs, yshear_max);
-                } else {
-                    yrot = qMax(yrot, yrot_min);
-                    vs = qMax(vs, yshear_min);
-                }
-                //ezlog_debug("mX=%f my=%f", mX, mY);
-                //moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-                setAnimationDuration(ani_duration);
-                smartTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
-			} else if (UiManager::page == UiManager::PlayPage) {
-				//TODO: animation, don't move out of the viewport
-                UiManager::instance()->currentPageRootItem()->setTransform(QTransform().translate(delta.x(), delta.y()), true);
-            }
-			mMousePos = e->posF();
+	if (!mCanTransform) {
+		QGraphicsView::mouseMoveEvent(e);
+		return;
+	}
+	QPointF delta = e->posF() - mMousePos;
+	if (mPressed) {
+		if (UiManager::page == UiManager::ThumbPage) {
+			mX += delta.x() * 4;
+			mY += delta.y();
+			//TODO: move out visible area effect
+			mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
+			mX = qMin(mX, qreal(Config::contentHMargin));
+			mY = qMax(mY, qreal(0.0));
+			mY = qMin(mY, qreal(Config::contentVMargin));
+			//ezlog_debug("dx dy %d %d", delta.x(), delta.y());
+			qreal hs = delta.x()/100;
+			qreal vs = delta.y()/100;
+			qreal xrot = delta.x()/6, yrot = delta.x()/6;
+			if (delta.x() > 0) {
+				xrot = qMin(xrot, xrot_max);
+				hs = qMin(hs, xshear_max);
+			} else {
+				xrot = qMax(xrot, xrot_min);
+				hs = qMax(hs, xshear_min);
+			}
+			if (delta.y() > 0) {
+				yrot = qMin(yrot, yrot_max);
+				vs = qMin(vs, yshear_max);
+			} else {
+				yrot = qMax(yrot, yrot_min);
+				vs = qMax(vs, yshear_min);
+			}
+			//ezlog_debug("mX=%f my=%f", mX, mY);
+			//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
+			setAnimationDuration(ani_duration);
+			smartTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
+		} else if (UiManager::page == UiManager::PlayPage) {
+			//TODO: animation, don't move out of the viewport
+			UiManager::instance()->currentPageRootItem()->setTransform(QTransform().translate(delta.x(), delta.y()), true);
+		}
+		mMousePos = e->posF();
 		//ezlog_debug("move in view");
 		//e->accept();
 	}
@@ -267,6 +285,10 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 
 void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
 {
+	if (!mCanTransform) {
+		QGraphicsView::mouseReleaseEvent(e);
+		return;
+	}
 	mPressed = false;
 	mMousePos = e->posF();
 	QGraphicsView::mouseReleaseEvent(e);
@@ -274,6 +296,11 @@ void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
 
 void PhotoKitView::mouseDoubleClickEvent(QMouseEvent *event)
 {
+	if (!mCanTransform) {
+		qDebug("dbclick disabled");
+		//QGraphicsView::mouseDoubleClickEvent(event); //WARNING: SlideDisplay will receive this. stop the event may cause other problem
+		return;
+	}
     if (UiManager::page == UiManager::PlayPage) {
         UiManager::instance()->gotoPage(UiManager::ThumbPage);
         event->accept();
@@ -284,6 +311,10 @@ void PhotoKitView::mouseDoubleClickEvent(QMouseEvent *event)
 
 void PhotoKitView::wheelEvent(QWheelEvent *event)
 {
+	if (!mCanTransform) {
+		//QGraphicsView::wheelEvent(event);
+		return;
+	}
 	int numDegrees = event->delta() / 8;
 	int numSteps = numDegrees / 15;
 	//ezlog_debug("wheel steps: %d", numSteps); //1
