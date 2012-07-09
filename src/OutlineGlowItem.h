@@ -26,7 +26,7 @@
 #include <QGraphicsPixmapItem>
 
 namespace PhotoKit {
-
+//TODO: shapeitem
 class OutlineGlowItem : public QGraphicsPixmapItem
 {
 public:

@@ -46,7 +46,9 @@ SOURCES += main.cpp \
     FlipAnimation.cpp \
     tools/ExifReader.cpp \
     Dialog.cpp \
-    tools/ImageInfoDialog.cpp
+    tools/ImageInfoDialog.cpp \
+    network/WeiboBox.cpp \
+    TextEdit.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -82,33 +84,51 @@ HEADERS  += \
     tools/ExifReader.h \
     Dialog.h \
     tools/ImageInfoDialog.h \
-    Dialog_p.h
+    Dialog_p.h \
+    network/WeiboBox.h \
+    TextEdit.h
 
-CONFIG += mobility
+#CONFIG += mobility
 MOBILITY = 
 
 RESOURCES += \
     ../res/res.qrc \
     ../res/style.qrc
 
-contains(MEEGO_EDITION,harmattan) {
 
+contains(MEEGO_EDITION,harmattan) {
+	DEFINES += CACHE_APPDIR
+	target.path = /opt/PhotoKit/bin
+	images.files = $$PROJECTROOT/res/images
+	images.path = /opt/PhotoKit/bin
+	desktopfile.files = $$PROJECTROOT/qtc_packaging/harmattan/PhotoKit.desktop
+    desktopfile.path = /usr/share/applications
+	icon.files = $$PROJECTROOT/qtc_packaging/PhotoKit.png
+    icon.path = /usr/share/icons/hicolor/80x80/apps
+	INSTALLS += target desktopfile icon images
 }
 
 maemo5 {
-    target.path = /opt/PhotoKit/bin
-    INSTALLS += target
+	target.path = /opt/PhotoKit/bin
+	images.files = $$PROJECTROOT/res/images
+	images.path = /opt/PhotoKit/bin
+	desktopfile.files = $$PROJECTROOT/qtc_packaging/fremantle/PhotoKit.desktop
+    desktopfile.path = /usr/share/applications/hildon
+	icon.files = $$PROJECTROOT/qtc_packaging/PhotoKit.png
+	icon.path = /usr/share/icons/hicolor/64x64/apps
+	INSTALLS += target desktopfile icon images
+}
+
+
+
+maemo5 {
+    desktopfile.files = PhotoKit.desktop
+    desktopfile.path = /usr/share/applications/hildon
+    INSTALLS += desktopfile
 }
 
 contains(MEEGO_EDITION,harmattan) {
-    DEFINES += CACHE_APPDIR
-    target.path = /opt/PhotoKit/bin
     desktopfile.files = PhotoKit.desktop
     desktopfile.path = /usr/share/applications
-    icon.files = PhotoKit.png
-    icon.path = /usr/share/icons/hicolor/80x80/apps
-    INSTALLS += target desktopfile icon
+    INSTALLS += desktopfile
 }
-
-OTHER_FILES += \
-    ../res/ui.css

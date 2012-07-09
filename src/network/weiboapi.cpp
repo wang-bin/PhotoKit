@@ -110,6 +110,7 @@ void WeiboApi::sendStatusWithPicture()
 {
 	ezlog_debug("update weibo with picture");
 	QString path(mFile);
+	//TODO: gif
 	if (!path.endsWith("jpg", Qt::CaseInsensitive)
 			&& !path.endsWith("jpeg", Qt::CaseInsensitive)
 			&& !path.endsWith("png", Qt::CaseInsensitive)

@@ -82,7 +82,7 @@ void SlidePlayControl::start()
 	ezlog_debug();
 
 	startOne();
-	tid_slide = startTimer(5555);
+	tid_slide = startTimer(6666);
 	running = true;
 }
 

@@ -379,6 +379,7 @@ void Button::setText(const QString &text)
     }
     mText = text;
     mTextItem = new QGraphicsTextItem(this);
+	mTextItem->setDefaultTextColor(Qt::white);
     mTextItem->setHtml(mText);
     QSizeF s = mTextItem->document()->size();
     qreal x = qMax<qreal>((logicalSize.width() - s.width())/2, 2);

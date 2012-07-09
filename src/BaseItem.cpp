@@ -20,6 +20,7 @@
 
 #include "BaseItem.h"
 #include <QPainter>
+#include <QGraphicsSceneMouseEvent>
 #include "DemoItemAnimation.h"
 #include "Guide.h"
 #include "Config.h"
@@ -264,5 +265,6 @@ void BaseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
 
     }
 }
+
 
 } //namespace PhotoKit

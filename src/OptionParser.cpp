@@ -16,6 +16,9 @@ void OptionParser::parseCmd(int argc, const char *const*argv)
 	po::parse(argc, argv);
     if (po::get("h"))
         po::help();
+	if (po::get("no-thumb")) {
+		Config::useThumb = false;
+	}
     if (po::get("opengl")) {
         Config::openGlRendering = true;
     }
@@ -32,7 +35,7 @@ void OptionParser::parseCmd(int argc, const char *const*argv)
 		images << f.split(";");
 	}
 	if (images.isEmpty()) {
-		images << ThumbRecorder::displayedThumbs();
+		images << *ThumbRecorder::displayedThumbs();
 	}
 }
 
@@ -42,8 +45,9 @@ OptionParser::OptionParser()
                             "Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>")
             ["Usage:"]
             ("-h,--help", "show this message")
-            ("--opengl", "enable opengl")
-            ("--no-opengl", "disable opengl")
+			("--no-thumb", "load images without using thumbnails")
+			("--opengl", "enable opengl")
+			("--no-opengl", "disable opengl")
             ("-d,--dirs", "", "load images from dirs")
             ("-f,--files", "", "load image from files")
     ;

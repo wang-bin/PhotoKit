@@ -1,0 +1,12 @@
+wtf smart pointer
+in SildeDisplay, zoom the original image
+gif play
+progressbar
+
+QGraphicsView translate bug: https://bugreports.qt-project.org/browse/QTBUG-15239
+zoom on boot
+
+qtransform perspective: http://www.qtcentre.org/threads/14000-Perspective-correction-with-QTransform
+qgraphicsview performance: http://thesmithfam.org/blog/2007/02/03/qt-improving-qgraphicsview-performance/
+center:  http://www.qtcentre.org/wiki/index.php?title=QGraphicsView:_Smooth_Panning_and_Zooming#Realizing_the_Pitfalls_with_QGraphicsView
+check page on event

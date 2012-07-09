@@ -89,6 +89,9 @@ protected:
     virtual bool collidesWithItem(const QGraphicsItem *, Qt::ItemSelectionMode) const { return false; }
     bool prepared;
 
+	//virtual void wheelEvent(QGraphicsSceneWheelEvent *event);
+	//virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+
 private:
     SharedImage *sharedImage;
     QString hashKey;
