@@ -25,6 +25,7 @@
 #include <QGraphicsLinearLayout>
 #include <QGraphicsScene>
 #include <QPainter>
+#include <QGraphicsDropShadowEffect>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsItemAnimation>
 #include "ItemAnimation.h"
@@ -40,7 +41,7 @@ DialogPrivate::DialogPrivate()
 {
 	titleBar = new QGraphicsWidget;
 	buttonBar = new QGraphicsWidget;
-	buttonBar->setContentsMargins(4, 2, 4, 1);
+	buttonBar->setContentsMargins(4, 6, 4, 1);
 	central = new QGraphicsWidget;
 	titleBar->setMaximumHeight(33);
 	buttonBar->setMaximumHeight(33);
@@ -51,7 +52,8 @@ DialogPrivate::DialogPrivate()
 }
 
 QSizeF DialogPrivate::size() const {
-	qreal w = qMax(central->contentsRect().width(), width); //?titleBar->size() is not the value of resize()?
+	//qDebug("%f %f", central->contentsRect().width(), width);
+	qreal w = qMax(central->contentsRect().width(), width); //?contentsRect().width(), titleBar->size() is not the value of resize()?
 	qreal h =  buttonBar->contentsRect().height() + central->contentsRect().height() + titleBar->contentsRect().height();
 	return QSizeF(w, h);
 }
@@ -75,9 +77,10 @@ void DialogPrivate::setupUi(Dialog* ui) {
 
 	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
 	layout->setPreferredHeight(222);
+	layout->setSpacing(8);
 	layout->addItem(titleBar);
 	layout->addItem(central);
-	layout->addStretch(4);
+	layout->addStretch(8);
 	layout->addItem(buttonBar);
 	ui->setLayout(layout);
 }
@@ -105,6 +108,7 @@ Dialog::Dialog(QGraphicsScene *scene, QGraphicsItem *parent) :
 
 	setFlag(QGraphicsItem::ItemIsPanel);
 	setPanelModality(QGraphicsItem::SceneModal);
+
 }
 
 Dialog::Dialog(DialogPrivate &p, QGraphicsScene *scene, QGraphicsItem *parent)
@@ -125,6 +129,11 @@ Dialog::Dialog(DialogPrivate &p, QGraphicsScene *scene, QGraphicsItem *parent)
 
 	setFlag(QGraphicsItem::ItemIsPanel);
 	setPanelModality(QGraphicsItem::SceneModal);
+/*
+	QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
+	effect->setBlurRadius(3);
+	effect->setXOffset(2);
+	setGraphicsEffect(effect);*/
 }
 
 Dialog::~Dialog()
@@ -161,22 +170,26 @@ void Dialog::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 	Q_UNUSED(widget);
 	QLinearGradient g(0, 0, 0, size().height());
 	g.setSpread(QLinearGradient::PadSpread);
-	g.setColorAt(0, QColor(168, 168, 222, 222));
-	g.setColorAt(0.618, QColor(222, 222, 255, 212));
-	g.setColorAt(1, QColor(168, 168, 222, 222));
+	g.setColorAt(0, QColor(168, 168, 222, 200));
+	g.setColorAt(0.618, QColor(222, 222, 255, 188));
+	g.setColorAt(1, QColor(168, 168, 222, 200));
 	painter->setPen(QPen(Qt::gray, 1));
 	painter->setBrush(g);
 	painter->setClipRect(boundingRect());
 	painter->drawRoundedRect(boundingRect(), 22, 22, Qt::AbsoluteSize);
 }
 
-void Dialog::exec()
+void Dialog::flipShow()
 {
-	qDebug("exec");
 	Q_D(Dialog);
 	d->animation->start();
+}
+
+void Dialog::exec()
+{
+	Q_D(Dialog);
+	show();
 	d->loop.exec();
-	qDebug("exec end");
 }
 
 void Dialog::accept()

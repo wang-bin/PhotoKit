@@ -23,7 +23,7 @@
 
 #include <QGraphicsWidget>
 
-//TODO: set effect
+//TODO: set effect. reject, done, etc
 
 namespace PhotoKit {
 class DialogPrivate;
@@ -38,6 +38,8 @@ public:
 	QGraphicsWidget* titleBar();
 	QGraphicsWidget* centralWidget();
 	QGraphicsWidget* buttonBar();
+
+	void flipShow();
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 signals:
 	

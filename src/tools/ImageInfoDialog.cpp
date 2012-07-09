@@ -106,7 +106,6 @@ void ImageInfoDialog::setGPSInfo(const QString &text)
 {
 	Q_D(ImageInfoDialog);
 	d->info[2] = text;
-
 }
 
 void ImageInfoDialog::showInfo()
@@ -126,6 +125,8 @@ void ImageInfoDialog::showBaseInfo()
 	d->text->setHtml(d->info[0]);
 	centralWidget()->resize(d->text->document()->size());
 	resize(d->size());
+
+	flipShow();
 }
 
 } //namespace PhotoKit
