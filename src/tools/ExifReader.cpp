@@ -34,8 +34,8 @@ typedef struct {
 static const tag_info idf0_tags[] = {
 	{EXIF_TAG_MAKE, 			QObject::tr("Manufacturer")}, //QObject::tr()
 	{EXIF_TAG_MODEL,			QObject::tr("Model")},
-	{EXIF_TAG_SOFTWARE,			QObject::tr("Software")},
-	{EXIF_TAG_COPYRIGHT,		QObject::tr("Copyright")},
+//	{EXIF_TAG_SOFTWARE,			QObject::tr("Software")},
+//	{EXIF_TAG_COPYRIGHT,		QObject::tr("Copyright")},
 };
 
 static const tag_info idf_exif_tags[] = {
@@ -47,7 +47,7 @@ static const tag_info idf_exif_tags[] = {
 	{EXIF_TAG_FLASH,				QObject::tr("Flash")},
 	{EXIF_TAG_ISO_SPEED_RATINGS,	QObject::tr("ISO Speed Ratings")},
 	{EXIF_TAG_DATE_TIME_ORIGINAL,	QObject::tr("Date and Time (Original)")},
-	{EXIF_TAG_METERING_MODE,		QObject::tr("Metering mode")},
+//	{EXIF_TAG_METERING_MODE,		QObject::tr("Metering mode")},
 	{EXIF_TAG_WHITE_BALANCE,		QObject::tr("White balance")}
 };
 
@@ -227,6 +227,15 @@ ExifReader::TagInfo ExifReader::getGpsBrief() const
 		//crash
 		//info.insert(QString::fromUtf8(exif_tag_get_title_in_ifd(entry->tag, exif_entry_get_ifd(entry))), QString::fromUtf8(v.constData()));
 	}
+	//TODO: i18n
+	info["Longitude"] = info["Longitude"] + " " + info["East or West"];
+	info.remove("East or West");
+	info["Latitude"] = info["Latitude"] + " " + info["North or South"];
+	info.remove("North or South");
+	info["Image Direction"] = info["Image Direction"] + " " + info["Image Direction Refrence"];
+	info.remove("Image Direction Refrence");
+	info["Altitude"] = info["Altitude"] + " " + info["Altitude refrence"];
+	info.remove("Altitude refrence");
 	return info;
 }
 
