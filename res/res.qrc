@@ -1,26 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/0.jpg</file>
-        <file>images/1.jpg</file>
-        <file>images/2.jpg</file>
-        <file>images/3.jpg</file>
-        <file>images/4.jpg</file>
-        <file>images/5.jpg</file>
-        <file>images/6.jpg</file>
-        <file>images/h1990-20.png</file>
-        <file>images/halo.png</file>
-        <file>images/m1.png</file>
-        <file>images/m42.png</file>
-        <file>images/m51.png</file>
-        <file>images/m63.png</file>
-        <file>images/m81.png</file>
-        <file>images/m91.png</file>
-        <file>images/m94.png</file>
-        <file>images/m101.png</file>
-        <file>images/m104.png</file>
-        <file>images/m109.png</file>
-        <file>images/m110.png</file>
-        <file>images/milkyway_chart.png</file>
         <file>i18n/PhotoKit_zh_CN.qm</file>
+        <file>icons/close.png</file>
+        <file>icons/ok.png</file>
     </qresource>
 </RCC>
