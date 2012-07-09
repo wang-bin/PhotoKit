@@ -35,6 +35,7 @@ ItemAnimation::ItemAnimation(QGraphicsItem *item, QObject *parent) :
 	connect(mMachine, SIGNAL(zValueChanged(qreal)), this, SLOT(setZValue(qreal)));
 	connect(mMachine, SIGNAL(posChanged(QPointF)), this, SLOT(setItemPos(QPointF)));
 	connect(mMachine->timeLine(), SIGNAL(finished()), this, SLOT(tryHide()));
+	connect(mMachine->timeLine(), SIGNAL(finished()), this, SIGNAL(finished()));
 
 	setItem(item);
 }

@@ -46,6 +46,9 @@ public:
 
 	void start();
 	void stop();
+
+signals:
+	void finished();
 public slots:
 	void setTransform(const QTransform& m);
     void setItemPos(const QPointF& pos);
