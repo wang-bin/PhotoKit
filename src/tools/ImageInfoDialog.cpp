@@ -52,9 +52,20 @@ public:
 		base->setData(0, 0); //signal slot
 		exif->setData(0, 1);
 		gps->setData(0, 2);
+
+		okBtn = new Button("<p style='color:white;font-size:16px'>" + QObject::tr("Ok") + "</p>", Button::RoundedRectShape, buttonBar);
+		buttonBar->resize(okBtn->boundingRect().size());
+		okBtn->setFlag(QGraphicsItem::ItemIgnoresTransformations, false);
+		okBtn->resize(100, 33);
+		buttonBar->resize(okBtn->boundingRect().size());
+		okBtn->setColor(Qt::black);
+	}
+	~ImageInfoDialogPrivate() {
+		delete okBtn;
 	}
 
 	void setupUi(ImageInfoDialog* ui) {
+		QObject::connect(okBtn, SIGNAL(clicked()), ui, SLOT(accept()));
 		text->setParentItem(central);
 		base->setParentItem(titleBar);
 		exif->setParentItem(titleBar);
@@ -70,6 +81,7 @@ public:
 		QObject::connect(gps, SIGNAL(clicked()), ui, SLOT(showInfo()));
 	}
 
+	Button *okBtn;
 	QGraphicsTextItem* text;
 	Button *base, *exif, *gps;
 	QString info[3];
@@ -83,11 +95,11 @@ ImageInfoDialog::ImageInfoDialog(QGraphicsScene *scene, QGraphicsItem *parent) :
 }
 
 ImageInfoDialog::~ImageInfoDialog()
-{
+{/*
 	if (d_ptr) {
 		delete d_ptr;
 		d_ptr = 0;
-	}
+	}*/
 }
 
 void ImageInfoDialog::setBaseImageInfo(const QString &text)

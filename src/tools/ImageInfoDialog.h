@@ -43,8 +43,6 @@ protected:
 	
 private slots:
 	void showInfo();
-private:
-	//ImageInfoDialogPrivate* d_ptr;
 };
 
 } //namespace PhotoKit
