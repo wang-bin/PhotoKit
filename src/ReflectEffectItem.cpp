@@ -111,6 +111,8 @@ void ReflectEffectItem::drawReflect()
         mPos.setX(mTarget->boundingWidth() + 2*mMirrorDistance + mTarget->marginWidth() + mTarget->borderWidth());
         mPos.setY(mTarget->marginWidth() + mTarget->borderWidth());
     }
+	if (mReflect->format() != QImage::Format_ARGB32_Premultiplied)
+		*mReflect = mReflect->convertToFormat(QImage::Format_ARGB32_Premultiplied); //fast scaled image does not have alpha?
     QPainter painter(mReflect);
     painter.setCompositionMode(QPainter::CompositionMode_DestinationIn);
     painter.fillRect(0, 0, mReflect->width(), mReflect->height(), g);
