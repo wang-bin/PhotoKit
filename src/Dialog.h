@@ -31,10 +31,12 @@ class Dialog : public QGraphicsWidget
 {
 	Q_OBJECT
 public:
+	enum DialogCode { Accepted, Rejected };
 	explicit Dialog(QGraphicsScene *scene, QGraphicsItem *parent = 0);
 	virtual ~Dialog();
 	//void setText(const QString& text);
 
+	void setBackgroundColor(const QColor& color);
 	QGraphicsWidget* titleBar();
 	QGraphicsWidget* centralWidget();
 	QGraphicsWidget* buttonBar();
@@ -42,10 +44,14 @@ public:
 	void flipShow();
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 signals:
-	
+	void accepted();
+	void rejected();
+	void finished(int result);
 public slots:
-	void exec();
+	int exec();
 	void accept();
+	void reject();
+	//void done(int r);
 
 protected:
 	Dialog(DialogPrivate& d, QGraphicsScene *scene, QGraphicsItem *parent = 0);

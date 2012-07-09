@@ -23,6 +23,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QEventLoop>
+#include <QtGui/QColor>
 class QSizeF;
 class QGraphicsWidget;
 class QGraphicsScene;
@@ -46,11 +47,12 @@ public:
 	QGraphicsWidget *central;
 	QGraphicsWidget *buttonBar;
 	//QGraphicsTextItem *text;
-	Button *okBtn;
 	QEventLoop loop;
 	QGraphicsScene *scene;
 	ItemAnimation *animation;
 	qreal width; //FIXME: width after resize is not the value i resized, why?
+	int result;
+	QColor color;
 protected:
 	Dialog *q_ptr;
 };

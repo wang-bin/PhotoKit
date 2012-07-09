@@ -37,7 +37,7 @@ namespace PhotoKit {
 //TODO: multipage
 
 DialogPrivate::DialogPrivate()
-	:okBtn(0),scene(0),animation(new ItemAnimation),width(0)
+	:scene(0),animation(new ItemAnimation),width(0),result(Dialog::Rejected)
 {
 	titleBar = new QGraphicsWidget;
 	buttonBar = new QGraphicsWidget;
@@ -68,12 +68,6 @@ void DialogPrivate::setupUi(Dialog* ui) {
 
 	central->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
-	okBtn = new Button("<p style='color:white;font-size:16px'>" + QObject::tr("Ok") + "</p>", Button::RoundedRectShape, buttonBar);
-	buttonBar->resize(okBtn->boundingRect().size());
-	okBtn->setFlag(QGraphicsItem::ItemIgnoresTransformations, false);
-	okBtn->resize(100, 33);
-	buttonBar->resize(okBtn->boundingRect().size());
-	okBtn->setColor(Qt::black);
 
 	QGraphicsLinearLayout *layout = new QGraphicsLinearLayout(Qt::Vertical);
 	layout->setPreferredHeight(222);
@@ -86,7 +80,6 @@ void DialogPrivate::setupUi(Dialog* ui) {
 }
 
 DialogPrivate::~DialogPrivate() {
-	delete okBtn;
 	delete animation;
 }
 
@@ -97,17 +90,12 @@ Dialog::Dialog(QGraphicsScene *scene, QGraphicsItem *parent) :
 
 	setAcceptsHoverEvents(true);
 	setZValue(22);
-	//setWindowFlags(Qt::Dialog);
 	Q_D(Dialog);
 	d->setupUi(this);
-	connect(d->okBtn, SIGNAL(clicked()), SLOT(accept()));
-
 	d->scene = scene;
 	d->scene->addItem(this);
-	//grabMouse();
 
-	setFlag(QGraphicsItem::ItemIsPanel);
-	setPanelModality(QGraphicsItem::SceneModal);
+	//setPanelModality(QGraphicsItem::SceneModal); //will block input. i need text editing
 
 }
 
@@ -118,22 +106,12 @@ Dialog::Dialog(DialogPrivate &p, QGraphicsScene *scene, QGraphicsItem *parent)
 
 	setAcceptsHoverEvents(true);
 	setZValue(22);
-	//setWindowFlags(Qt::Dialog);
 	Q_D(Dialog);
 	d->setupUi(this);
-	connect(d->okBtn, SIGNAL(clicked()), SLOT(accept()));
-
 	d->scene = scene;
 	d->scene->addItem(this);
-	//grabMouse();
 
-	setFlag(QGraphicsItem::ItemIsPanel);
-	setPanelModality(QGraphicsItem::SceneModal);
-/*
-	QGraphicsDropShadowEffect *effect = new QGraphicsDropShadowEffect(this);
-	effect->setBlurRadius(3);
-	effect->setXOffset(2);
-	setGraphicsEffect(effect);*/
+	//setPanelModality(QGraphicsItem::SceneModal); //will block input. i need text editing
 }
 
 Dialog::~Dialog()
@@ -168,7 +146,7 @@ void Dialog::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 {
 	Q_UNUSED(option);
 	Q_UNUSED(widget);
-	QLinearGradient g(0, 0, 0, size().height());
+	QLinearGradient g(0, 0, 0, size().height()); //TODO: member var
 	g.setSpread(QLinearGradient::PadSpread);
 	g.setColorAt(0, QColor(168, 168, 222, 200));
 	g.setColorAt(0.618, QColor(222, 222, 255, 188));
@@ -185,19 +163,35 @@ void Dialog::flipShow()
 	d->animation->start();
 }
 
-void Dialog::exec()
+int Dialog::exec()
 {
 	Q_D(Dialog);
-	show();
+	flipShow(); //?
 	d->loop.exec();
+	emit finished(d->result);
+	return d->result;
 }
 
 void Dialog::accept()
 {
 	Q_D(Dialog);
+	d->result = Dialog::Accepted;
 	d->animation->transformMachine()->timeLine()->setDirection(QTimeLine::Backward);
 	d->animation->start();
+	emit accepted();
+	emit finished(d->result);
+	connect(d->animation, SIGNAL(finished()), this, SLOT(close()));
+	connect(d->animation, SIGNAL(finished()), &d->loop, SLOT(quit()));
+}
 
+void Dialog::reject()
+{
+	Q_D(Dialog);
+	d->result = Dialog::Rejected;
+	d->animation->transformMachine()->timeLine()->setDirection(QTimeLine::Backward);
+	d->animation->start();
+	emit rejected();
+	emit finished(d->result);
 	connect(d->animation, SIGNAL(finished()), this, SLOT(close()));
 	connect(d->animation, SIGNAL(finished()), &d->loop, SLOT(quit()));
 }
