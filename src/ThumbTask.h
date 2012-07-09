@@ -62,9 +62,9 @@ public:
 	~ThumbTask();
 
     QFutureWatcher<ThumbInfo>* watcher();
-    void createThumbs(const QStringList& paths); //
-    void createThumbsFromDirs(const QStringList& dirs);
-    void createThumbsFromDirsAndPaths(const QStringList& dirs, const QStringList& paths);
+	void createThumbs(const QStringList& paths, bool create = true); //
+	void createThumbsFromDirs(const QStringList& dirs, bool create = true);
+	void createThumbsFromDirsAndPaths(const QStringList& dirs, const QStringList& paths, bool create = true);
 
     QImage thumbAt(int index);
     ThumbInfo thumbInfoAt(int index);

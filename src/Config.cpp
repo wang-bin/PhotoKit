@@ -69,6 +69,7 @@ bool Config::showTips = true;
 int Config::contentHMargin = 444;
 int Config::contentVMargin = 120;
 
+bool Config::useThumb = true;
 QString Config::thumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs.qds";
 QString Config::displayedThumbRecordFile = QDir::homePath() + "/.PhotoKit/thumbs_show.qds";
 int Config::thumbRows = 2; //TODO: 2 for mobile
@@ -122,6 +123,7 @@ bool Config::read(const QString& ini)
 
 	thumbItemWidth = cfg.value("thumbItemWidth", 160).toInt();
 	thumbItemHeight = cfg.value("thumbItemHeight", 120).toInt();
+	useThumb = cfg.value("useThumb", true).toBool();
 
 	return true;
 }
@@ -145,6 +147,7 @@ bool Config::save(const QString &ini)
 	cfg.setValue("thumbBorder", thumbBorder);
 	cfg.setValue("thumbItemWidth", thumbItemWidth);
 	cfg.setValue("thumbItemHeight", thumbItemHeight);
+	cfg.setValue("useThumb", useThumb);
 
 	return true;
 }

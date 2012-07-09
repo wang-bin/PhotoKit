@@ -73,6 +73,7 @@ public:
     static bool showTips;
 	static int contentHMargin;
 	static int contentVMargin;
+	static bool useThumb;
 	static QString thumbRecordFile;
 	static QString displayedThumbRecordFile;
 	static int thumbRows;

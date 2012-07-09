@@ -39,6 +39,18 @@ ThumbHash ThumbRecorder::thumbs;
 QStringList ThumbRecorder::display;
 //OwnPtr<ThumbInfo>?
 
+static ThumbInfo loadImage(const QString& path)
+{
+	ThumbInfo thumb;
+	QImage image(path);
+	if (image.isNull()) {
+		ThumbRecorder::displayedThumbs()->removeOne(path);
+	}
+	thumb.thumb = image;
+	thumb.path = path;
+	return thumb;
+}
+
 static ThumbInfo createThumb(const QString& path)
 {
 	ezlog_debug("%s", qPrintable(path));
@@ -189,16 +201,19 @@ QFutureWatcher<ThumbInfo>* ThumbTask::watcher()
     return mThumbsWatcher;
 }
 
-void ThumbTask::createThumbs(const QStringList& paths)
+void ThumbTask::createThumbs(const QStringList& paths, bool create)
 {/*
 	foreach(const QString& path, paths) {
 		//new thumitem
 
 	}*/
-	mThumbsWatcher->setFuture(QtConcurrent::mapped(paths, createThumb));
+	if (create)
+		mThumbsWatcher->setFuture(QtConcurrent::mapped(paths, createThumb));
+	else
+		mThumbsWatcher->setFuture(QtConcurrent::mapped(paths, loadImage));
 }
 
-void ThumbTask::createThumbsFromDirs(const QStringList& dirs)
+void ThumbTask::createThumbsFromDirs(const QStringList& dirs, bool create)
 {
 	ezlog_debug("%s", qPrintable(Tools::imageNameFilters().join(";")));
     QStringList files;
@@ -210,10 +225,10 @@ void ThumbTask::createThumbsFromDirs(const QStringList& dirs)
         list.replaceInStrings(QRegExp("^(.*)"), dir + "/\\1");
         files << list;
     }
-    createThumbs(files);
+	createThumbs(files, create);
 }
 
-void ThumbTask::createThumbsFromDirsAndPaths(const QStringList &dirs, const QStringList &paths)
+void ThumbTask::createThumbsFromDirsAndPaths(const QStringList &dirs, const QStringList &paths, bool create)
 {
     QStringList files;
     foreach(const QString& dir, dirs) {
@@ -225,7 +240,7 @@ void ThumbTask::createThumbsFromDirsAndPaths(const QStringList &dirs, const QStr
         files << list;
     }
     files << paths;
-    createThumbs(files);
+	createThumbs(files, create);
 }
 
 QImage ThumbTask::thumbAt(int index)
