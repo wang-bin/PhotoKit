@@ -36,6 +36,7 @@ namespace PhotoKit {
 //TODO: add glow
 static int count = 0;
 ToolTip* ToolTip::instance = 0;
+bool ToolTip::isText = true;
 ToolTip::ToolTip(const QString& text, QGraphicsScene* scene, QGraphicsItem *parent) :
 	QGraphicsObject(parent),mTextChanged(false),mScene(scene)
 {
@@ -65,6 +66,7 @@ QRectF ToolTip::boundingRect() const
 
 void ToolTip::setText(const QString &text)
 {
+	isText = true;
 	mTextItem->setHtml(text);
 	mWidth = mTextItem->document()->size().width();
 	mHeight = mTextItem->document()->size().height();
@@ -72,6 +74,7 @@ void ToolTip::setText(const QString &text)
 
 void ToolTip::setImage(const QImage &image)
 {
+	isText = false;
 	mImage = image;
 	mWidth = image.width();
 	mHeight = image.height();
@@ -91,7 +94,7 @@ void ToolTip::showText(const QString &text, QGraphicsScene* scene, int msshow)
 	instance->setPos(x, y);
     instance->show();
     QTimer::singleShot(msshow, instance, SLOT(done()));
-    count++;
+	count++;
 }
 
 void ToolTip::showImage(const QImage &image, QGraphicsScene *scene, int msshow)
@@ -112,7 +115,8 @@ void ToolTip::showImage(const QImage &image, QGraphicsScene *scene, int msshow)
 
 void ToolTip::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	if (!mImage.isNull()) {
+	if (!isText) {
+		mTextItem->hide();
 		painter->drawImage(QPointF(), mImage);
 		return;
 	}
@@ -122,6 +126,7 @@ void ToolTip::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 	painter->setBrush(QColor(44, 44, 44, 234));
 	painter->setClipRect(boundingRect());
 	painter->drawRoundedRect(boundingRect(), 12, 12, Qt::AbsoluteSize);
+	mTextItem->show();
 }
 
 void ToolTip::mousePressEvent(QGraphicsSceneMouseEvent *event)

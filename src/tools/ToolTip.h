@@ -38,6 +38,7 @@ public:
 
     void setText(const QString& text);
 	void setImage(const QImage& image);
+
 protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -45,6 +46,7 @@ protected:
 public slots:
     void done();
 private:
+	static bool isText;
     static ToolTip* instance;
 	bool mTextChanged;
     QGraphicsScene *mScene;
