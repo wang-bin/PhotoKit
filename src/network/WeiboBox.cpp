@@ -23,7 +23,6 @@
 #include <QTextDocument>
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QMessageBox>
 #include "TextEdit.h"
 #include "Dialog_p.h"
 #include "Button.h"
@@ -41,24 +40,26 @@ class WeiboBoxPrivate : public DialogPrivate
 public:
 	WeiboBoxPrivate() {
 		api = new WeiboApi;
+		qreal x = 6;
 		QGraphicsTextItem *title = new QGraphicsTextItem(titleBar);
-		title->setDefaultTextColor(QColor(250, 128, 10));
+		title->setPos(x, 12);
+		title->setDefaultTextColor(Qt::white);
 		QFont f;
 		f.setPixelSize(23);
 		title->setFont(f);
-		title->setPlainText(QObject::tr("New weibo (Sina) with current image"));
+		title->setPlainText(QObject::tr("New weibo (Sina)"));
 		qreal w = qApp->desktop()->width()/2 - 44;
 		statusEdit = new TextEdit(central);
 		statusEdit->setDefaultTextColor(Qt::blue);
 		statusEdit->document()->setDocumentMargin(22);
 
-        qreal x = 6, y = 22;
+		qreal y = 22;
 		statusEdit->setPos(x, y);
 		statusEdit->document()->setTextWidth(qApp->desktop()->width()/2 - 8);
 		//statusEdit->setPlainText("Write something...");
         qreal h = qApp->desktop()->height()*0.618;
 		statusEdit->resize(w, h);
-		y += statusEdit->size().height() + 8;
+		y += statusEdit->size().height() + 12;
         qreal hh = qMin<qreal>(qApp->desktop()->height()*0.314/2, 66); //TODO: calculate the line edit height
 		f.setBold(true);
 		QGraphicsTextItem *user = new QGraphicsTextItem(central);
@@ -149,14 +150,18 @@ void WeiboBox::setImage(const QString &path)
 
 void WeiboBox::doError(const QString &error)
 {
+	Q_UNUSED(error);
 	Tools::showError(3000);
 }
 
 void WeiboBox::login()
 {
 	Q_D(WeiboBox);
-	if (d->userEdit->text().isEmpty() || d->passwdEdit->text().isEmpty())
-		QMessageBox::warning(0, tr("Error"), tr("User name and password can't be empty"));
+	if (d->userEdit->text().isEmpty() || d->passwdEdit->text().isEmpty()) {
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+					   + tr("User name and password can't be empty") + "</p>", true, 3000);
+		return;
+	}
 	d->api->setUSer(d->userEdit->toPlainText());
 	d->api->setPassword(d->passwdEdit->data(0).toString());
 	d->api->login();
@@ -174,21 +179,34 @@ void WeiboBox::sendWeiboWithPicture()
     QSettings cfg(Config::configPath, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
     if (d->userEdit->text().isEmpty() && d->passwdEdit->text().isEmpty())
-        QMessageBox::warning(0, tr("Error"), tr("User name and password can't be empty"));
-    d->api->setUSer(d->userEdit->text());
-    d->api->setPassword(d->passwdEdit->text());
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+					   + tr("User name and password can't be empty") + "</p>", true, 3000);
+	//TODO: check whether the user changed. if yes, set empty token and login as new account
+	QString userNow = d->userEdit->text();
+	if (userNow != Config::weiboUser) {
+		access_token.clear();
+	}
+	QString passwdNow = d->passwdEdit->text();
+	d->api->setUSer(userNow);
+	d->api->setPassword(passwdNow);
     d->api->setAccessToken(access_token);
-	Config::weiboUser = d->userEdit->text();
-	Config::weiboPasswd = d->passwdEdit->text();
+	Config::weiboUser = userNow;
+	Config::weiboPasswd = passwdNow;
 	qDebug("%s %s", qPrintable(Config::weiboUser), qPrintable(Config::weiboPasswd));
 	cfg.setValue("weiboUser", qCompress(Config::weiboUser.toAscii()));
 	cfg.setValue("weiboPasswd", qCompress(Config::weiboPasswd.toAscii()));
 	QString text = d->statusEdit->text();
-	if (text.isEmpty())
-		QMessageBox::warning(0, tr("Error"), tr("Weibo can't be empty"));
-	if (text.size() > 140)
-		QMessageBox::warning(0, tr("Error"), tr("Weibo caontent is limited to 140. now are %1").arg(text.size()));
-
+	qDebug("content: %s", qPrintable(text));
+	if (text.isEmpty()) {
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+					   + tr("Weibo can't be empty") + "</p>", true, 3000);
+		return;
+	}
+	if (text.size() > 140) {
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+					   + tr("Weibo caontent is limited to 140. now are %1").arg(text.size()) + "</p>", true, 3000);
+		return;
+	}
 	d->api->updateStatusWithPicture(text, d->image);
     connect(d->api, SIGNAL(sendOk()), SLOT(sendOk()));
 }
