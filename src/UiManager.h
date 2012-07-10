@@ -88,13 +88,14 @@ public slots:
 private slots:
 	void clickMenuItem(); //check sender's button text
 	void okCancelFinish();
+	void hideConfigMenu();
+
 private:
 	explicit UiManager(QObject *parent = 0);
 	void createMenus(); //called by init()
-	void createMenuItemMovie(Button *item, int index);
 	void createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinished, Movie* movieIn, Movie *movieCollapse, Movie* movieOut, Movie *movieShake = 0);
+	void createConfigMenuMovie(Button *item, int i, Movie* movieIn, Movie* movieOut);
 	void createOkCancelMovie(Button *item, int index, Movie* movieIn, Movie *movieOut); //index 0: from top
-	void createRightMenuRightInOutMovie(Button *item, int index);
 	void showMenu(const QString& menu);
     void hideMenu(const QString& menu);
 

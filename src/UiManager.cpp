@@ -27,7 +27,6 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QMenu>
-#include <QMessageBox>
 #include <QAction>
 #include "TextEdit.h"
 #include "tools/ImageInfoDialog.h"
@@ -71,6 +70,7 @@ static qreal X0 = 0;
 static qreal Y0 = 0;
 static const QString THUMB_PAGE_MENU("thumbPageMenu");
 static const QString PLAY_PAGE_MENU("playPageMenu");
+static const QString CONFIG_MENU("ConfigMenu");
 static const QString OK_CANCEL_MENU("OkCancel");
 
 static void initTranslation() {
@@ -102,11 +102,10 @@ static void initTranslation() {
                                            "Two finger touch to zoom(NOT TESTED)");
 
     about = QObject::tr("Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>\n");
-    HELP_TEXT = about + "\n" + QObject::tr("PRESS ME TO HIDE\n"
-                                           "Press a picture to zoom\n"
-                                           "Double click a picture to show large image and double click aagin to go back\n"
-                                           "You can share the current picture to sina weibo\n"
-                                           "Two finger touch to zoom(NOT TESTED)");
+	HELP_TEXT = "<p>" + about + "</p></p>" + QObject::tr("PRESS ME TO HIDE") + "</p>"
+			+ "<p>" + QObject::tr("Press a picture to zoom") + "</p>"
+			+ "<p>" + QObject::tr("Double click a picture to show large image and double click again to go back") + "</p>"
+			+ "<p>" + QObject::tr("Two finger touch to zoom(NOT TESTED)") + "</p>";
 }
 UiManager* UiManager::mInstance = 0;
 ThumbItem* UiManager::lastHoverThumb = 0;
@@ -226,12 +225,13 @@ void UiManager::showImagesFromThumb(const QStringList &paths, bool yes)
 	mThumbTask->createThumbs(paths, yes);
 }
 
+//TODO: move to setup
 void UiManager::clearThumbs()
 {
-	//TODO: custume message box
-	QMessageBox::StandardButton res = QMessageBox::question(0, "", tr("Clear will not delete the image. Continue?"), QMessageBox::Ok | QMessageBox::No);
-	if (res != QMessageBox::Ok)
-		return;
+	//TODO: custume message box. Use MessageBox
+	Tools::showTip(tr("Clear will not delete the image. Continue?"), true, 2000);
+	//if (res != QMessageBox::Ok)
+	//	return;
 	mThumbTask->stop();
 	//mView->scene()->removeItem(mThumbPageRoot);
 	QList<QGraphicsItem*> cs = mThumbPageRoot->childItems();
@@ -489,14 +489,31 @@ void UiManager::clickMenuItem()
 		ThumbRecorder::instance()->save();
 		qApp->quit();
     } else if (menuText == SETUP) {
-
-    } else if (menuText == CLEAR_CACHE) {
+		if (page == ThumbPage)
+			hideMenu(THUMB_PAGE_MENU);
+		else if (page == PlayPage)
+			hideMenu(PLAY_PAGE_MENU);
+		showMenu(OK_CANCEL_MENU);
+		showMenu(CONFIG_MENU);
+		//TODO: cancel the setup
+		connect(mOk, SIGNAL(clicked()), this, SLOT(hideConfigMenu()));
+		connect(mCancel, SIGNAL(clicked()), this, SLOT(hideConfigMenu()));
+		if (score->hasQueuedMovies()){
+			score->playQue();
+		}
+		return;
+	} else if (menuText == CLEAR_CACHE) {
         QDir thumbDir(Config::thumbDir);
         QStringList files = thumbDir.entryList(QDir::Files | QDir::Hidden);
+		bool ok = true;
         foreach(QString f, files) {
-            QFile::remove(thumbDir.filePath(f));
+			ok &= QFile::remove(thumbDir.filePath(f));
         }
-        QFile::remove(Config::thumbRecordFile);
+		QFile::remove(Config::thumbRecordFile); //ok &=
+		if (ok)
+			Tools::showOk(1000);
+		else
+			Tools::showError(1000);
         return;
 	} else if (menuText == HELP) {
 		showHelp();
@@ -514,8 +531,8 @@ void UiManager::clickMenuItem()
             addImages();
         } else if (menuText == ADDDIRS) {
             addImagesFromDir();
-        } else if (menuText == CLEAR) {
-            clearThumbs();
+		} else if (menuText == CLEAR) {
+			clearThumbs();
 		}
         else {
             score->queueMovie(THUMB_PAGE_MENU + " -shake");
@@ -562,6 +579,19 @@ void UiManager::okCancelFinish()
 	} else if (page == ThumbPage) {
 		showMenu(THUMB_PAGE_MENU);
 	}
+	disconnect(this, SLOT(okCancelFinish()));
+}
+
+void UiManager::hideConfigMenu()
+{
+	hideMenu(OK_CANCEL_MENU);
+	if (page == PlayPage) {
+		showMenu(PLAY_PAGE_MENU);
+	} else if (page == ThumbPage) {
+		showMenu(THUMB_PAGE_MENU);
+	}
+	hideMenu(CONFIG_MENU);
+	disconnect(this, SLOT(hideConfigMenu()));
 }
 
 //TODO: setData() data()
@@ -573,7 +603,7 @@ void UiManager::createMenus()
     static Movie *thumbPageMovieOut = score->insertMovie(THUMB_PAGE_MENU + " -out");
     static Movie *thumbPageMovieShake = score->insertMovie(THUMB_PAGE_MENU + " -shake");
 	QStringList thumbPageMenuItems;
-    thumbPageMenuItems << CLEAR_CACHE << SETUP << HELP << CLEAR << ADDIMAGES << ADDDIRS << QUIT;
+	thumbPageMenuItems << SETUP << HELP << CLEAR << ADDIMAGES << ADDDIRS << QUIT;
     Button *menuItem = 0;
 	for (int i = 0; i < thumbPageMenuItems.size(); ++i) {
 		menuItem = new Button("<p style='color:white;font-size:18px'>" + thumbPageMenuItems[i] + "</p>");
@@ -593,7 +623,7 @@ void UiManager::createMenus()
     static Movie *playPageMovieOut = score->insertMovie(PLAY_PAGE_MENU + " -out");
     static Movie *playPageMovieShake = score->insertMovie(PLAY_PAGE_MENU + " -shake");
     QStringList playPageMenuItems;
-	playPageMenuItems << CLEAR_CACHE << SETUP << HELP << IMAGE_INFO << START_STOP_SLIDE << WEIBO_SHARE << BACK << QUIT;
+	playPageMenuItems << SETUP << HELP << IMAGE_INFO << START_STOP_SLIDE << WEIBO_SHARE << BACK << QUIT;
     menuItem = 0;
     for (int i = 0; i < playPageMenuItems.size(); ++i) {
 		menuItem = new Button("<p style='color:white;font-size:18px'>" + playPageMenuItems[i] + "</p>");
@@ -607,6 +637,19 @@ void UiManager::createMenus()
     mView->scene()->addItem(menuItem);
     createLeftMenuTopInMovie(menuItem, thumbPageMenuItems.size() + 1, false , playPageMenuMovieIn, playPageMovieCollapse, playPageMovieOut, playPageMovieShake);
 
+
+	//Config menu. right side
+	static Movie *configMenuMovieIn = score->insertMovie(CONFIG_MENU);
+	static Movie *configMenuMovieOut = score->insertMovie(CONFIG_MENU + " -out");
+	QStringList configMenuItems;
+	configMenuItems << "OpenGL " + Config::glVersion << CLEAR_CACHE;
+	menuItem = 0;
+	for (int i = 0; i < configMenuItems.size(); ++i) {
+		menuItem = new Button("<p style='color:white;font-size:18px'>" + configMenuItems[i] + "</p>");
+		mView->scene()->addItem(menuItem);
+		connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+		createConfigMenuMovie(menuItem, i, configMenuMovieIn, configMenuMovieOut);
+	}
 
 	static Movie *okCancelMenuMovieIn = score->insertMovie(OK_CANCEL_MENU);
 	static Movie *okCancelMenuMovieOut = score->insertMovie(OK_CANCEL_MENU + " -out");
@@ -684,6 +727,33 @@ void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinishe
 	movieShake->append(anim);
 }
 
+//TODO: viewport rect
+void UiManager::createConfigMenuMovie(Button *item, int i, Movie *movieIn, Movie *movieOut)
+{
+	static qreal w = qApp->desktop()->width();
+	int xOffset = w - item->width() - 22;
+	int yOffset = 88;
+
+	item->setVisible(false);
+	item->setZValue(10);
+	qreal ih = item->sceneBoundingRect().height();
+	qreal ihp = ih + 8;
+
+	// create in-animation:
+	DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
+	anim->setDuration(float(600 + (i * 20)));
+	anim->setStartPos(QPointF(w + 22, yOffset + i*ihp));
+	anim->setPosAt(1.00, QPointF(xOffset, yOffset + i*ihp));
+	movieIn->append(anim);
+
+	anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_OUT);
+	anim->hideOnFinished = true;
+	anim->setDuration((600 + (30 * i)));
+	anim->setStartPos(QPointF(xOffset, yOffset + i*ihp));
+	anim->setPosAt(1.00, QPointF(w + 22, yOffset + i*ihp));
+	movieOut->append(anim);
+}
+
 void UiManager::createOkCancelMovie(Button *item, int index, Movie *movieIn, Movie *movieOut)
 {
 	if (index > 1)
@@ -695,11 +765,12 @@ void UiManager::createOkCancelMovie(Button *item, int index, Movie *movieIn, Mov
 	qreal space = 24;
 	qreal mh = qApp->desktop()->height()/2;
 	qreal x0 = -item->width() -11;
-	qreal y0 = index == 0 ? qMax<qreal>(mh - 4 * item->height() - space/2, 44) : qMin(mh + space/2 + 3*item->height(), 2*mh - 44);
+	qreal y0 = index == 0 ? item->height() : qMax(qApp->desktop()->height() - 2*item->height(), mh + 2*item->height());
 	DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
 	anim->setDuration(600);
 	anim->setStartPos(QPointF(x0, y0));
 	anim->setPosAt(0.20, QPointF(xOffset, y0));
+	anim->setPosAt(0.40, QPointF(xOffset, y0));
 	if (index == 0) {
 		anim->setPosAt(0.90, QPointF(xOffset, qMax<qreal>(mh - item->height()*2, 44)));
 		anim->setPosAt(1.00, QPointF(xOffset, mh - item->height() - space/2));
@@ -720,6 +791,7 @@ void UiManager::createOkCancelMovie(Button *item, int index, Movie *movieIn, Mov
 		anim->setPosAt(0.20, QPointF(xOffset, qMin(mh + item->height(), 2*mh - 44)));
 	}*/
 	anim->setPosAt(0.314, QPointF(xOffset, y0));
+	anim->setPosAt(0.618, QPointF(xOffset, y0));
 	anim->setPosAt(1.00, QPointF(x0, y0));
 	movieOut->append(anim);
 }
