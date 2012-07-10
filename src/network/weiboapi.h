@@ -30,6 +30,8 @@ public:
     explicit WeiboApi(QObject *parent = 0);
     void setUSer(const QString& user);
     void setPassword(const QString& passwd);
+    void setAccessToken(const QByteArray& token);
+    QByteArray accessToken() const;
 
 	void login();
 	void logout();
@@ -37,7 +39,6 @@ public:
 
 signals:
 	void error(const QString& error);
-    void ok();
 	void loginOk();
 	void loginFail();
 	void sendOk();

@@ -34,6 +34,8 @@
 
 namespace PhotoKit {
 
+static QByteArray access_token;
+
 class WeiboBoxPrivate : public DialogPrivate
 {
 public:
@@ -50,43 +52,46 @@ public:
 		statusEdit->setDefaultTextColor(Qt::blue);
 		statusEdit->document()->setDocumentMargin(22);
 
-		qreal x = 11, y = 22;
+        qreal x = 6, y = 22;
 		statusEdit->setPos(x, y);
 		statusEdit->document()->setTextWidth(qApp->desktop()->width()/2 - 8);
 		//statusEdit->setPlainText("Write something...");
-		qreal h = qApp->desktop()->height()*2/3;
+        qreal h = qApp->desktop()->height()*0.618;
 		statusEdit->resize(w, h);
 		y += statusEdit->size().height() + 8;
+        qreal hh = qMin<qreal>(qApp->desktop()->height()*0.314/2, 66); //TODO: calculate the line edit height
 		f.setBold(true);
 		QGraphicsTextItem *user = new QGraphicsTextItem(central);
+        f.setPixelSize(20);
 		user->setFont(f);
-		user->document()->setDocumentMargin(8);
+        user->document()->setDocumentMargin(4);
 		user->setDefaultTextColor(QColor(33, 33, 33));
 		user->setPlainText(QObject::tr("User"));
 		user->setPos(x, y);
 		userEdit = new TextEdit(central);
 		userEdit->setPos(x + 120, y);
-		userEdit->resize(w - 120, 66);
+        userEdit->resize(w - 120, hh);
 		userEdit->setDefaultTextColor(Qt::black);
-		userEdit->document()->setDocumentMargin(8);
+        userEdit->document()->setDocumentMargin(11);
 		userEdit->document()->setTextWidth(qApp->desktop()->width()/2 - 8);
-		y += 66 + 2;
+        y += hh + 2;
 		QGraphicsTextItem *passwd = new QGraphicsTextItem(central);
-		passwd->setFont(f);
-		passwd->document()->setDocumentMargin(8);
+        passwd->setFont(f);
+        passwd->document()->setDocumentMargin(4);
 		passwd->setDefaultTextColor(QColor(33, 33, 33));
 		passwd->setPlainText(QObject::tr("Password"));
 		passwd->setPos(x, y);
 		passwdEdit = new TextEdit(central);
 		passwdEdit->setPos(x + 120, y);
-		passwdEdit->resize(w - 120, 66);
+        passwdEdit->resize(w - 120, hh);
 		passwdEdit->setDefaultTextColor(Qt::black);
-		passwdEdit->document()->setDocumentMargin(8);
+        passwdEdit->document()->setDocumentMargin(11);
 		statusEdit->setTextInteractionFlags(Qt::TextEditorInteraction);
 		userEdit->setTextInteractionFlags(Qt::TextEditorInteraction);
 		passwdEdit->setTextInteractionFlags(Qt::TextEditorInteraction);
 
-		userEdit->setFont(f);
+        f.setPixelSize(24);
+        userEdit->setFont(f);
 		passwdEdit->setFont(f);
 		passwdEdit->setEchoMode(TextEdit::Password);
 	}
@@ -99,8 +104,8 @@ public:
 
 	void setupUi(WeiboBox *ui) {
 		QObject::connect(api, SIGNAL(error(QString)), ui, SLOT(doError(QString)));
-		QObject::connect(api, SIGNAL(loginOk()), ui, SLOT(sendWeiboWithPicture()));
-		ui->resize(qApp->desktop()->width()/2 - 11, qApp->desktop()->height() -22);
+        QObject::connect(api, SIGNAL(loginOk()), ui, SLOT(loginDone()));
+        ui->resize(qApp->desktop()->width()/2 - 11, qApp->desktop()->height() -22);
 	}
 
 	//Button *ok, *cancel; //left side of screen
@@ -147,16 +152,6 @@ void WeiboBox::doError(const QString &error)
 	Tools::showError(3000);
 }
 
-void WeiboBox::loginOrSend()
-{/*
-	if (mContent->currentWidget() == mWeiboPage)
-		sendWeiboWithPicture();
-	else
-		login();
-*/
-	login();
-}
-
 void WeiboBox::login()
 {
 	Q_D(WeiboBox);
@@ -176,8 +171,13 @@ void WeiboBox::sendOk()
 void WeiboBox::sendWeiboWithPicture()
 {
 	Q_D(WeiboBox);
-	QSettings cfg(Config::configPath, QSettings::IniFormat);
+    QSettings cfg(Config::configPath, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
+    if (d->userEdit->text().isEmpty() && d->passwdEdit->text().isEmpty())
+        QMessageBox::warning(0, tr("Error"), tr("User name and password can't be empty"));
+    d->api->setUSer(d->userEdit->text());
+    d->api->setPassword(d->passwdEdit->text());
+    d->api->setAccessToken(access_token);
 	Config::weiboUser = d->userEdit->text();
 	Config::weiboPasswd = d->passwdEdit->text();
 	qDebug("%s %s", qPrintable(Config::weiboUser), qPrintable(Config::weiboPasswd));
@@ -190,7 +190,13 @@ void WeiboBox::sendWeiboWithPicture()
 		QMessageBox::warning(0, tr("Error"), tr("Weibo caontent is limited to 140. now are %1").arg(text.size()));
 
 	d->api->updateStatusWithPicture(text, d->image);
-	connect(d->api, SIGNAL(ok()), SLOT(sendOk()));//TODO: ok message
+    connect(d->api, SIGNAL(sendOk()), SLOT(sendOk()));
+}
+
+void WeiboBox::loginDone()
+{
+    Q_D(WeiboBox);
+    access_token = d->api->accessToken();
 }
 
 } //namespace PhotoKit

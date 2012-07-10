@@ -248,10 +248,12 @@ void UiManager::addImages()
 {
 	QString dir = "/"; //QDir::homePath() is an invalid path on n900, why?
 	QStringList paths;
+    ezlog_debug();
 	QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	d->setFileMode(QFileDialog::ExistingFiles);
 	//d->setOption(QFileDialog::DontUseNativeDialog, false);
-	if (d->exec() == QDialog::Accepted) {
+    ezlog_debug();
+    if (d->exec() == QDialog::Accepted) {
 		paths = d->selectedFiles();
 		delete d;
 	} else {
@@ -269,10 +271,12 @@ void UiManager::addImages()
 void UiManager::addImagesFromDir()
 {
 	QString dir;
-	QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
+    ezlog_debug();
+    QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	//d->setOption(QFileDialog::ShowDirsOnly);
 	d->setFileMode(QFileDialog::DirectoryOnly);
-	if (d->exec() == QDialog::Accepted) {
+    ezlog_debug();
+    if (d->exec() == QDialog::Accepted) {
 		dir = d->directory().absolutePath();
 		delete d;
 	} else {
@@ -363,7 +367,7 @@ void UiManager::shareToWeibo()
 	w.setImage(mPlayPageRoot->imagePath());
 	w.setUser(Config::weiboUser);
 	w.setPassword(Config::weiboPasswd);
-	connect(mOk, SIGNAL(clicked()), &w, SLOT(loginOrSend()));
+    connect(mOk, SIGNAL(clicked()), &w, SLOT(sendWeiboWithPicture()));
 	connect(mCancel, SIGNAL(clicked()), &w, SLOT(reject()));
 	connect(&w, SIGNAL(finished(int)), this, SLOT(okCancelFinish()));
 	w.exec();

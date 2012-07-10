@@ -41,10 +41,11 @@ public:
 
 public slots:
 	void doError(const QString& error);
-	void loginOrSend();
+    //void loginOrSend();
 	//void cancel();
 	void login();
 	void sendWeiboWithPicture();
+    void loginDone();
 
 private slots:
 	void sendOk();

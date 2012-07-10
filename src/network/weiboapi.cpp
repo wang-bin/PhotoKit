@@ -52,6 +52,16 @@ void WeiboApi::setPassword(const QString &passwd)
 	mPasswd = passwd;
 }
 
+void WeiboApi::setAccessToken(const QByteArray &token)
+{
+    mAccessToken = token;
+}
+
+QByteArray WeiboApi::accessToken() const
+{
+    return mAccessToken;
+}
+
 void WeiboApi::login()
 {
 	if (mUser.isEmpty() || mPasswd.isEmpty()) {
@@ -115,6 +125,7 @@ void WeiboApi::sendStatusWithPicture()
 			&& !path.endsWith("jpeg", Qt::CaseInsensitive)
 			&& !path.endsWith("png", Qt::CaseInsensitive)
 			&& !path.endsWith("gif", Qt::CaseInsensitive)) {
+        ezlog_debug();
 		QImage image(path);
 		path = QDir::tempPath() + "/weibotemp" + ".jpg", "JPG";
 		if (!image.save(path)) {
@@ -123,14 +134,18 @@ void WeiboApi::sendStatusWithPicture()
 		}
 	}
 	QFile f(path);
-	if (!f.open(QIODevice::ReadOnly)) {
+    ezlog_debug();
+    if (!f.open(QIODevice::ReadOnly)) {
 		ezlog_debug("open error: %s", qPrintable(f.errorString()));
 		return;
 	}
-	QByteArray data = f.readAll();
+    ezlog_debug();
+    QByteArray data = f.readAll();
 	f.close();
+    ezlog_debug();
 
-	connect(mPut, SIGNAL(ok(QByteArray)), this, SIGNAL(ok()));
+    connect(mPut, SIGNAL(ok(QByteArray)), this, SIGNAL(sendOk()));
+    ezlog_debug();
 
 	mPut->reset();
 	QUrl url(ApiHost + "statuses/upload.json");

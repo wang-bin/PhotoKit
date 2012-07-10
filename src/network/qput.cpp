@@ -146,7 +146,7 @@ void QPut::DoFinished()
 	foreach(QByteArray h, r.rawHeaderList())
 		ezlog_debug("Head [%s] = %s", h.constData(), r.rawHeader(h).constData());
 
-	ezlog_debug("Network finished. Result: %s", res.trimmed().constData());
+	//ezlog_debug("Network finished. Result: %s", res.trimmed().constData());
 	reply->deleteLater();
 	//qApp->exit(!mSuccess);
 }
