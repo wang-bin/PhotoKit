@@ -28,7 +28,6 @@
 #ifndef QT_NO_OPENGL
 	#include <QGLWidget>
 #endif
-#include <QtGui/QMessageBox>
 //#define QT_NO_OPENGL
 
 namespace PhotoKit {

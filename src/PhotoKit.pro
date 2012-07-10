@@ -32,7 +32,6 @@ SOURCES += main.cpp \
     SlidePlayControl.cpp \
     network/weiboapi.cpp \
     network/qput.cpp \
-    network/WeiboDialog.cpp \
     tools/ConfigDialog.cpp \
     Guide.cpp \
     DemoItemAnimation.cpp \
@@ -69,7 +68,6 @@ HEADERS  += \
     SlidePlayControl.h \
     network/weiboapi.h \
     network/qput.h \
-    network/WeiboDialog.h \
     tools/ConfigDialog.h \
     Guide.h \
     DemoItemAnimation.h \

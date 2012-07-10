@@ -29,7 +29,6 @@
 #include <QLayout>
 #include <QSettings>
 #include <QDir>
-#include <QMessageBox>
 #include <QScrollArea>
 #include "Config.h"
 

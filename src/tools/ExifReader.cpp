@@ -26,40 +26,40 @@ namespace PhotoKit {
 
 typedef struct {
 	int tag;
-	QString name;
+	const char* name;
 } tag_info;
 
 
 //TODO: not translated?
 static const tag_info idf0_tags[] = {
-	{EXIF_TAG_MAKE, 			QObject::tr("Manufacturer")}, //QObject::tr()
-	{EXIF_TAG_MODEL,			QObject::tr("Model")},
-//	{EXIF_TAG_SOFTWARE,			QObject::tr("Software")},
-//	{EXIF_TAG_COPYRIGHT,		QObject::tr("Copyright")},
+	{EXIF_TAG_MAKE, 			QT_TR_NOOP("Manufacturer")}, //QT_TR_NOOP()
+	{EXIF_TAG_MODEL,			QT_TR_NOOP("Model")},
+//	{EXIF_TAG_SOFTWARE,			QT_TR_NOOP("Software")},
+//	{EXIF_TAG_COPYRIGHT,		QT_TR_NOOP("Copyright")},
 };
 
 static const tag_info idf_exif_tags[] = {
-	{EXIF_TAG_EXIF_VERSION,			QObject::tr("Exif Verion")},
-	{EXIF_TAG_FNUMBER,				QObject::tr("F-Number")},
-	{EXIF_TAG_EXPOSURE_TIME,		QObject::tr("Exposure time")},
-	{EXIF_TAG_EXPOSURE_MODE,		QObject::tr("Exposure mode")},
-	{EXIF_TAG_FOCAL_LENGTH,			QObject::tr("Focal length")},
-	{EXIF_TAG_FLASH,				QObject::tr("Flash")},
-	{EXIF_TAG_ISO_SPEED_RATINGS,	QObject::tr("ISO Speed Ratings")},
-	{EXIF_TAG_DATE_TIME_ORIGINAL,	QObject::tr("Date and Time (Original)")},
-//	{EXIF_TAG_METERING_MODE,		QObject::tr("Metering mode")},
-	{EXIF_TAG_WHITE_BALANCE,		QObject::tr("White balance")}
+	{EXIF_TAG_EXIF_VERSION,			QT_TR_NOOP("Exif Verion")},
+	{EXIF_TAG_FNUMBER,				QT_TR_NOOP("F-Number")},
+	{EXIF_TAG_EXPOSURE_TIME,		QT_TR_NOOP("Exposure time")},
+	{EXIF_TAG_EXPOSURE_MODE,		QT_TR_NOOP("Exposure mode")},
+	{EXIF_TAG_FOCAL_LENGTH,			QT_TR_NOOP("Focal length")},
+	{EXIF_TAG_FLASH,				QT_TR_NOOP("Flash")},
+	{EXIF_TAG_ISO_SPEED_RATINGS,	QT_TR_NOOP("ISO Speed Ratings")},
+	{EXIF_TAG_DATE_TIME_ORIGINAL,	QT_TR_NOOP("Date and Time (Original)")},
+//	{EXIF_TAG_METERING_MODE,		QT_TR_NOOP("Metering mode")},
+	{EXIF_TAG_WHITE_BALANCE,		QT_TR_NOOP("White balance")}
 };
 
 static const tag_info idf_gps_tags[] = {
-	{EXIF_TAG_GPS_LATITUDE_REF, 	QObject::tr("North or South")},
-	{EXIF_TAG_GPS_LATITUDE,			QObject::tr("Latitude")},
-	{EXIF_TAG_GPS_LONGITUDE_REF,	QObject::tr("East or West")},
-	{EXIF_TAG_GPS_LONGITUDE,		QObject::tr("Longitude")},
-	{EXIF_TAG_GPS_ALTITUDE_REF,		QObject::tr("Altitude refrence")},
-	{EXIF_TAG_GPS_ALTITUDE,			QObject::tr("Altitude")},
-	{EXIF_TAG_GPS_IMG_DIRECTION_REF,QObject::tr("Image Direction Refrence")},
-	{EXIF_TAG_GPS_IMG_DIRECTION,	QObject::tr("Image Direction")}
+	{EXIF_TAG_GPS_LATITUDE_REF, 	QT_TR_NOOP("North or South")},
+	{EXIF_TAG_GPS_LATITUDE,			QT_TR_NOOP("Latitude")},
+	{EXIF_TAG_GPS_LONGITUDE_REF,	QT_TR_NOOP("East or West")},
+	{EXIF_TAG_GPS_LONGITUDE,		QT_TR_NOOP("Longitude")},
+	{EXIF_TAG_GPS_ALTITUDE_REF,		QT_TR_NOOP("Altitude refrence")},
+	{EXIF_TAG_GPS_ALTITUDE,			QT_TR_NOOP("Altitude")},
+	{EXIF_TAG_GPS_IMG_DIRECTION_REF,QT_TR_NOOP("Image Direction Refrence")},
+	{EXIF_TAG_GPS_IMG_DIRECTION,	QT_TR_NOOP("Image Direction")}
 };
 
 
@@ -185,7 +185,7 @@ ExifReader::TagInfo ExifReader::getIFD0Brief() const
 		ExifEntry *entry = exif_content_get_entry(c, (ExifTag)idf0_tags[i].tag);
 		exif_entry_get_value(entry, v.data(), v.size());
 		v.trimmed();
-		info.insert(idf0_tags[i].name, QString::fromUtf8(v.constData())); //libexif use utf8
+		info.insert(QObject::tr(idf0_tags[i].name), QString::fromUtf8(v.constData())); //libexif use utf8
 		//info.insert(QString::fromUtf8(exif_tag_get_title_in_ifd(entry->tag, exif_entry_get_ifd(entry))), QString::fromUtf8(v.constData()));
 	}
 	return info;
@@ -204,7 +204,7 @@ ExifReader::TagInfo ExifReader::getExifBrief() const
 		ExifEntry *entry = exif_content_get_entry(c, (ExifTag)idf_exif_tags[i].tag);
 		exif_entry_get_value(entry, v.data(), v.size());
 		v.trimmed();
-		info.insert(idf_exif_tags[i].name,  QString::fromUtf8(v.constData()));
+		info.insert(QObject::tr(idf_exif_tags[i].name),  QString::fromUtf8(v.constData()));
 		//info.insert(QString::fromUtf8(exif_tag_get_title_in_ifd(entry->tag, exif_entry_get_ifd(entry))), QString::fromUtf8(v.constData()));
 	}
 	return info;
@@ -223,19 +223,19 @@ ExifReader::TagInfo ExifReader::getGpsBrief() const
 		ExifEntry *entry = exif_content_get_entry(c, (ExifTag)idf_gps_tags[i].tag);
 		exif_entry_get_value(entry, v.data(), v.size());
 		v.trimmed();
-		info.insert(idf_gps_tags[i].name,  QString::fromUtf8(v.constData()));
+		info.insert(QObject::tr(idf_gps_tags[i].name),  QString::fromUtf8(v.constData()));
 		//crash
 		//info.insert(QString::fromUtf8(exif_tag_get_title_in_ifd(entry->tag, exif_entry_get_ifd(entry))), QString::fromUtf8(v.constData()));
 	}
 	//TODO: i18n
-	info["Longitude"] = info["Longitude"] + " " + info["East or West"];
-	info.remove("East or West");
-	info["Latitude"] = info["Latitude"] + " " + info["North or South"];
-	info.remove("North or South");
-	info["Image Direction"] = info["Image Direction"] + " " + info["Image Direction Refrence"];
-	info.remove("Image Direction Refrence");
-	info["Altitude"] = info["Altitude"] + " " + info["Altitude refrence"];
-	info.remove("Altitude refrence");
+	info[QObject::tr("Longitude")] = info[QObject::tr("Longitude")] + " " + info[QObject::tr("East or West")];
+	info.remove(QObject::tr("East or West"));
+	info[QObject::tr("Latitude")] = info[QObject::tr("Latitude")] + " " + info[QObject::tr("North or South")];
+	info.remove(QObject::tr("North or South"));
+	info[QObject::tr("Image Direction")] = info[QObject::tr("Image Direction")] + " " + info[QObject::tr("Image Direction Refrence")];
+	info.remove(QObject::tr("Image Direction Refrence"));
+	info[QObject::tr("Altitude")] = info[QObject::tr("Altitude")] + " " + info[QObject::tr("Altitude refrence")];
+	info.remove(QObject::tr("Altitude refrence"));
 	return info;
 }
 

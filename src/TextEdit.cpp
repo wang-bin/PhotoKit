@@ -134,7 +134,7 @@ void TextEdit::storeString()//(int position, int charsRemoved, int charsAdded) /
 		cursor.setPosition(len);
 		setTextCursor(cursor); //FIXME: can't move cursor!
 	}
-	qDebug("string %s", qPrintable(text()));
+    //qDebug("string %s", qPrintable(text()));
 	//QGraphicsTextItem::keyReleaseEvent(event);
 }
 

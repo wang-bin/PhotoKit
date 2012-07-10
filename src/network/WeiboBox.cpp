@@ -46,10 +46,12 @@ public:
 		title->setDefaultTextColor(Qt::white);
 		QFont f;
 		f.setPixelSize(23);
+		f.setBold(true);
 		title->setFont(f);
 		title->setPlainText(QObject::tr("New weibo (Sina)"));
 		qreal w = qApp->desktop()->width()/2 - 44;
 		statusEdit = new TextEdit(central);
+		statusEdit->setFont(f);
 		statusEdit->setDefaultTextColor(Qt::blue);
 		statusEdit->document()->setDocumentMargin(22);
 
