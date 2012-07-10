@@ -18,7 +18,6 @@ void showTip(const QString &text, bool force, int msshow)
 {
     if (Config::showTips || force) {
 		ToolTip::showText(text, UiManager::instance()->view()->scene(), msshow);
-		ezlog_debug("Tip: %s", qPrintable(text));
 	}
 
 }
