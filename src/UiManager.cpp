@@ -72,6 +72,7 @@ static const QString THUMB_PAGE_MENU("thumbPageMenu");
 static const QString PLAY_PAGE_MENU("playPageMenu");
 static const QString CONFIG_MENU("ConfigMenu");
 static const QString OK_CANCEL_MENU("OkCancel");
+static const QString BACK_MENU("GoBack");
 
 static void initTranslation() {
     WEIBO_SHARE = QObject::tr("Weibo share");
@@ -248,11 +249,9 @@ void UiManager::addImages()
 {
 	QString dir = "/"; //QDir::homePath() is an invalid path on n900, why?
 	QStringList paths;
-    ezlog_debug();
 	QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	d->setFileMode(QFileDialog::ExistingFiles);
 	//d->setOption(QFileDialog::DontUseNativeDialog, false);
-    ezlog_debug();
     if (d->exec() == QDialog::Accepted) {
 		paths = d->selectedFiles();
 		delete d;
@@ -271,11 +270,9 @@ void UiManager::addImages()
 void UiManager::addImagesFromDir()
 {
 	QString dir;
-    ezlog_debug();
     QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	//d->setOption(QFileDialog::ShowDirsOnly);
 	d->setFileMode(QFileDialog::DirectoryOnly);
-    ezlog_debug();
     if (d->exec() == QDialog::Accepted) {
 		dir = d->directory().absolutePath();
 		delete d;
@@ -374,12 +371,6 @@ void UiManager::shareToWeibo()
 	mView->setCanTransform(true);
 }
 
-void UiManager::setup()
-{
-	ConfigDialog d;
-	d.exec();
-}
-
 void UiManager::showHelp()
 {
     Tools::showTip(HELP_TEXT, true);
@@ -393,7 +384,7 @@ void UiManager::showAbout()
 void UiManager::updateThumbItemAt(int index)
 {
 	int show_index = index + mThumbsCount;
-	//ezlog_debug("updateing thumb at %d. show on %d", index, show_index);
+    //qDebug("updateing thumb at %d. show on %d", index, show_index);
 	int col = show_index / Config::thumbRows;
 	int row = show_index % Config::thumbRows;
 
@@ -416,29 +407,7 @@ void UiManager::updateDisplayedThumbList()
 {
 	mPlayControl->setImages(*ThumbRecorder::displayedThumbs()); //current record
 	mThumbsCount = ThumbRecorder::displayedThumbs()->size();
-	ezlog_debug("total %d", mThumbsCount);
-}
-
-void UiManager::popupMenu(const QPoint& pos)
-{
-	QMenu menu;
-	if (page == UiManager::ThumbPage) {
-		menu.addAction(tr("Clear"), this, SLOT(clearThumbs()));
-		menu.addAction(tr("Add images"), this, SLOT(addImages()));
-		menu.addAction(tr("Add dir"), this, SLOT(addImagesFromDir()));
-	} else if (page == UiManager::PlayPage) {
-		menu.addAction(tr("Information"), this, SLOT(showCurrentImageInfo()));
-		menu.addAction(tr("Weibo share"), this, SLOT(shareToWeibo()));
-		if (mPlayControl->isRunning())
-			menu.addAction(tr("Stop slide"), this, SLOT(stopSlide()));
-		else
-			menu.addAction(tr("Start slide"), this, SLOT(startSlide()));
-	}
-	menu.addAction(tr("Setup"), this, SLOT(setup()));
-	menu.addAction(tr("Help"), this, SLOT(showHelp()));
-    //menu.addAction(tr("About"), this, SLOT(showAbout()));
-    menu.addAction(tr("Exit"), qApp, SLOT(quit()));
-	menu.exec(pos);
+    qDebug("total %d", mThumbsCount);
 }
 
 void UiManager::gotoPage(PageType pageType, const QString& image)
@@ -481,9 +450,7 @@ void UiManager::clickMenuItem()
 {
 	//common menu items
 	Button *button = qobject_cast<Button*>(sender());
-	ezlog_debug();
 	QString menuText(button->text()); //plain text
-	ezlog_debug();
     if (menuText == QUIT) {
 		mThumbTask->stop();
 		ThumbRecorder::instance()->save();
@@ -493,12 +460,11 @@ void UiManager::clickMenuItem()
 			hideMenu(THUMB_PAGE_MENU);
 		else if (page == PlayPage)
 			hideMenu(PLAY_PAGE_MENU);
-		showMenu(OK_CANCEL_MENU);
+        showMenu(BACK_MENU);
 		showMenu(CONFIG_MENU);
 		//TODO: cancel the setup
-		connect(mOk, SIGNAL(clicked()), this, SLOT(hideConfigMenu()));
-		connect(mCancel, SIGNAL(clicked()), this, SLOT(hideConfigMenu()));
-		if (score->hasQueuedMovies()){
+        connect(mBack, SIGNAL(clicked()), this, SLOT(hideConfigMenu()));
+        if (score->hasQueuedMovies()){
 			score->playQue();
 		}
 		return;
@@ -579,19 +545,19 @@ void UiManager::okCancelFinish()
 	} else if (page == ThumbPage) {
 		showMenu(THUMB_PAGE_MENU);
 	}
-	disconnect(this, SLOT(okCancelFinish()));
+    disconnect(this, SLOT(okCancelFinish()));
 }
 
 void UiManager::hideConfigMenu()
 {
-	hideMenu(OK_CANCEL_MENU);
+    hideMenu(BACK_MENU);
 	if (page == PlayPage) {
 		showMenu(PLAY_PAGE_MENU);
 	} else if (page == ThumbPage) {
 		showMenu(THUMB_PAGE_MENU);
 	}
 	hideMenu(CONFIG_MENU);
-	disconnect(this, SLOT(hideConfigMenu()));
+    disconnect(this, SLOT(hideConfigMenu())); //
 }
 
 //TODO: setData() data()
@@ -664,6 +630,15 @@ void UiManager::createMenus()
 
 	createOkCancelMovie(mOk, 0, okCancelMenuMovieIn, okCancelMenuMovieOut);
 	createOkCancelMovie(mCancel, 1, okCancelMenuMovieIn, okCancelMenuMovieOut);
+
+    static Movie *backMenuMovieIn = score->insertMovie(BACK_MENU);
+    static Movie *backMenuMovieOut = score->insertMovie(BACK_MENU + " -out");
+    mBack = new Button("<p style='color:white;font-size:24px'>" + tr("Back") + "</p>");
+    mBack->setColor(QColor(100, 40, 8));
+    mBack->resize(222, 55);
+    mView->scene()->addItem(mBack);
+
+    createBackButtonMovie(mBack, backMenuMovieIn, backMenuMovieOut);
 }
 
 void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinished, Movie *movieIn, Movie *movieCollapse, Movie *movieOut, Movie *movieShake)
@@ -796,9 +771,14 @@ void UiManager::createOkCancelMovie(Button *item, int index, Movie *movieIn, Mov
 	movieOut->append(anim);
 }
 
+
+void UiManager::createBackButtonMovie(Button *item, Movie *movieIn, Movie *movieOut)
+{
+    createOkCancelMovie(item, 1, movieIn, movieOut);
+}
+
 void UiManager::showMenu(const QString &menu)
 {
-    ezlog_debug();
 	score->queueMovie(menu);
     //score->queueMovie(menu + " -out", Score::NEW_ANIMATION_ONLY);
     //score->queueMovie(menu + " -buttons -out", Score::NEW_ANIMATION_ONLY);

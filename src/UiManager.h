@@ -60,7 +60,6 @@ public:
     void showImagesFromThumb(const QString& dir, bool yes = true);
     void showImagesFromThumb(const QStringList& paths, bool yes = true);
 
-	void popupMenu(const QPoint& pos);
 	void gotoPage(PageType pageType, const QString& image = QString());
 
 	void tryMoveCenter(QGraphicsItem* item);
@@ -78,7 +77,6 @@ public slots:
 	void stopSlide();
 	void showCurrentImageInfo();
 	void shareToWeibo();
-	void setup();
 	void showHelp();
     void showAbout();
 
@@ -96,6 +94,7 @@ private:
 	void createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinished, Movie* movieIn, Movie *movieCollapse, Movie* movieOut, Movie *movieShake = 0);
 	void createConfigMenuMovie(Button *item, int i, Movie* movieIn, Movie* movieOut);
 	void createOkCancelMovie(Button *item, int index, Movie* movieIn, Movie *movieOut); //index 0: from top
+    void createBackButtonMovie(Button *item, Movie* movieIn, Movie *movieOut);
 	void showMenu(const QString& menu);
     void hideMenu(const QString& menu);
 
@@ -111,6 +110,7 @@ private:
 	Score *score;
 
 	Button *mOk, *mCancel; //for connecting signals and slots with dialogs
+    Button *mBack;
 
 };
 } //namespace PhotoKit
