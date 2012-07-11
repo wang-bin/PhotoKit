@@ -23,9 +23,8 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtGui/QImage>
-
 #include "qput.h"
-#include "ezlog.h"
+
 namespace PhotoKit {
 
 const QString OAuthUrl = "https://api.weibo.com/oauth2/access_token";
@@ -90,7 +89,7 @@ void WeiboApi::updateStatusWithPicture(const QString &status, const QString &fil
 	mStatus = status;
 	mFile = fileName;
 	if (mAccessToken.isEmpty()) {
-		ezlog_debug("Not login.");
+        qDebug("Not login.");
 		connect(this, SIGNAL(loginOk()), SLOT(sendStatusWithPicture()));
 		login();
 		return;
@@ -110,7 +109,7 @@ void WeiboApi::parseOAuth2ReplyData(const QByteArray &data)
 	p0 = d.indexOf(":", i) + 2;
 	p1 = d.indexOf("\"", p0);
 	mUid = d.mid(p0, p1 - p0);
-	ezlog_debug("token=%s, uid=%s", mAccessToken.constData(), mUid.constData());
+    qDebug("token=%s, uid=%s", mAccessToken.constData(), mUid.constData());
 
 	disconnect(this, SLOT(parseOAuth2ReplyData(QByteArray)));
 	emit loginOk();
@@ -118,14 +117,13 @@ void WeiboApi::parseOAuth2ReplyData(const QByteArray &data)
 
 void WeiboApi::sendStatusWithPicture()
 {
-	ezlog_debug("update weibo with picture");
+    qDebug("update weibo with picture");
 	QString path(mFile);
 	//TODO: gif
 	if (!path.endsWith("jpg", Qt::CaseInsensitive)
 			&& !path.endsWith("jpeg", Qt::CaseInsensitive)
 			&& !path.endsWith("png", Qt::CaseInsensitive)
 			&& !path.endsWith("gif", Qt::CaseInsensitive)) {
-        ezlog_debug();
 		QImage image(path);
 		path = QDir::tempPath() + "/weibotemp" + ".jpg", "JPG";
 		if (!image.save(path)) {
@@ -134,18 +132,14 @@ void WeiboApi::sendStatusWithPicture()
 		}
 	}
 	QFile f(path);
-    ezlog_debug();
     if (!f.open(QIODevice::ReadOnly)) {
-		ezlog_debug("open error: %s", qPrintable(f.errorString()));
+        qDebug("open error: %s", qPrintable(f.errorString()));
 		return;
 	}
-    ezlog_debug();
     QByteArray data = f.readAll();
 	f.close();
-    ezlog_debug();
 
     connect(mPut, SIGNAL(ok(QByteArray)), this, SIGNAL(sendOk()));
-    ezlog_debug();
 
 	mPut->reset();
 	QUrl url(ApiHost + "statuses/upload.json");
