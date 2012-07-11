@@ -53,6 +53,9 @@ ToolTip::ToolTip(const QString& text, QGraphicsScene* scene, QGraphicsItem *pare
 ToolTip::ToolTip(const QImage& image, QGraphicsScene* scene, QGraphicsItem *parent) :
 	QGraphicsObject(parent),mTextChanged(false),mScene(scene)
 {
+    mTextItem = new QGraphicsTextItem(this);
+    mTextItem->setDefaultTextColor(Qt::white);
+    mTextItem->document()->setDocumentMargin(mMargin);
 	setFlag(QGraphicsItem::ItemIgnoresTransformations);
 	setZValue(100);
 	mScene->addItem(this);
