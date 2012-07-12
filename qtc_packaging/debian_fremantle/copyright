@@ -1,38 +1,36 @@
-This package was debianized by wbin <wbin@unknown> on
-Sat, 23 Jun 2012 21:41:07 +0800.
+This package was debianized by WangBin <wbsecg1@gmail.com> on
+Wed, 27 Jun 2012 10:00:42 +0800.
 
-It was downloaded from <url://example.com>
+It was downloaded from <https://github.com/wang-bin/PhotoKit>
 
 Upstream Author(s):
 
-    <put author's name and email here>
-    <likewise for another author>
+	WangBin aka. LucasWang, wbsecg1@gmail.com
 
 Copyright:
 
-    <Copyright (C) YYYY Name OfAuthor>
-    <likewise for another author>
+	<Copyright (C) 2012 WangBin>
 
 License:
 
-    This package is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+	This package is free software; you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation; either version 2 of the License, or
+	(at your option) any later version.
 
-    This package is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	This package is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this package; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+	You should have received a copy of the GNU General Public License
+	along with this package; if not, write to the Free Software
+	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
 On Debian systems, the complete text of the GNU General
 Public License can be found in `/usr/share/common-licenses/GPL'.
 
-The Debian packaging is (C) 2012, wbin <wbin@unknown> and
+The Debian packaging is (C) 2012, WangBin <wbsecg1@gmail.com> and
 is licensed under the GPL, see above.
 
 
