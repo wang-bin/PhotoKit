@@ -17,11 +17,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 
+isEmpty(COMMON_PRI_INCLUDED): { #begin COMMON_PRI_INCLUDED
+
 CONFIG += profile
 #profiling, -pg is not supported for msvc
 debug:!*msvc*:profile {
-        QMAKE_CXXFLAGS_DEBUG += -pg
-        QMAKE_LFLAGS_DEBUG += -pg
+		QMAKE_CXXFLAGS_DEBUG += -pg
+		QMAKE_LFLAGS_DEBUG += -pg
 		QMAKE_CXXFLAGS_DEBUG = $$unique(QMAKE_CXXFLAGS_DEBUG)
 		QMAKE_LFLAGS_DEBUG = $$unique(QMAKE_LFLAGS_DEBUG)
 }
@@ -52,29 +54,29 @@ unix {
 
 #*arm*: _ARCH = $${_ARCH}_arm
 contains(QT_ARCH, arm.*) {
-        _ARCH = $${_ARCH}_$${QT_ARCH}
+		_ARCH = $${_ARCH}_$${QT_ARCH}
 }
 *64:   _ARCH = $${_ARCH}_x64
 *llvm*: _EXTRA = _llvm
 #*msvc*:
 
 win32-msvc* {
-        #Don't warn about sprintf, fopen etc being 'unsafe'
-        DEFINES += _CRT_SECURE_NO_WARNINGS
+		#Don't warn about sprintf, fopen etc being 'unsafe'
+		DEFINES += _CRT_SECURE_NO_WARNINGS
 }
 
 #################################functions#########################################
 defineReplace(cleanPath) {
-    win32:1 ~= s|\\\\|/|g
-    contains(1, ^/.*):pfx = /
-    else:pfx =
-    segs = $$split(1, /)
-    out =
-    for(seg, segs) {
-        equals(seg, ..):out = $$member(out, 0, -2)
-        else:!equals(seg, .):out += $$seg
-    }
-    return($$join(out, /, $$pfx))
+	win32:1 ~= s|\\\\|/|g
+	contains(1, ^/.*):pfx = /
+	else:pfx =
+	segs = $$split(1, /)
+	out =
+	for(seg, segs) {
+		equals(seg, ..):out = $$member(out, 0, -2)
+		else:!equals(seg, .):out += $$seg
+	}
+	return($$join(out, /, $$pfx))
 }
 
 #Acts like qtLibraryTarget. From qtcreator.pri
@@ -118,29 +120,26 @@ defineReplace(qtSharedLib) {
 	unset(LIB_FULLNAME)
 	LIB_FULLNAME = $$qtLibName($$1, $$2)
 	win32: LIB_FULLNAME = $$member(LIB_FULLNAME, 0).dll
-	else: LIB_FULLNAME = lib$$member(LIB_FULLNAME, 0).so
-	#macx: TARGET_BASEPATH = $${TARGET_BASEPATH}.$${QMAKE_EXTENSION_SHLIB} #default_post.prf
+	else {
+		macx|ios: LIB_FULLNAME = lib$$member(LIB_FULLNAME, 0).$${QMAKE_EXTENSION_SHLIB} #default_post.prf
+		else: LIB_FULLNAME = lib$$member(LIB_FULLNAME, 0).so
+	}
 	return($$LIB_FULLNAME)
 }
 
 defineReplace(qtLongName) {
 	unset(LONG_NAME)
-        LONG_NAME = $$1$${_OS}$${_ARCH}$${_EXTRA}
+		LONG_NAME = $$1$${_OS}$${_ARCH}$${_EXTRA}
 	return($$LONG_NAME)
 }
 
-
-
 ##############################paths####################################
-#message(pwd=$$PWD)			#this file dir
-#message(out pwd=$$OUT_PWD)	#Makefile dir
-#message(pro file=$$_PRO_FILE_)
-#message(pro file pwd=$$_PRO_FILE_PWD_)
-BUILD_DIR=$$PWD
+#TRANSLATIONS += i18n/$${TARGET}_zh-cn.ts i18n/$${TARGET}_zh_CN.ts
 
+BUILD_DIR=$$PWD
 isEqual(TEMPLATE, app) {
 	DESTDIR = $$BUILD_DIR/bin
-	!isEqual(COMMON_PRI_INCLUDED, 1): TARGET = $$qtLongName($$TARGET)
+	TARGET = $$qtLongName($$TARGET)
 	EXE_EXT =
 	win32: EXE_EXT = .exe
 	CONFIG(release, debug|release):
@@ -155,6 +154,10 @@ RCC_DIR = $$BUILD_DIR/.rcc/$${QT_VERSION}
 UI_DIR  = $$BUILD_DIR/.ui/$${QT_VERSION}
 
 !build_pass:message(target: $$DESTDIR/$$TARGET)
+
 COMMON_PRI_INCLUDED = 1
-#before target name changed
+
+} #end COMMON_PRI_INCLUDED
+	#before target name changed
 #TRANSLATIONS += i18n/$${TARGET}_zh-cn.ts #i18n/$${TARGET}_zh_CN.ts
+
