@@ -86,19 +86,19 @@ void Score::prepare(Movie *movie, RUN_MODE runMode, LOCK_MODE lockMode)
 void Score::play(Movie *movie, RUN_MODE runMode)
 {
     if (runMode == NEW_ANIMATION_ONLY){
-		ezlog_debug();
+        //ezlog_debug();
 		for (int i=0; i<movie->size(); ++i)
             if (movie->at(i)->notOwnerOfItem())
                 movie->at(i)->play(true);
     }
     else if (runMode == ONLY_IF_VISIBLE){
-		ezlog_debug();
+        //ezlog_debug();
 		for (int i=0; i<movie->size(); ++i)
 			if (movie->at(i)->baseAnimationItem()->isVisible())
                 movie->at(i)->play(runMode == FROM_START);
     }
     else {
-		ezlog_debug();
+        //ezlog_debug();
 		for (int i=0; i<movie->size(); ++i)
             movie->at(i)->play(runMode == FROM_START);
     }
@@ -119,27 +119,28 @@ void Score::queueMovie(const QString &indexName, RUN_MODE runMode, LOCK_MODE loc
 {
     MovieIndex::iterator movieIterator = this->index.find(indexName);
     if (movieIterator == this->index.end()){
-		if (Config::verbose)
-            qDebug() << "Queuing movie:" << indexName << "(does not exist)";
+		//if (Config::verbose)
+	   //     qDebug() << "Queuing movie:" << indexName << "(does not exist)";
         return;
     }
 
     Movie *movie = *movieIterator;
     this->prepare(movie, runMode, lockMode);
     this->playList.append(PlayListMember(movie, int(runMode)));
-	if (Config::verbose)
-        qDebug() << "Queuing movie:" << indexName;
+    //if (Config::verbose)
+    //    qDebug() << "Queuing movie:" << indexName;
 }
 
 void Score::playQue()
 {
-	ezlog_debug();
+    //ezlog_debug();
 	int movieCount = this->playList.size();
     for (int i=0; i<movieCount; i++)
         this->play(this->playList.at(i).movie, RUN_MODE(this->playList.at(i).runMode));
     this->playList.clear();
+    /*
 	if (Config::verbose)
-        qDebug() << "********* Playing que *********";
+        qDebug() << "********* Playing que *********";*/
 }
 
 void Score::insertMovie(const QString &indexName, Movie *movie)

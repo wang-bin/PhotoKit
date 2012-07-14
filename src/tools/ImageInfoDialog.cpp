@@ -127,6 +127,7 @@ void ImageInfoDialog::showInfo()
 	d->text->document()->setTextWidth(size().width());
 	d->text->setHtml(d->info[b->data(0).toInt()]);
 	centralWidget()->resize(d->text->document()->size());
+	prepareGeometryChange();
 	resize(d->size());
 }
 
@@ -136,6 +137,7 @@ void ImageInfoDialog::showBaseInfo()
 	d->text->document()->setTextWidth(size().width());
 	d->text->setHtml(d->info[0]);
 	centralWidget()->resize(d->text->document()->size());
+	prepareGeometryChange();
 	resize(d->size());
 
 	flipShow();

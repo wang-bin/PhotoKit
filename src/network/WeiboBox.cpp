@@ -29,7 +29,6 @@
 #include "tools/Tools.h"
 #include "weiboapi.h"
 #include "Config.h"
-#include "ezlog.h"
 
 namespace PhotoKit {
 
@@ -62,7 +61,7 @@ public:
         qreal h = qApp->desktop()->height()*0.618;
 		statusEdit->resize(w, h);
 		y += statusEdit->size().height() + 12;
-        qreal hh = qMin<qreal>(qApp->desktop()->height()*0.314/2, 66); //TODO: calculate the line edit height
+		qreal hh = qMin<qreal>(qApp->desktop()->height()*0.314/2, 44); //TODO: calculate the line edit height
 		f.setBold(true);
 		QGraphicsTextItem *user = new QGraphicsTextItem(central);
         f.setPixelSize(20);
@@ -160,7 +159,7 @@ void WeiboBox::login()
 {
 	Q_D(WeiboBox);
 	if (d->userEdit->text().isEmpty() || d->passwdEdit->text().isEmpty()) {
-		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:22px;'>"
 					   + tr("User name and password can't be empty") + "</p>", true, 3000);
 		return;
 	}
@@ -181,7 +180,7 @@ void WeiboBox::sendWeiboWithPicture()
     QSettings cfg(Config::configPath, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
     if (d->userEdit->text().isEmpty() && d->passwdEdit->text().isEmpty())
-		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:22px;'>"
 					   + tr("User name and password can't be empty") + "</p>", true, 3000);
 	//TODO: check whether the user changed. if yes, set empty token and login as new account
 	QString userNow = d->userEdit->text();
@@ -200,12 +199,12 @@ void WeiboBox::sendWeiboWithPicture()
 	QString text = d->statusEdit->text();
 	qDebug("content: %s", qPrintable(text));
 	if (text.isEmpty()) {
-		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:22px;'>"
 					   + tr("Weibo can't be empty") + "</p>", true, 3000);
 		return;
 	}
 	if (text.size() > 140) {
-		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:18px;'>"
+		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:22px;'>"
 					   + tr("Weibo caontent is limited to 140. now are %1").arg(text.size()) + "</p>", true, 3000);
 		return;
 	}

@@ -67,8 +67,8 @@ PhotoKitView::PhotoKitView(QWidget *parent) :
     //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setTransformationAnchor(QGraphicsView::AnchorViewCenter);
     setResizeAnchor(QGraphicsView::AnchorUnderMouse);
-	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn); //TODO: always on when debug.
-	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); //TODO: always on when debug.
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     //setBackgroundBrush(QBrush(Qt::gray));
 	mScene = new PhotoKitScene(this);
 
@@ -384,8 +384,9 @@ bool PhotoKitView::viewportEvent(QEvent *event)
                 } else if (UiManager::page == UiManager::PlayPage) {
                     QGraphicsItem *item =  UiManager::instance()->currentPageRootItem();
 					//qreal s0 = item->transform().m11();
-                    qreal s = currentScaleFactor > 1 ? 1.1:0.9;
+					qreal s = currentScaleFactor > 1 ? 1.1:0.9; //TODO: smooth and slow
                     QRectF r = item->boundingRect();
+					//TODO: why translate?
                     item->setTransform(QTransform().translate(r.width()/2, r.height()/2)
                                        .scale(s, s).translate(-r.width()/2, -r.height()/2), true);
                 }

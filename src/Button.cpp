@@ -122,7 +122,7 @@ protected:
     {
         QRect scaledRect;
         scaledRect = matrix.mapRect(QRect(0, 0, logicalSize.width(), logicalSize.height()));
-		qDebug("type=%d w=%d h=%d %d %d", type, scaledRect.width(), scaledRect.height(), highlighted, pressed);
+        //qDebug("type=%d w=%d h=%d %d %d", type, scaledRect.width(), scaledRect.height(), highlighted, pressed);
         QImage *image = new QImage(scaledRect.width(), scaledRect.height(), QImage::Format_ARGB32_Premultiplied);
         image->fill(QColor(0, 0, 0, 0).rgba());
         QPainter painter(image);
@@ -138,9 +138,9 @@ protected:
         brush.setSpread(QLinearGradient::PadSpread);
 		QColor highlight(245, 245, 245, 168);
 		QColor shadow(0, 0, 0, 123);
-		QColor sunken(c.red() - 33, c.green() -33, c.blue() -40, 66);//(220, 220, 220, 99);
+        QColor sunken(qMax(c.red() - 33, c.red()), qMax(c.green() -33, c.green()), qMax(c.blue() -40, c.blue()), 66);//(220, 220, 220, 99);
 		QColor normal1(c.red(), c.green(), c.blue(), 123);  //(255, 255, 245, 123);
-		QColor normal2(c.red() - 3, c.green() -5, c.blue() -10, 66);//(255, 255, 235, 66);
+        QColor normal2(qMax(c.red() - 3, c.red()), qMax(c.green() -5, c.green()), qMax(c.blue() -10, c.blue()), 66);//(255, 255, 235, 66);
 /*
         if (this->mShape == Button::RectShape){
 			normal1 = QColor(200, 170, 160, 121);
