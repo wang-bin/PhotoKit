@@ -2,6 +2,10 @@
 QT       += core gui opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+#else { #from qt5
+#	INCLUDEPATH += json
+#	include(json/json.pri)
+#}
 
 TARGET = PhotoKit
 TEMPLATE = app
@@ -11,7 +15,7 @@ TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$$
 !include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
 !include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
-include($${PROJECTROOT}/common.pri)
+load($${PROJECTROOT}/common.pri)
 
 INCLUDEPATH += $$PWD
 SOURCES += main.cpp \
@@ -36,7 +40,6 @@ SOURCES += main.cpp \
     Guide.cpp \
     DemoItemAnimation.cpp \
     tools/ToolTip.cpp \
-    network/ImageSearcher.cpp \
     ToolBar.cpp \
     Button.cpp \
     ProgressBarItem.cpp \
@@ -47,7 +50,9 @@ SOURCES += main.cpp \
     Dialog.cpp \
     tools/ImageInfoDialog.cpp \
     network/WeiboBox.cpp \
-    TextEdit.cpp
+    TextEdit.cpp \
+    ImageProvider.cpp \
+    network/GoogleImageSearcher.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -72,7 +77,6 @@ HEADERS  += \
     Guide.h \
     DemoItemAnimation.h \
     tools/ToolTip.h \
-    network/ImageSearcher.h \
     ToolBar.h \
     Button.h \
     ProgressBarItem.h \
@@ -84,7 +88,11 @@ HEADERS  += \
     tools/ImageInfoDialog.h \
     Dialog_p.h \
     network/WeiboBox.h \
-    TextEdit.h
+    TextEdit.h \
+    ImageProvider.h \
+    ImageProvider_p.h \
+    network/GoogleImageSearcher.h \
+    ImageBaseInfo.h
 
 #CONFIG += mobility
 MOBILITY = 
@@ -130,3 +138,18 @@ contains(MEEGO_EDITION,harmattan) {
     desktopfile.path = /usr/share/applications
     INSTALLS += desktopfile
 }
+
+
+message($$_PRO_FILE_PWD_)
+#message($$_PRO_FILE_)
+message($$OUT_PWD)
+message($$PWD)
+message($$IN_PWD)
+message($$_FILE_)
+message($$_LINE_)
+message($$QMAKE_HOST.version)
+message($$QMAKE_HOST.name)
+message($$QMAKE_HOST.os)
+message($$QMAKE_HOST.arch)
+message($$BUILD_NAME)
+

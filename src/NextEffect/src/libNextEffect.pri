@@ -114,15 +114,6 @@ QMAKE_LFLAGS_RPATH += #will append to rpath dir
 			DEPLOYMENT += addFiles
 		}
 	}
-	unix:!symbian {
-		maemo5 {
-			target.path = /opt/usr/lib
-		} else {
-			target.path = /usr/lib
-		}
-		INSTALLS += target
-	}
-
 }
 
 unset(LIB_VERSION)
