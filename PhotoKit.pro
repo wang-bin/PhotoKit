@@ -6,7 +6,7 @@
 
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS = libezlog libprogramoptions libNextEffect photokit
+SUBDIRS = libezlog libprogramoptions libNextEffect photokit test
 
 libezlog.file = src/ezlog/src/libezlog.pro
 libprogramoptions.file = src/ProgramOptions/src/libProgramOptions.pro
