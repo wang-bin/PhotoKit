@@ -66,10 +66,12 @@ private:
 
 	bool mPressed;
 	PhotoKitScene *mScene;
-	qreal mScale;
+	/*qreal &mScale;
+	qreal mScaleS, mScaleT; //search page, thumb page
 	//qreal mXRot, mYRot, mZRot;
-	qreal mX, mY;
-	//qreal mHShear, mVShear;
+	qreal &mX, &mY;
+	qreal mXS, mYS, mXT, mYT; //search page
+	//qreal mHShear, mVShear;*/
 	QPointF mMousePos;
 	//QTime mPressTime; //not required. use movement distance is enough
 

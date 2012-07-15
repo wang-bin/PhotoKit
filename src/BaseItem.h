@@ -108,6 +108,9 @@ private:
     static QHash<QString, SharedImage *> sharedImageHash;
     static QMatrix matrix;
     ItemAnimation *mItemAnimation;
+	friend class PhotoKitView;
+	qreal mScale;
+	qreal mX, mY;
 };
 
 } //namespace PhotoKit

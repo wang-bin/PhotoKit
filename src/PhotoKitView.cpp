@@ -60,7 +60,7 @@ static const qreal yshear_min = -0.1;
 static const qreal yshear_max = 0.1;
 static const int ani_duration = 1400;
 PhotoKitView::PhotoKitView(QWidget *parent) :
-	QGraphicsView(parent),mPressed(false),mScale(1.0),mX(0),mY(0),mMachine(0),mCanTransform(true)
+	QGraphicsView(parent),mPressed(false),mMachine(0),mCanTransform(true)
 {
 	//setDragMode(QGraphicsView::NoDrag);
     //setAlignment(Qt::AlignBottom);
@@ -111,16 +111,19 @@ void PhotoKitView::setAnimationDuration(int ms)
 
 void PhotoKitView::setInitialPos(qreal x, qreal y)
 {
-    mX = x;
-    mY = y;
+	BaseItem *item = UiManager::instance()->currentPageRootItem();
+	item->mX = x;
+	item->mY = y;
     translate(x, y);
 }
 
 //params x, y and scale are the final value. final rotation and shear params are the values in animation, final values are 0
 void PhotoKitView::smartTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
 {
+	BaseItem *item = UiManager::instance()->currentPageRootItem();
+	//TODO: different page has different machine
 	//ezlog_debug();
-	qreal x0 = mX, y0 = mY;
+	qreal x0 = item->mX, y0 = item->mY;
 	qreal s0 = scale0;
 	qreal xr0 = 0, yr0 = 0;
 	qreal hs0 = 0, vs0 = 0;
@@ -161,7 +164,7 @@ void PhotoKitView::doTransform(const QTransform& m)
 		ezlog_debug("thumb page transform");*/
     //UiManager::instance()->currentPageRootItem()->setTransformOriginPoint(UiManager::instance()->currentPageRootItem()->boundingRect().center());
 
-    QGraphicsItem *item = UiManager::instance()->currentPageRootItem();
+	BaseItem *item = UiManager::instance()->currentPageRootItem();
 /*    qreal sx0 = item->transform().m11(), sy0 = item->transform().m22();
     if (sx0 != m.m11() || sy0 != m.m22()) {
         QRectF r = item->boundingRect();
@@ -239,16 +242,17 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 		QGraphicsView::mouseMoveEvent(e);
 		return;
 	}
-	QPointF delta = e->posF() - mMousePos;
 	if (mPressed) {
-		if (UiManager::page == UiManager::ThumbPage) {
-			mX += delta.x() * 4;
-			mY += delta.y();
+		QPointF delta = e->posF() - mMousePos;
+		BaseItem* item = UiManager::instance()->currentPageRootItem();
+		if (UiManager::page == UiManager::ThumbPage || UiManager::page == UiManager::SearchPage) {
+			item->mX += delta.x() * 4;
+			item->mY += delta.y();
 			//TODO: move out visible area effect
-			mX = qMax(mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
-			mX = qMin(mX, qreal(Config::contentHMargin));
-			mY = qMax(mY, qreal(0.0));
-			mY = qMin(mY, qreal(Config::contentVMargin));
+			item->mX = qMax(item->mX, -sceneRect().width() +  rect().width()); //? +qreal(Config::contentHMargin). desktop
+			item->mX = qMin(item->mX, qreal(Config::contentHMargin));
+			item->mY = qMax(item->mY, qreal(0.0));
+			item->mY = qMin(item->mY, qreal(Config::contentVMargin));
 			//ezlog_debug("dx dy %d %d", delta.x(), delta.y());
 			qreal hs = delta.x()/100;
 			qreal vs = delta.y()/100;
@@ -267,13 +271,13 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 				yrot = qMax(yrot, yrot_min);
 				vs = qMax(vs, yshear_min);
 			}
-			//ezlog_debug("mX=%f my=%f", mX, mY);
+			//ezlog_debug("item->mX=%f my=%f", item->mX, item->mY);
 			//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
 			setAnimationDuration(ani_duration);
-			smartTransform(mX, mY, mScale, mScale, xrot, yrot, 0, vs, hs);
+			smartTransform(item->mX, item->mY, item->mScale, item->mScale, xrot, yrot, 0, vs, hs);
 		} else if (UiManager::page == UiManager::PlayPage) {
 			//TODO: animation, don't move out of the viewport
-			UiManager::instance()->currentPageRootItem()->setTransform(QTransform().translate(delta.x(), delta.y()), true);
+			item->setTransform(QTransform().translate(delta.x(), delta.y()), true);
 		}
 		mMousePos = e->posF();
 		//ezlog_debug("move in view");
@@ -318,19 +322,20 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 	int numDegrees = event->delta() / 8;
 	int numSteps = numDegrees / 15;
 	//ezlog_debug("wheel steps: %d", numSteps); //1
-    if (UiManager::page == UiManager::ThumbPage) {
-        qreal scale0 = mScale;
+	//TODO: use page depend scale factor
+	BaseItem* item = UiManager::instance()->currentPageRootItem();
+	if (UiManager::page == UiManager::ThumbPage || UiManager::page == UiManager::SearchPage) {
+		qreal scale0 = item->mScale;
         if (numSteps > 0) {
-            mScale += 0.12;
-            mScale = qMin(scale_max, mScale);
+			item->mScale += 0.12;
+			item->mScale = qMin(scale_max, item->mScale);
         } else {
-            mScale -= 0.12;
-            mScale = qMax(scale_min, mScale);
+			item->mScale -= 0.12;
+			item->mScale = qMax(scale_min, item->mScale);
         }
         setAnimationDuration(ani_duration);
-        smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0);
+		smartTransform(item->mX, item->mY, scale0, item->mScale, 0, 0, 0, 0, 0);
     } else if (UiManager::page == UiManager::PlayPage) {
-        QGraphicsItem *item =  UiManager::instance()->currentPageRootItem();
         qreal s = numSteps > 0 ? 1.1:0.9;
         QRectF r = item->boundingRect();
         item->setTransform(QTransform().translate(r.width()/2, r.height()/2)
@@ -370,19 +375,20 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 					/ QLineF(touchPoint0.startPos(), touchPoint1.startPos()).length();
 			if (touchEvent->touchPointStates() & Qt::TouchPointMoved
 					|| touchEvent->touchPointStates() & Qt::TouchPointReleased) {
-                if (UiManager::page == UiManager::ThumbPage) {
-                    qreal scale0 = mScale;
+				BaseItem* item = UiManager::instance()->currentPageRootItem();
+				if (UiManager::page == UiManager::ThumbPage
+						|| UiManager::page == UiManager::SearchPage) {
+					qreal scale0 = item->mScale;
                     if (currentScaleFactor > 1) {
-                        mScale += 0.12;
-                        mScale = qMin(scale_max, mScale);
+						item->mScale += 0.12;
+						item->mScale = qMin(scale_max, item->mScale);
                     } else {
-                        mScale -= 0.12;
-                        mScale = qMax(scale_min, mScale);
+						item->mScale -= 0.12;
+						item->mScale = qMax(scale_min, item->mScale);
                     }
                     setAnimationDuration(ani_duration);
-                    smartTransform(mX, mY, scale0, mScale, 0, 0, 0, 0, 0); //both thumbpage and playpage works
+					smartTransform(item->mX, item->mY, scale0, item->mScale, 0, 0, 0, 0, 0); //both thumbpage and playpage works
                 } else if (UiManager::page == UiManager::PlayPage) {
-                    QGraphicsItem *item =  UiManager::instance()->currentPageRootItem();
 					//qreal s0 = item->transform().m11();
 					qreal s = currentScaleFactor > 1 ? 1.1:0.9; //TODO: smooth and slow
                     QRectF r = item->boundingRect();

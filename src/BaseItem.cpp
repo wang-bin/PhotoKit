@@ -31,27 +31,27 @@ namespace PhotoKit {
 QHash<QString, SharedImage *> BaseItem::sharedImageHash;
 QMatrix BaseItem::matrix;
 
-BaseItem::BaseItem(QGraphicsItem *parent) : QGraphicsItem(parent)
+BaseItem::BaseItem(QGraphicsItem *parent) : QGraphicsItem(parent),mScale(1.0),mX(0),mY(0)
 {
     Config::noRescale = true; //TODO:
-    this->opacity = 1.0;
-    this->locked = false;
-    this->prepared = false;
-    this->neverVisible = false;
-    this->noSubPixeling = false;
-    this->currentAnimation = 0;
-    this->currGuide = 0;
-    this->guideFrame = 0;
-    this->sharedImage = new SharedImage();
-    ++this->sharedImage->refCount;
+	opacity = 1.0;
+	locked = false;
+	prepared = false;
+	neverVisible = false;
+	noSubPixeling = false;
+	currentAnimation = 0;
+	currGuide = 0;
+	guideFrame = 0;
+	sharedImage = new SharedImage();
+	++sharedImage->refCount;
 }
 
 BaseItem::~BaseItem()
 {
-    if(--this->sharedImage->refCount == 0){
-        if (!this->hashKey.isEmpty())
-            BaseItem::sharedImageHash.remove(this->hashKey);
-        delete this->sharedImage;
+	if(--sharedImage->refCount == 0){
+		if (!hashKey.isEmpty())
+			BaseItem::sharedImageHash.remove(hashKey);
+		delete sharedImage;
     }
 }
 
@@ -59,9 +59,9 @@ void BaseItem::setNeverVisible(bool never)
 {
     Q_UNUSED(never);
 /*
-    this->neverVisible = never;
+	neverVisible = never;
     if (never){
-        this->setVisible(false);
+		setVisible(false);
         QList<QGraphicsItem *> c = children();
         for (int i=0; i<c.size(); i++){
             BaseItem *d = dynamic_cast<BaseItem *>(c[i]); // Don't use dynamic cast because it needs RTTI support.
@@ -76,12 +76,12 @@ void BaseItem::setNeverVisible(bool never)
 }
 
 void BaseItem::setRecursiveVisible(bool visible){
-	if (visible && this->neverVisible){
-        this->setVisible(false);
+	if (visible && neverVisible){
+		setVisible(false);
         return;
     }
 
-    this->setVisible(visible);
+	setVisible(visible);
     QList<QGraphicsItem *> c = children();
     for (int i=0; i<c.size(); i++){
         // BaseItem *d = dynamic_cast<BaseItem *>(c[i]);
@@ -95,71 +95,71 @@ void BaseItem::setRecursiveVisible(bool visible){
 
 void BaseItem::useGuide(Guide *guide, float startFrame)
 {
-    this->startFrame = startFrame;
-    this->guideFrame = startFrame;
-    while (this->guideFrame > guide->startLength + guide->length()){
+	this->startFrame = startFrame;
+	guideFrame = startFrame;
+	while (guideFrame > guide->startLength + guide->length()){
         if (guide->nextGuide == guide->firstGuide)
             break;
 
         guide = guide->nextGuide;
     }
-    this->currGuide = guide;
+	currGuide = guide;
 }
 
 void BaseItem::guideAdvance(float distance)
 {
-    this->guideFrame += distance;
-    while (this->guideFrame > this->currGuide->startLength + this->currGuide->length()){
-        this->currGuide = this->currGuide->nextGuide;
-        if (this->currGuide == this->currGuide->firstGuide)
-            this->guideFrame -= this->currGuide->lengthAll();
+	guideFrame += distance;
+	while (guideFrame > currGuide->startLength + currGuide->length()){
+		currGuide = currGuide->nextGuide;
+		if (currGuide == currGuide->firstGuide)
+			guideFrame -= currGuide->lengthAll();
     }
 }
 
 void BaseItem::guideMove(float moveSpeed)
 {
-    this->currGuide->guide(this, moveSpeed);
+	currGuide->guide(this, moveSpeed);
 }
 
 void BaseItem::setPosUsingSheepDog(const QPointF &dest, const QRectF &sceneFence)
 {
-    this->setPos(dest);
+	setPos(dest);
     if (sceneFence.isNull())
         return;
 
     // I agree. This is not the optimal way of doing it.
     // But don't want for use time on it now....
-    float itemWidth = this->boundingRect().width();
-    float itemHeight = this->boundingRect().height();
+	float itemWidth = boundingRect().width();
+	float itemHeight = boundingRect().height();
     float fenceRight = sceneFence.x() + sceneFence.width();
     float fenceBottom = sceneFence.y() + sceneFence.height();
 
-    if (this->scenePos().x() < sceneFence.x()) this->moveBy(this->mapFromScene(QPointF(sceneFence.x(), 0)).x(), 0);
-    if (this->scenePos().x() > fenceRight - itemWidth) this->moveBy(this->mapFromScene(QPointF(fenceRight - itemWidth, 0)).x(), 0);
-    if (this->scenePos().y() < sceneFence.y()) this->moveBy(0, this->mapFromScene(QPointF(0, sceneFence.y())).y());
-    if (this->scenePos().y() > fenceBottom - itemHeight) this->moveBy(0, this->mapFromScene(QPointF(0, fenceBottom - itemHeight)).y());
+	if (scenePos().x() < sceneFence.x()) moveBy(mapFromScene(QPointF(sceneFence.x(), 0)).x(), 0);
+	if (scenePos().x() > fenceRight - itemWidth) moveBy(mapFromScene(QPointF(fenceRight - itemWidth, 0)).x(), 0);
+	if (scenePos().y() < sceneFence.y()) moveBy(0, mapFromScene(QPointF(0, sceneFence.y())).y());
+	if (scenePos().y() > fenceBottom - itemHeight) moveBy(0, mapFromScene(QPointF(0, fenceBottom - itemHeight)).y());
 }
 
 void BaseItem::setGuidedPos(const QPointF &pos)
 {
-    this->guidedPos = pos;
+	guidedPos = pos;
 }
 
 QPointF BaseItem::getGuidedPos()
 {
-    return this->guidedPos;
+	return guidedPos;
 }
 
 void BaseItem::switchGuide(Guide *guide)
 {
-    this->currGuide = guide;
-    this->guideFrame = 0;
+	currGuide = guide;
+	guideFrame = 0;
 }
 
 bool BaseItem::inTransition()
 {
-    if (this->currentAnimation)
-        return this->currentAnimation->running();
+	if (currentAnimation)
+		return currentAnimation->running();
     else
         return false;
 }
@@ -171,30 +171,30 @@ void BaseItem::setMatrix(const QMatrix &matrix)
 
 void BaseItem::useSharedImage(const QString &hashKey)
 {
-    this->hashKey = hashKey;
+	this->hashKey = hashKey;
     if (!sharedImageHash.contains(hashKey))
-        sharedImageHash.insert(hashKey, this->sharedImage);
+		sharedImageHash.insert(hashKey, sharedImage);
     else {
-        if(--this->sharedImage->refCount == 0)
-            delete this->sharedImage;
-        this->sharedImage = sharedImageHash.value(hashKey);
-        ++this->sharedImage->refCount;
+		if(--sharedImage->refCount == 0)
+			delete sharedImage;
+		sharedImage = sharedImageHash.value(hashKey);
+		++sharedImage->refCount;
     }
 }
 
 bool BaseItem::validateImage()
 {
-    if ((this->sharedImage->matrix != BaseItem::matrix && !Config::noRescale) || !(this->sharedImage->image || this->sharedImage->pixmap)){
+	if ((sharedImage->matrix != BaseItem::matrix && !Config::noRescale) || !(sharedImage->image || sharedImage->pixmap)){
         // (Re)create image according to new matrix
-        delete this->sharedImage->image;
-        this->sharedImage->image = 0;
-        delete this->sharedImage->pixmap;
-        this->sharedImage->pixmap = 0;
-        this->sharedImage->matrix = BaseItem::matrix;
+		delete sharedImage->image;
+		sharedImage->image = 0;
+		delete sharedImage->pixmap;
+		sharedImage->pixmap = 0;
+		sharedImage->matrix = BaseItem::matrix;
 
         // Let subclass create and draw a new image according to the new matrix
-        //TODO: QImage *image = this->createImage(Config::noRescale ? QMatrix() : BaseItem::matrix);
-        QImage *image = this->createImage(BaseItem::matrix);
+		//TODO: QImage *image = createImage(Config::noRescale ? QMatrix() : BaseItem::matrix);
+		QImage *image = createImage(BaseItem::matrix);
         if (image){
            /* if (Config::showBoundingRect){
                 // draw red transparent rect
@@ -203,18 +203,18 @@ bool BaseItem::validateImage()
                 painter.end();
             }*/
 
-            this->sharedImage->unscaledBoundingRect = this->sharedImage->matrix.inverted().mapRect(image->rect());
+			sharedImage->unscaledBoundingRect = sharedImage->matrix.inverted().mapRect(image->rect());
             if (Config::usePixmaps){
                 if (image->isNull())
-                    this->sharedImage->pixmap = new QPixmap(1, 1);
+					sharedImage->pixmap = new QPixmap(1, 1);
                 else
-                    this->sharedImage->pixmap = new QPixmap(image->size());
-                this->sharedImage->pixmap->fill(QColor(0, 0, 0, 0));
-                QPainter painter(this->sharedImage->pixmap);
+					sharedImage->pixmap = new QPixmap(image->size());
+				sharedImage->pixmap->fill(QColor(0, 0, 0, 0));
+				QPainter painter(sharedImage->pixmap);
                 painter.drawImage(0, 0, *image);
                 delete image;
             } else {
-                this->sharedImage->image = image;
+				sharedImage->image = image;
             }
             return true;
         } else
@@ -226,7 +226,7 @@ bool BaseItem::validateImage()
 QRectF BaseItem::boundingRect() const
 {
     const_cast<BaseItem *>(this)->validateImage();
-    return this->sharedImage->unscaledBoundingRect;
+	return sharedImage->unscaledBoundingRect;
 }
 
 
@@ -235,7 +235,7 @@ void BaseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    if (this->validateImage()){
+	if (validateImage()){
 
         bool wasSmoothPixmapTransform = painter->testRenderHint(QPainter::SmoothPixmapTransform);
         painter->setRenderHint(QPainter::SmoothPixmapTransform);
@@ -243,20 +243,20 @@ void BaseItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, 
         if (Config::noRescale){
             // Let the painter scale the image for us.
             // This may degrade both quality and performance
-            if (this->sharedImage->image)
-                painter->drawImage(boundingRect(), *this->sharedImage->image);
+			if (sharedImage->image)
+				painter->drawImage(boundingRect(), *sharedImage->image);
             else
-                painter->drawPixmap(boundingRect().toRect(), *this->sharedImage->pixmap);
+				painter->drawPixmap(boundingRect().toRect(), *sharedImage->pixmap);
         }
         else {
             QMatrix m = painter->worldMatrix();
             painter->setWorldMatrix(QMatrix());
-            float x = this->noSubPixeling ? qRound(m.dx()) : m.dx();
-            float y = this->noSubPixeling ? qRound(m.dy()) : m.dy();
-            if (this->sharedImage->image)
-                painter->drawImage(QPointF(x, y), *this->sharedImage->image);
+			float x = noSubPixeling ? qRound(m.dx()) : m.dx();
+			float y = noSubPixeling ? qRound(m.dy()) : m.dy();
+			if (sharedImage->image)
+				painter->drawImage(QPointF(x, y), *sharedImage->image);
             else
-                painter->drawPixmap(QPointF(x, y), *this->sharedImage->pixmap);
+				painter->drawPixmap(QPointF(x, y), *sharedImage->pixmap);
         }
 
         if (!wasSmoothPixmapTransform) {
