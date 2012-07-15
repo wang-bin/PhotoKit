@@ -53,7 +53,7 @@ public:
 	static UiManager* instance();
     virtual ~UiManager();
 	void init(PhotoKitView *view);  //call createMenus
-    QGraphicsItem* currentPageRootItem();
+	BaseItem* currentPageRootItem();
     BaseItem* thumbPageRootItem();
     SlideDisplay* playPageItem() {return mPlayPageRoot;}
     QGraphicsView *view();
@@ -104,7 +104,7 @@ private:
     void hideMenu(const QString& menu);
 
 	static UiManager *mInstance;
-    QGraphicsItem *mCurrentPageRoot;
+	BaseItem *mCurrentPageRoot;
 	BaseItem *mThumbPageRoot, *mSearchPageRoot;
     SlideDisplay *mPlayPageRoot;
 	SlidePlayControl *mPlayControl;

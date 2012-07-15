@@ -97,7 +97,7 @@ static void initTranslation() {
                                   "Press a picture to zoom\n"
                                   "Double click a picture to show large image and double click aagin to go back\n"
                                   "Move mouse to see moving effect\n"
-                                  "Two finger touch to zoom(NOT TESTED)");
+								  "Two finger touch to zoom");
     thumbpage_help = QObject::tr("PRESS ME TO HIDE\n"
                                             "Press a picture to zoom\n"
                                             "Double click a picture to show large image"
@@ -112,7 +112,7 @@ static void initTranslation() {
 	HELP_TEXT = "<p>" + about + "</p></p>" + QObject::tr("PRESS ME TO HIDE") + "</p>"
 			+ "<p>" + QObject::tr("Press a picture to zoom") + "</p>"
 			+ "<p>" + QObject::tr("Double click a picture to show large image and double click again to go back") + "</p>"
-			+ "<p>" + QObject::tr("Two finger touch to zoom(NOT TESTED)") + "</p>";
+			+ "<p>" + QObject::tr("Two finger touch to zoom") + "</p>";
 }
 UiManager* UiManager::mInstance = 0;
 ThumbItem* UiManager::lastHoverThumb = 0;
@@ -198,7 +198,7 @@ void UiManager::init(PhotoKitView *view)
 
 }
 
-QGraphicsItem* UiManager::currentPageRootItem()
+BaseItem* UiManager::currentPageRootItem()
 {
     return mCurrentPageRoot;
 }
@@ -243,9 +243,7 @@ void UiManager::showImagesFromThumb(const QStringList &paths, bool yes)
 void UiManager::clearThumbs()
 {
 	//TODO: custume message box. Use MessageBox
-	Tools::showTip(tr("Clear will not delete the image. Continue?"), true, 2000);
-	//if (res != QMessageBox::Ok)
-	//	return;
+	//Tools::showTip(tr("Clear will not delete the image. Continue?"), true, 2000);
 	mThumbTask->stop();
 	//mView->scene()->removeItem(mThumbPageRoot);
 	QList<QGraphicsItem*> cs = mThumbPageRoot->childItems();
@@ -409,14 +407,17 @@ void UiManager::updateThumbItemAt(int index)
     item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
                  + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemWidth - item->boundingRect().width())/2
                  , row * (Config::thumbItemHeight + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
-                 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemHeight - item->boundingRect().height())/2);
+				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemHeight - item->boundingRect().height())/2);
     //addItem(item);
     if (row == Config::thumbRows - 1) {
         new ReflectEffectItem(item, ReflectEffectItem::MirrorBottom);
     }
     //scene rect is importance.
 	//if not 0, 0, the scene will move right
-	mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(0, 0, Config::contentHMargin + X0, Config::contentVMargin));
+	//TODO: itemsBoundingRect is slow. need a fast solution
+	//qDebug("root children w=%d, scenew=%d", mCurrentPageRoot->childItems().size(), mView->scene()->items().size());
+	mView->scene()->setSceneRect(QRectF(mView->scene()->sceneRect() | item->boundingRect())  //mView->scene()->itemsBoundingRect()
+								 .adjusted(0, 0, Config::contentHMargin + X0, Config::contentVMargin));
 	//mView->scene()->setSceneRect(mCurrentPageRoot->childrenBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 	//mView->scene()->setSceneRect(mView->scene()->.adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 }
@@ -435,6 +436,7 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 	if (pageType == ThumbPage) {
         mCurrentPageRoot = mThumbPageRoot;
 		mThumbPageRoot->show();		
+		//TODO: itemsBoundingRect is slow. need a fast solution
 		QRectF r = mView->scene()->itemsBoundingRect()
 				.adjusted(0, 0, Config::contentHMargin + X0, Config::contentVMargin);
 		mView->scene()->setSceneRect(r.translated(-r.x(), -r.y()));
@@ -478,7 +480,8 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		mSearchInput->show();
 		if (UiManager::lastHoverThumb)
 			UiManager::lastHoverThumb->zoom(ThumbItem::ZoomOut); //TODO: keep zoom
-		QRectF r = mView->scene()->itemsBoundingRect()//mCurrentPageRoot->childrenBoundingRect()
+		//TODO: itemsBoundingRect is slow. need a fast solution
+		QRectF r = mView->scene()->sceneRect()  //mView->scene()->itemsBoundingRect()//mCurrentPageRoot->childrenBoundingRect()
 				.adjusted(0, 0, Config::contentHMargin + X0, Config::contentVMargin);
 		if (mCurrentPageRoot->childItems().isEmpty())
 			r = qApp->desktop()->rect();
@@ -640,7 +643,6 @@ void UiManager::searchGoogleImage()
 
 void UiManager::showOnlineImage(const ImageBaseInfo &image)
 {
-	qDebug("google image ready");
 	int col = mSearchImageIndex / Config::thumbRows;
 	int row = mSearchImageIndex % Config::thumbRows;
 	mSearchImageIndex++;
@@ -666,8 +668,8 @@ void UiManager::showOnlineImage(const ImageBaseInfo &image)
 	if (row == Config::thumbRows - 1) {
 		new ReflectEffectItem(item, ReflectEffectItem::MirrorBottom);
 	}
-	//scene rect is importance.
-	mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect() //mCurrentPageRoot->childrenBoundingRect()
+	//TODO: itemsBoundingRect is slow. need a fast solution
+	mView->scene()->setSceneRect(QRectF(mView->scene()->sceneRect() | item->boundingRect())  //mView->scene()->itemsBoundingRect() //mCurrentPageRoot->childrenBoundingRect()
 								 .adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 	item->setThumbPath(image.thumbPath);
 	item->setOriginImage(image.path);
@@ -760,7 +762,7 @@ void UiManager::createMenus()
 	searchPageMenuItems << SEARCH << BACK;
 	menuItem = 0;
 	for (int i = 0; i < searchPageMenuItems.size(); ++i) {
-		menuItem = new Button("<p style='color:white;font-size:18px'>" + searchPageMenuItems[i] + "</p>");
+		menuItem = new Button("<p style='color:white;font-size:24px'>" + searchPageMenuItems[i] + "</p>");
 		menuItem->setColor(Qt::blue);
 		menuItem->resize(222, 55);
 		mView->scene()->addItem(menuItem);
