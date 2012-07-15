@@ -22,7 +22,20 @@
 #include <cstdio>
 #include <libexif/exif-data.h>
 #include <QtCore/QObject>
+#include <QtDebug>
 namespace PhotoKit {
+
+static void retranslateUi() {
+	qDebug() << QObject::tr("Manufacturer") << QObject::tr("Model") <<QObject::tr("Software")
+			<< QObject::tr("Copyright") << QObject::tr("Exif Verion") << QObject::tr("F-Number")
+			<< QObject::tr("Exposure time") << QObject::tr("Exposure mode") <<QObject::tr("Focal length")
+			<< QObject::tr("Flash") << QObject::tr("ISO Speed Ratings") << QObject::tr("Date and Time (Original)")
+			<< QObject::tr("Metering mode") << QObject::tr("White balance")
+			<< QObject::tr("North or South") << QObject::tr("Latitude") << QObject::tr("East or West")
+			<< QObject::tr("Longitude") << QObject::tr("Altitude refrence") << QObject::tr("Altitude")
+			<< QObject::tr("Image Direction Refrence") << QObject::tr("Image Direction");
+}
+
 
 typedef struct {
 	int tag;
