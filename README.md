@@ -9,4 +9,4 @@ You can share the image to sina weibo easily with it. Google image search is sup
 Screenshot
 -------
 
-![Alt text](screenshot/Screenshot-854x480.png "desktop version")
+![Alt text](https://github.com/wang-bin/PhotoKit/raw/master/screenshot/Screenshot-854x480.png "desktop version")
