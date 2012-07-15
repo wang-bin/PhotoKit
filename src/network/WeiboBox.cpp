@@ -61,7 +61,7 @@ public:
         qreal h = qApp->desktop()->height()*0.618;
 		statusEdit->resize(w, h);
 		y += statusEdit->size().height() + 12;
-		qreal hh = qMin<qreal>(qApp->desktop()->height()*0.314/2, 44); //TODO: calculate the line edit height
+		qreal hh = qMin<qreal>(qApp->desktop()->height()*0.314/2, 40); //TODO: calculate the line edit height
 		f.setBold(true);
 		QGraphicsTextItem *user = new QGraphicsTextItem(central);
         f.setPixelSize(20);

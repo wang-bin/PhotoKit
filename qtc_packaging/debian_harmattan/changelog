@@ -1,3 +1,8 @@
+photokit (0.3.6) unstable; urgency=low
+  * Add google image search
+
+ -- LucasWang <wbsecg1@gmail.com>  Sun, 15 Jul 2012 04:32:57 +0800
+
 photokit (0.3.3) unstable; urgency=low
   * Fix crash bug when send weibo ok
 

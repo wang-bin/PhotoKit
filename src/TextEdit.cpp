@@ -90,9 +90,9 @@ void TextEdit::resize(qreal width, qreal height)
 	setTextWidth(mWidth);
 	mGradient.setStart(0, 0);
 	mGradient.setFinalStop(mWidth, mHeight);
-	mGradient.setColorAt(0, QColor(180, 212, 234, 168));
-	mGradient.setColorAt(0.618, QColor(220, 230, 240, 188));
-	mGradient.setColorAt(1, QColor(211, 222, 238, 200));
+	mGradient.setColorAt(0, QColor(180, 212, 234, 148));
+	mGradient.setColorAt(0.618, QColor(220, 230, 240, 168));
+	mGradient.setColorAt(1, QColor(211, 222, 238, 180));
 }
 
 QSizeF TextEdit::size() const

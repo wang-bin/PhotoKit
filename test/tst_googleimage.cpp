@@ -27,7 +27,9 @@ int main(int argc, char** argv)
 	QCoreApplication app(argc, argv);
 	GoogleImageSearcher gi;
 	gi.setNameFilter("Hello Kitty");
-	gi.fetchMore();
+	while (gi.canFetchMore())
+		gi.fetchMore();
+	qDebug("google image search request end"); //async so this may print first
 	return app.exec();
 }
 
