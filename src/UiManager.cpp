@@ -36,6 +36,7 @@
 #include "tools/ExifReader.h"
 #include "tools/ConfigDialog.h"
 #include "network/WeiboBox.h"
+#include "network/GoogleImageSearcher.h"
 #include "PhotoKitView.h"
 #include "ReflectEffectItem.h"
 #include "score.h"
@@ -66,6 +67,8 @@ static QString WEIBO_SHARE;
 static QString BACK;
 static QString HELP_TEXT;
 static QString IMAGE_INFO;
+static QString GOOGLE_SEARCH;
+static QString SEARCH;
 static qreal X0 = 0;
 static qreal Y0 = 0;
 static const QString THUMB_PAGE_MENU("thumbPageMenu");
@@ -73,8 +76,11 @@ static const QString PLAY_PAGE_MENU("playPageMenu");
 static const QString CONFIG_MENU("ConfigMenu");
 static const QString OK_CANCEL_MENU("OkCancel");
 static const QString BACK_MENU("GoBack");
+static const QString SEARCH_PAGE_MENU("SearchPageMenu");
 
 static void initTranslation() {
+	SEARCH = QObject::tr("Search");
+	GOOGLE_SEARCH = QObject::tr("Google");
     WEIBO_SHARE = QObject::tr("Weibo share");
     BACK = QObject::tr("Back");
     START_STOP_SLIDE = QObject::tr("Play/Stop slide");
@@ -96,11 +102,11 @@ static void initTranslation() {
                                             "Press a picture to zoom\n"
                                             "Double click a picture to show large image"
                                             "Move mouse to see moving effect\n"
-                                            "Two finger touch to zoom(NOT TESTED)");
+											"Two finger touch to zoom");
     playpage_help = QObject::tr("PRESS ME TO HIDE\n"
                                            "You can share the current picture to sina weibo\n"
                                            "Double click to go back\n"
-                                           "Two finger touch to zoom(NOT TESTED)");
+										   "Two finger touch to zoom");
 
     about = QObject::tr("Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>\n");
 	HELP_TEXT = "<p>" + about + "</p></p>" + QObject::tr("PRESS ME TO HIDE") + "</p>"
@@ -113,7 +119,8 @@ ThumbItem* UiManager::lastHoverThumb = 0;
 UiManager::PageType UiManager::page = UiManager::ThumbPage;
 
 UiManager::UiManager(QObject *parent) :
-    QObject(parent),mView(0),mThumbTask(new ThumbTask),mThumbsCount(0)
+	QObject(parent),mView(0),mThumbTask(new ThumbTask),mThumbsCount(0)
+  ,mSearchInput(0),mGoogleSearcher(0),mSearchImageIndex(0)
 {
     initTranslation();
 	score = new Score();
@@ -135,15 +142,19 @@ UiManager::~UiManager()
     if (mThumbTask) {
         delete mThumbTask;
         mThumbTask = 0;
-    }
+	}/*
 	if (mThumbPageRoot) {
 		delete mThumbPageRoot;
 		mThumbPageRoot = 0;
-    }
+	}
 	if (mPlayPageRoot) {
 		delete mPlayPageRoot;
 		mPlayPageRoot = 0;
 	}
+	if (mSearchPageRoot) {
+		delete mSearchPageRoot;
+		mSearchPageRoot = 0;
+	}*/
 }
 
 void UiManager::init(PhotoKitView *view)
@@ -152,13 +163,17 @@ void UiManager::init(PhotoKitView *view)
     mThumbPageRoot = new BaseItem;
     mCurrentPageRoot = mThumbPageRoot;
 	mThumbPageRoot->setAcceptHoverEvents(true);
-	X0 = qMin<qreal>(qMax<qreal>(qApp->desktop()->width() - 3*(2*(Config::thumbMargin + Config::thumbBorder) + Config::thumbSpacing + Config::thumbItemWidth), 0.5*Config::thumbItemWidth), Config::contentHMargin);
+	X0 = qMin<qreal>(qMax<qreal>(qApp->desktop()->width() - (Config::thumbRows+1)*(2*(Config::thumbMargin + Config::thumbBorder)
+			+ Config::thumbSpacing + Config::thumbItemWidth), 0.5*Config::thumbItemWidth), Config::contentHMargin);
 	Y0 = qMin<qreal>(qMax<qreal>((qreal)qApp->desktop()->height() - ((qreal)Config::thumbRows + 1)*((Config::thumbBorder
             + Config::thumbMargin)*2 + Config::thumbSpacing + Config::thumbItemHeight), - 0.5*Config::thumbItemHeight), Config::contentVMargin);
-    qDebug("************%f, %f", X0, Y0);
+	Y0 = qMax<qreal>(Y0, 0.5*(qApp->desktop()->height() - (Config::thumbRows+2)*(Config::thumbItemHeight
+			+ 2*(Config::thumbMargin + Config::thumbBorder) + Config::thumbSpacing)));
+	qDebug("************%f, %f", X0, Y0);
     //content can't move if setPos?
     //mThumbPageRoot->setPos(Config::contentHMargin, qMax<qreal>(Config::thumbItemHeight, y));//contentVMargin); //TODO: ensure see the reflection
-    mThumbPageRoot->translate(X0, Y0);
+	mThumbPageRoot->translate(-X0, Y0);
+	mThumbPageRoot->setPos(X0, Y0);
     mThumbPageRoot->setTransform(QTransform().scale(0.5, 0.5));
 	mView->scene()->addItem(mThumbPageRoot);
 	mPlayPageRoot = new SlideDisplay;
@@ -167,21 +182,19 @@ void UiManager::init(PhotoKitView *view)
 	mView->scene()->addItem(mPlayPageRoot);
 	mPlayControl = new SlidePlayControl(this);
 	mPlayPageRoot->setPlayControl(mPlayControl);
-/*
-	TextEdit *edit = new TextEdit;
-	edit->setDefaultTextColor(Qt::yellow);
-	edit->resize(300, 200);
-	edit->setPlainText("Hello world");
-	edit->setPos(200, 100);
-	mView->scene()->addItem(edit);
-*/
+
+	mSearchPageRoot = new BaseItem;
+	mSearchPageRoot->setPos(0, Y0);
+	mView->scene()->addItem(mSearchPageRoot);
+
     createMenus(); //before gotoPage
     showMenu(THUMB_PAGE_MENU);
 
     gotoPage(ThumbPage);
-    mView->setInitialPos(X0, Y0);
+	//mView->setInitialPos(X0, Y0);
 	mView->setAnimationDuration(1618);
-    mView->smartTransform(X0, Y0, 0.5, 1, 0, 0, 0, 0, 0);
+	//mView->smartTransform(X0, Y0, 0.5, 1, 0, 0, 0, 0, 0);
+	mView->smartTransform(0, 0, 0.5, 1, 0, 0, 0, 0, 0);
 
 }
 
@@ -236,8 +249,10 @@ void UiManager::clearThumbs()
 	mThumbTask->stop();
 	//mView->scene()->removeItem(mThumbPageRoot);
 	QList<QGraphicsItem*> cs = mThumbPageRoot->childItems();
-	foreach(QGraphicsItem* c, cs)
+	foreach(QGraphicsItem* c, cs) {
 		mView->scene()->removeItem(c);
+		delete c;
+	}
     mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect());
 	ThumbRecorder::instance()->clearDisplay();
 	ThumbRecorder::instance()->save(); //
@@ -373,7 +388,7 @@ void UiManager::shareToWeibo()
 
 void UiManager::showHelp()
 {
-    Tools::showTip(HELP_TEXT, true);
+	Tools::showTip("<span style='font-size:20px;'>" + HELP_TEXT + "</span>", true);
 }
 
 void UiManager::showAbout()
@@ -400,7 +415,10 @@ void UiManager::updateThumbItemAt(int index)
         new ReflectEffectItem(item, ReflectEffectItem::MirrorBottom);
     }
     //scene rect is importance.
-    mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
+	//if not 0, 0, the scene will move right
+	mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect().adjusted(0, 0, Config::contentHMargin + X0, Config::contentVMargin));
+	//mView->scene()->setSceneRect(mCurrentPageRoot->childrenBoundingRect().adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
+	//mView->scene()->setSceneRect(mView->scene()->.adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
 }
 
 void UiManager::updateDisplayedThumbList()
@@ -414,20 +432,27 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 {
 	if (page == pageType)
 		return;
-	page = pageType;
-	if (page == ThumbPage) {
+	if (pageType == ThumbPage) {
         mCurrentPageRoot = mThumbPageRoot;
-		mThumbPageRoot->show();
-        mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect()
-                .adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin)
-            );
+		mThumbPageRoot->show();		
+		QRectF r = mView->scene()->itemsBoundingRect()
+				.adjusted(0, 0, Config::contentHMargin + X0, Config::contentVMargin);
+		mView->scene()->setSceneRect(r.translated(-r.x(), -r.y()));
         if (mPlayControl->isRunning()) {
             mPlayControl->stop();
         }
-		mPlayPageRoot->smoothScale(1, 0.2, ItemAnimation::FadeOut);
-        hideMenu(PLAY_PAGE_MENU);
+		if (page == PlayPage) {
+			mPlayPageRoot->smoothScale(1, 0.2, ItemAnimation::FadeOut);
+			hideMenu(PLAY_PAGE_MENU);
+		} else if (page == SearchPage) {
+			mSearchInput->hide();
+			mSearchPageRoot->hide(); //fadeout
+			if (UiManager::lastHoverThumb)
+				UiManager::lastHoverThumb->zoom(ThumbItem::ZoomOut);
+			hideMenu(SEARCH_PAGE_MENU);
+		}
         showMenu(THUMB_PAGE_MENU);
-	} else if (page == PlayPage) {
+	} else if (pageType == PlayPage) {
         mCurrentPageRoot = mPlayPageRoot;
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
@@ -437,7 +462,29 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
         //mPlayPageRoot->setPos(mView->mapToScene(QPoint())); //keep it center.
         //the following line will let it keep center. why?
 		mView->scene()->setSceneRect(qApp->desktop()->rect());//mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
-    }
+	} else if (pageType == SearchPage) {
+		mCurrentPageRoot->hide();
+		mCurrentPageRoot = mSearchPageRoot;
+		mCurrentPageRoot->show();
+		hideMenu(THUMB_PAGE_MENU);
+		showMenu(SEARCH_PAGE_MENU);
+		if (!mSearchInput) {
+			mSearchInput = new TextEdit;
+			mSearchInput->setFlag(QGraphicsItem::ItemIgnoresTransformations);
+			mSearchInput->resize(qApp->desktop()->width()*2/3, 50);
+			mSearchInput->setPos(qApp->desktop()->width()/3, 8);
+			mView->scene()->addItem(mSearchInput);
+		}
+		mSearchInput->show();
+		if (UiManager::lastHoverThumb)
+			UiManager::lastHoverThumb->zoom(ThumbItem::ZoomOut); //TODO: keep zoom
+		QRectF r = mView->scene()->itemsBoundingRect()//mCurrentPageRoot->childrenBoundingRect()
+				.adjusted(0, 0, Config::contentHMargin + X0, Config::contentVMargin);
+		if (mCurrentPageRoot->childItems().isEmpty())
+			r = qApp->desktop()->rect();
+		mView->scene()->setSceneRect(r);//.translated(-r.x(), -r.y()));
+	}
+	page = pageType;
 }
 
 void UiManager::tryMoveCenter(QGraphicsItem *item)
@@ -493,7 +540,10 @@ void UiManager::clickMenuItem()
         } else if (button->buttonType() == Button::ArrowDown) {
             score->queueMovie(THUMB_PAGE_MENU);
             button->setButtonType(Button::ArrowUp);
-        } else if (menuText == ADDIMAGES) {
+		} else if (menuText == GOOGLE_SEARCH) {
+			gotoPage(SearchPage);
+			return;
+		} else if (menuText == ADDIMAGES) {
             addImages();
         } else if (menuText == ADDDIRS) {
             addImagesFromDir();
@@ -529,6 +579,13 @@ void UiManager::clickMenuItem()
         } else {
             score->queueMovie(PLAY_PAGE_MENU + " -shake");
         }
+	} else if (page == SearchPage) {
+		if (menuText == BACK) {
+			gotoPage(ThumbPage);
+			return;
+		} else if (menuText == SEARCH) {
+			searchGoogleImage();
+		}
 	}
 
     if (score->hasQueuedMovies()){
@@ -560,6 +617,62 @@ void UiManager::hideConfigMenu()
     disconnect(this, SLOT(hideConfigMenu())); //
 }
 
+void UiManager::searchGoogleImage()
+{
+	mSearchImageIndex = 0;
+	UiManager::lastHoverThumb = 0; //TODO: 2 page is diffrent
+	//clear previous images
+	QList<QGraphicsItem*> cs = mSearchPageRoot->childItems();
+	foreach(QGraphicsItem* c, cs) {
+		mView->scene()->removeItem(c);
+		delete c;
+	}
+	if (!mGoogleSearcher) {
+		mGoogleSearcher = new GoogleImageSearcher(this);
+		connect(mGoogleSearcher, SIGNAL(imageReady(ImageBaseInfo)), this, SLOT(showOnlineImage(ImageBaseInfo)));
+	}
+	mGoogleSearcher->setNameFilter(mSearchInput->text());
+	while (mGoogleSearcher->canFetchMore())
+		mGoogleSearcher->fetchMore();
+
+	Tools::showTip(tr("Please wait"), true, 3000);
+}
+
+void UiManager::showOnlineImage(const ImageBaseInfo &image)
+{
+	qDebug("google image ready");
+	int col = mSearchImageIndex / Config::thumbRows;
+	int row = mSearchImageIndex % Config::thumbRows;
+	mSearchImageIndex++;
+	//TODO: if too small
+	qreal w = image.thumbWidth, h = image.thumbHeight;
+	if (w > Config::thumbItemWidth) {
+		h = Config::thumbItemWidth * h/w; //set image width to mMaxWidth;
+		w = Config::thumbItemWidth;
+	}
+	if (h > Config::thumbItemHeight) {
+		w = Config::thumbItemHeight * w/h; //set image height to mMaxHeight;
+		h = Config::thumbItemHeight;
+	}
+	ThumbItem *item = new ThumbItem(mSearchPageRoot);
+	item->resize(w, h);
+	item->setOnlineImage(true);
+	//show item first then download
+	item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
+				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemWidth - item->boundingRect().width())/2
+				 , row * (Config::thumbItemHeight + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)
+				 + Config::thumbBorder + Config::thumbMargin + (Config::thumbItemHeight - item->boundingRect().height())/2);
+	//addItem(item);
+	if (row == Config::thumbRows - 1) {
+		new ReflectEffectItem(item, ReflectEffectItem::MirrorBottom);
+	}
+	//scene rect is importance.
+	mView->scene()->setSceneRect(mView->scene()->itemsBoundingRect() //mCurrentPageRoot->childrenBoundingRect()
+								 .adjusted(-Config::contentHMargin, -Config::contentVMargin, Config::contentHMargin, Config::contentVMargin));
+	item->setThumbPath(image.thumbPath);
+	item->setOriginImage(image.path);
+}
+
 //TODO: setData() data()
 void UiManager::createMenus()
 {
@@ -569,7 +682,7 @@ void UiManager::createMenus()
     static Movie *thumbPageMovieOut = score->insertMovie(THUMB_PAGE_MENU + " -out");
     static Movie *thumbPageMovieShake = score->insertMovie(THUMB_PAGE_MENU + " -shake");
 	QStringList thumbPageMenuItems;
-	thumbPageMenuItems << SETUP << HELP << CLEAR << ADDIMAGES << ADDDIRS << QUIT;
+	thumbPageMenuItems << SETUP << HELP << CLEAR << GOOGLE_SEARCH << ADDIMAGES << ADDDIRS << QUIT;
     Button *menuItem = 0;
 	for (int i = 0; i < thumbPageMenuItems.size(); ++i) {
 		menuItem = new Button("<p style='color:white;font-size:18px'>" + thumbPageMenuItems[i] + "</p>");
@@ -633,12 +746,27 @@ void UiManager::createMenus()
 
     static Movie *backMenuMovieIn = score->insertMovie(BACK_MENU);
     static Movie *backMenuMovieOut = score->insertMovie(BACK_MENU + " -out");
-    mBack = new Button("<p style='color:white;font-size:24px'>" + tr("Back") + "</p>");
+	mBack = new Button("<p style='color:white;font-size:24px'>" + BACK + "</p>");
     mBack->setColor(QColor(100, 40, 8));
     mBack->resize(222, 55);
     mView->scene()->addItem(mBack);
 
     createBackButtonMovie(mBack, backMenuMovieIn, backMenuMovieOut);
+
+	//Config menu. right side
+	static Movie *searchPageMenuMovieIn = score->insertMovie(SEARCH_PAGE_MENU);
+	static Movie *searchPageMenuMovieOut = score->insertMovie(SEARCH_PAGE_MENU + " -out");
+	QStringList searchPageMenuItems;
+	searchPageMenuItems << SEARCH << BACK;
+	menuItem = 0;
+	for (int i = 0; i < searchPageMenuItems.size(); ++i) {
+		menuItem = new Button("<p style='color:white;font-size:18px'>" + searchPageMenuItems[i] + "</p>");
+		menuItem->setColor(Qt::blue);
+		menuItem->resize(222, 55);
+		mView->scene()->addItem(menuItem);
+		connect(menuItem, SIGNAL(clicked()), SLOT(clickMenuItem()));
+		createOkCancelMovie(menuItem, i, searchPageMenuMovieIn, searchPageMenuMovieOut);
+	}
 }
 
 void UiManager::createLeftMenuTopInMovie(Button *item, int i, bool hideOnFinished, Movie *movieIn, Movie *movieCollapse, Movie *movieOut, Movie *movieShake)
@@ -739,7 +867,7 @@ void UiManager::createOkCancelMovie(Button *item, int index, Movie *movieIn, Mov
 	int xOffset = 40;
 	qreal space = 24;
 	qreal mh = qApp->desktop()->height()/2;
-	qreal x0 = -item->width() -11;
+	qreal x0 = -item->width() -22;
 	qreal y0 = index == 0 ? item->height() : qMax(qApp->desktop()->height() - 2*item->height(), mh + 2*item->height());
 	DemoItemAnimation *anim = new DemoItemAnimation(item, DemoItemAnimation::ANIM_IN);
 	anim->setDuration(600);

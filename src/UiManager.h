@@ -22,6 +22,7 @@
 #define UIMANAGER_H
 
 #include <QObject>
+#include "network/GoogleImageSearcher.h"
 #include "score.h"
 class QGraphicsView;
 class QGraphicsWidget;
@@ -40,12 +41,14 @@ class SlidePlayControl;
 class BaseItem;
 class Button;
 class Score;
+class TextEdit;
+class GoogleImageSearcher;
 class UiManager : public QObject
 {
 	Q_OBJECT
 public:
 	enum PageType {
-		CategoryPage, ThumbPage, PlayPage, InfoPage, ConfigPage, HelpPage
+		CategoryPage, ThumbPage, PlayPage, SearchPage, InfoPage, ConfigPage
 	};
 	static UiManager* instance();
     virtual ~UiManager();
@@ -87,6 +90,8 @@ private slots:
 	void clickMenuItem(); //check sender's button text
 	void okCancelFinish();
 	void hideConfigMenu();
+	void searchGoogleImage();
+	void showOnlineImage(const ImageBaseInfo& image);
 
 private:
 	explicit UiManager(QObject *parent = 0);
@@ -100,7 +105,7 @@ private:
 
 	static UiManager *mInstance;
     QGraphicsItem *mCurrentPageRoot;
-    BaseItem *mThumbPageRoot; //mWallRoot
+	BaseItem *mThumbPageRoot, *mSearchPageRoot;
     SlideDisplay *mPlayPageRoot;
 	SlidePlayControl *mPlayControl;
 	ToolBar *mBottomBar;
@@ -111,7 +116,9 @@ private:
 
 	Button *mOk, *mCancel; //for connecting signals and slots with dialogs
     Button *mBack;
-
+	TextEdit *mSearchInput;
+	GoogleImageSearcher *mGoogleSearcher;
+	int mSearchImageIndex;
 };
 } //namespace PhotoKit
 #endif // UIMANAGER_H
