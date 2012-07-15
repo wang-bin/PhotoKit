@@ -44,7 +44,7 @@ public:
 	ImageProvider(QObject *parent = 0);
 	virtual ~ImageProvider();
 
-	void setNameFilter(const QByteArray& filter);
+	void setNameFilter(const QString& filter);
 	//void setSizeFilter();
 
 	virtual bool canFetchMore() const;

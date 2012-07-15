@@ -49,6 +49,8 @@ public:
 	virtual bool canFetchMore() const;
 	virtual void fetchMore();
 
+	void reset();
+
 private:
 	void parseJson(const QByteArray& json);
 private slots:

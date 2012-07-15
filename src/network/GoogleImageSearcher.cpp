@@ -84,7 +84,7 @@ void GoogleImageSearcher::fetchMore()
 	Q_D(GoogleImageSearcher);
 	QUrl url(GooglerImageSeachServer);
 	url.addQueryItem("v", "1.0");
-	url.addQueryItem("q", QByteArray(d->nameFilter).replace(' ', '+')); //+
+	url.addQueryItem("q", QUrl::toPercentEncoding(QString(d->nameFilter).replace(' ', '+'))); //+
 	url.addQueryItem("imgsz", GIParam[d->size]);
 	url.addQueryItem("start", QString::number(d->page*8));
 	url.addQueryItem("rsz", "8"); //rsz: 1-8, the number of results to return per page
@@ -94,6 +94,12 @@ void GoogleImageSearcher::fetchMore()
 	d->network->get(request);
 
 	d->page++;
+}
+
+void GoogleImageSearcher::reset()
+{
+	Q_D(GoogleImageSearcher);
+	d->page = 0;
 }
 
 void GoogleImageSearcher::parseJson(const QByteArray &json)

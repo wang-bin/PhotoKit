@@ -30,7 +30,7 @@ public:
 	ImageProviderPrivate():page(0){}
 	virtual ~ImageProviderPrivate(){}
 	int page;
-	QByteArray nameFilter;
+	QString nameFilter;
 
 };
 

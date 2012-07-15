@@ -43,10 +43,11 @@ ImageProvider::~ImageProvider()
 	}
 }
 
-void ImageProvider::setNameFilter(const QByteArray &filter)
+void ImageProvider::setNameFilter(const QString &filter)
 {
 	Q_D(ImageProvider);
 	d->nameFilter = filter;
+	d->page = 0; //reset for a new search
 }
 
 bool ImageProvider::canFetchMore() const
