@@ -121,8 +121,6 @@ void PhotoKitView::setInitialPos(qreal x, qreal y)
 void PhotoKitView::smartTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xrot, qreal yrot, qreal zrot, qreal xshear, qreal yshear)
 {
 	BaseItem *item = UiManager::instance()->currentPageRootItem();
-	//TODO: different page has different machine
-	//ezlog_debug();
 	qreal x0 = item->mX, y0 = item->mY;
 	qreal s0 = scale0;
 	qreal xr0 = 0, yr0 = 0;

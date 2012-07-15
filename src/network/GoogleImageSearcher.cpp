@@ -143,8 +143,8 @@ void GoogleImageSearcher::parseJson(const QByteArray &json)
 			img.thumbPath = turl.cap(1).replace("\\u003d", "="); //\u003d
 		else
 			continue;
-		qDebug("w: %d h: %d, tw: %d, th: %d", img.width, img.height, img.thumbWidth, img.thumbHeight);
-		qDebug("url: %s\nturl: %s",  qPrintable(img.path), qPrintable(img.thumbPath));
+		//qDebug("w: %d h: %d, tw: %d, th: %d", img.width, img.height, img.thumbWidth, img.thumbHeight);
+		//qDebug("url: %s\nturl: %s",  qPrintable(img.path), qPrintable(img.thumbPath));
 		emit imageReady(img);
 	}
 }
@@ -153,7 +153,7 @@ void GoogleImageSearcher::parseReply(QNetworkReply *reply)
 {
 	QNetworkReply::NetworkError error = reply->error();
 	if (error != QNetworkReply::NoError) {
-		qCritical("Network error: %s", qPrintable(reply->errorString()));
+		qWarning("Network error: %s", qPrintable(reply->errorString()));
 	}
 	QByteArray data = reply->readAll();
 	reply->deleteLater();
