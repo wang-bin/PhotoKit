@@ -27,12 +27,14 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkRequest>
+#include <QtNetwork/QNetworkReply>
 #include "ItemAnimation.h"
 #include "OutlineGlowItem.h"
 #include "TransformMachine.h"
 #include "UiManager.h"
 #include "Config.h"
-#include "ezlog.h"
 
 #define ZOOM_ON_HOVER 0
 namespace PhotoKit {
@@ -41,10 +43,12 @@ namespace PhotoKit {
 static const qreal zoom_max = 2.2;
 
 ThumbItem::ThumbItem(QGraphicsItem *parent) :
-    QGraphicsItem(parent),mGlow(0),mItemAnimation(0)
+	QGraphicsObject(parent),mGlow(0),mItemAnimation(0)
   ,mWidth(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
   ,mHeight(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
 {
+	mIsOnlineImage = false;
+	mNetwork = 0;
     maxWidth = Config::thumbItemWidth;
     maxHeight = Config::thumbItemHeight;
     adjustSize = true;
@@ -56,10 +60,12 @@ ThumbItem::ThumbItem(QGraphicsItem *parent) :
 }
 
 ThumbItem::ThumbItem(const QImage& image, QGraphicsItem *parent) :
-    QGraphicsItem(parent),thumb(image),mGlow(0),mItemAnimation(0)
+	QGraphicsObject(parent),thumb(image),mGlow(0),mItemAnimation(0)
   ,mWidth(Config::thumbItemWidth - 2*(Config::thumbBorder + Config::thumbMargin))
   ,mHeight(Config::thumbItemHeight - 2*(Config::thumbBorder + Config::thumbMargin))
 {
+	mIsOnlineImage = false;
+	mNetwork = 0;
     maxWidth = Config::thumbItemWidth;
     maxHeight = Config::thumbItemHeight;
     adjustSize = true;
@@ -72,10 +78,47 @@ ThumbItem::~ThumbItem()
 {
 }
 
+void ThumbItem::setOnlineImage(bool online)
+{
+	mIsOnlineImage = online;
+}
+
+bool ThumbItem::isOnlineImage() const
+{
+	return mIsOnlineImage;
+}
+
+void ThumbItem::setThumbPath(const QString &path)
+{
+	thumb_path = path;
+	if (mIsOnlineImage || path.startsWith("http")) { //TODO: other proctol?
+		if (!mNetwork) {
+			mNetwork = new QNetworkAccessManager(this);
+			connect(mNetwork, SIGNAL(finished(QNetworkReply*)), this, SLOT(loadFinish(QNetworkReply*)));
+		}
+		QNetworkRequest request(path);
+		mNetwork->get(request);
+	}
+
+}
+
 void ThumbItem::setOriginImage(const QString& path)
 {
     origin_image_path = path;
 }
+
+void ThumbItem::resize(qreal width, qreal height)
+{
+	mWidth = width;
+	mHeight = height;
+}
+
+void ThumbItem::resize(const QSizeF &size)
+{
+	mWidth = size.width();
+	mHeight = size.height();
+}
+
 
 qreal ThumbItem::borderWidth() const
 {
@@ -136,7 +179,6 @@ qreal ThumbItem::contentHeight() const
 void ThumbItem::showGlow()
 {
 	if (Q_UNLIKELY(!mGlow)) {
-		ezlog_debug();
 		mGlow = new OutlineGlowItem(this);
 		//mGlow->setZValue(zValue() + 1);
 		QSizeF s = boundingRect().size();
@@ -339,11 +381,10 @@ void ThumbItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 #if ZOOM_ON_HOVER
     if (UiManager::lastHoverThumb) {
         UiManager::lastHoverThumb->zoom(ZoomOut);
-		ezlog_debug("last hover: %#x", UiManager::lastHoverThumb);
     }
     UiManager::lastHoverThumb = this;
 	//scene()->views().at(0)->centerOn(this);
-    ensureVisible();
+	//ensureVisible();
 	zoom(ZoomIn);
 #endif //ZOOM_ON_HOVER
 	QGraphicsItem::hoverEnterEvent(event);
@@ -365,7 +406,6 @@ void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     //toggle zoom
 	if (event->button() == Qt::LeftButton) {
 		if (UiManager::lastHoverThumb) {
-			ezlog_debug("zoom out");
 			UiManager::lastHoverThumb->zoom(ZoomOut);
 		}
 		if (UiManager::lastHoverThumb == this) {
@@ -373,10 +413,10 @@ void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 			return;
 		}
 		if (!mGlow || !mGlow->isVisible()) {//test !mGlow first. mGlow may be 0
-			ezlog_debug("zoom in");
 			zoom(ZoomIn);
 			showGlow();
-			ensureVisible(); //UiManager::tryMoveCenter(this);
+			//ensureVisible() will move the fixed items. we need our own implemention
+			//ensureVisible(); //UiManager::tryMoveCenter(this);
 			//TODO: rewrite center on
 			//scene()->views().at(0)->centerOn(this); //too fast
 			UiManager::lastHoverThumb = this;
@@ -388,6 +428,9 @@ void ThumbItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void ThumbItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
+	//TODO: show large online image
+	if (mIsOnlineImage)
+		return;
 	UiManager::instance()->gotoPage(UiManager::PlayPage, origin_image_path);
 	QGraphicsItem::mouseDoubleClickEvent(event);
 }
@@ -419,4 +462,27 @@ bool ThumbItem::sceneEvent(QEvent *event)
 	return true;
 }
 */
+
+void ThumbItem::updateLoadProgress(qint64 value)
+{
+
+}
+
+void ThumbItem::loadFinish(QNetworkReply *reply)
+{
+	QNetworkReply::NetworkError error = reply->error();
+	if (error != QNetworkReply::NoError) {
+		qCritical("Network error: %s", qPrintable(reply->errorString()));
+		thumb = QImage(":/icons/close.png");
+		prepairSize();
+		update(boundingRect());
+		return;
+	}
+	QByteArray data = reply->readAll();
+	thumb.loadFromData(data);
+	update(boundingRect());
+	reply->deleteLater();
+	emit loadFinished();
+}
+
 } //namespace PhotoKit

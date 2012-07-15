@@ -4,13 +4,14 @@
 /*!
   TODO: subclass of QGraphicsEffect
 */
-#include <QGraphicsItem>
+#include <QGraphicsObject>
 class QGraphicsBlurEffect;
 namespace PhotoKit {
 
 class ThumbItem;
-class ReflectEffectItem : public QGraphicsItem
+class ReflectEffectItem : public QGraphicsObject
 {
+	Q_OBJECT
 public:
 	//TODO: MirrorLeft and MirrorTop
 	/*MirrorBottom and MirrorRight can be directly installed to an item without special settings*/
@@ -36,7 +37,11 @@ protected:
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option = 0, QWidget *widget = 0);
     void drawReflect(); //createImage
 
+protected slots:
+	void updateSourceReflect();
+
 private:
+	bool mSourceAvailable;
     bool mBlur, mGradient;
     QGraphicsBlurEffect *mBlurEffect;
     ThumbItem *mTarget;

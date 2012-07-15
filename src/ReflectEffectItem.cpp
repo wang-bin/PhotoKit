@@ -7,10 +7,13 @@
 namespace PhotoKit {
 
 ReflectEffectItem::ReflectEffectItem(ThumbItem* target, MirrorDirection direction)
-    :QGraphicsItem(target),mBlur(true),mGradient(true),mBlurEffect(0),mTarget(target),mDirection(direction),mMirrorDistance(2),mReflect(0)
+	:QGraphicsObject(target),mBlur(true),mGradient(true),mBlurEffect(0),mTarget(target),mDirection(direction),mMirrorDistance(2),mReflect(0)
 {
+	mSourceAvailable = !mTarget->isOnlineImage();
 	setCacheMode(QGraphicsItem::ItemCoordinateCache); //item.scroll enabled(not for gl). speed up
 	setFlag(QGraphicsItem::ItemStacksBehindParent);
+
+	connect(mTarget, SIGNAL(loadFinished()), this, SLOT(updateSourceReflect()));
 }
 
 ReflectEffectItem::~ReflectEffectItem()
@@ -71,10 +74,11 @@ QRectF ReflectEffectItem::boundingRect() const
 
 void ReflectEffectItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    if (!mReflect) {
+	if (!mReflect && mSourceAvailable) {
         drawReflect();
     }
-    painter->drawImage(mPos, *mReflect);
+	if (mReflect)
+		painter->drawImage(mPos, *mReflect);
 }
 
 void ReflectEffectItem::drawReflect()
@@ -125,6 +129,13 @@ void ReflectEffectItem::drawReflect()
         mBlurEffect->setBlurHints(QGraphicsBlurEffect::PerformanceHint);
         setGraphicsEffect(mBlurEffect);
     } //TODO: how to remove effect? can not delete
+}
+
+void ReflectEffectItem::updateSourceReflect()
+{
+	drawReflect();
+	mSourceAvailable = true;
+	update();
 }
 
 } //namespace PhotoKit

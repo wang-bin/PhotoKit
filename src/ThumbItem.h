@@ -22,22 +22,30 @@
 #define PHOTOKIT_THUMBITEM_H
 
 #include "PhotoKit_Global.h"
-#include <QGraphicsItem>
+#include <QGraphicsObject>
 #define NO_BASE
 class QGraphicsItemAnimation;
+class QNetworkReply;
+class QNetworkAccessManager;
 namespace PhotoKit {
 class ItemAnimation;
 class OutlineGlowItem;
-class ThumbItem : public QGraphicsItem
+class ThumbItem : public QGraphicsObject  //QGraphicsItem
 {
+	Q_OBJECT
 public:
 	enum ZoomAction { ZoomIn, ZoomOut};
 	explicit ThumbItem(QGraphicsItem *parent = 0);
 	explicit ThumbItem(const QImage& image, QGraphicsItem *parent = 0);
 	~ThumbItem();
 
+	void setOnlineImage(bool online);
+	bool isOnlineImage() const;
+	void setThumbPath(const QString& path);
     void setOriginImage(const QString& path);
 
+	void resize(qreal width, qreal height);
+	void resize(const QSizeF& size);
     qreal borderWidth() const;
     qreal marginWidth() const;
 	QImage thumbImage() const; //origin thumb
@@ -57,6 +65,9 @@ public:
 	qreal contentWidth() const;
 	qreal contentHeight() const;
 
+signals:
+	void loadFinished();
+
 protected:
     void prepairSize();
     virtual QImage* createImage(const QMatrix &) const;
@@ -67,8 +78,14 @@ protected:
 	virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
     //virtual bool sceneEvent(QEvent *event);
 
+private slots:
+	void updateLoadProgress(qint64 value);
+	void loadFinish(QNetworkReply* reply); //TODO: no param
+
 private:
-	QString origin_image_path;
+	bool mIsOnlineImage;
+	QNetworkAccessManager *mNetwork;
+	QString thumb_path, origin_image_path;
 	QImage thumb;
 	//QImage origin;
 	OutlineGlowItem *mGlow;
