@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 {
 	ezlog_init_default();
     ezlog_registerAppender(file_appender);
-    ezlog_add_logfile("/tmp/PhotoKit.ezlog", New);
+
     QApplication a(argc, argv);
 #ifdef CACHE_APPDIR
     //Config::setAppDir(QCoreApplication::applicationDirPath());
@@ -44,13 +44,15 @@ int main(int argc, char *argv[])
     QDir().mkpath(Config::thumbDir);
     ezlog_debug("appdir: %s, thumbdir: %s", qPrintable(QCoreApplication::applicationDirPath()), qPrintable(Config::thumbDir));
     OptionParser::parseCmd(argc, argv);
+	if (Config::logToFile)
+		ezlog_add_logfile("/tmp/PhotoKit.ezlog", New);
 
     QString qm("PhotoKit_" + QLocale::system().name());
 	QTranslator translator;
     translator.load(qm, ":/i18n");
 	a.installTranslator(&translator);
     qDebug("qm: %s", qPrintable(qm));
-    qDebug() << QStyleFactory::keys(); //("Windows", "Motif", "CDE", "Plastique", "GTK+", "Cleanlooks")
+	//qDebug() << QStyleFactory::keys(); //("Windows", "Motif", "CDE", "Plastique", "GTK+", "Cleanlooks")
     //a.setStyle(QStyleFactory::create("Cleanlooks"));
     /*QFile f(":/style/ui.css");
     if (f.open(QIODevice::ReadOnly)) {

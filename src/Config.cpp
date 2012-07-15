@@ -1,5 +1,5 @@
 /******************************************************************************
-	config.cpp: description
+	Config: global configurations
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -83,6 +83,8 @@ bool Config::keepAspectRatio = true;
 
 QString Config::weiboUser;
 QString Config::weiboPasswd;
+
+bool Config::logToFile = false;
 
 void Config::setAppDir(const QString &dir)
 {

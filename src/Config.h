@@ -1,5 +1,5 @@
 /******************************************************************************
-	config.h: description
+	Config: global configurations
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -88,6 +88,8 @@ public:
 
 	static QString weiboUser;
 	static QString weiboPasswd;
+
+	static bool logToFile;
 private:
 	Config(){}
 };
