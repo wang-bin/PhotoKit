@@ -1,5 +1,5 @@
 /******************************************************************************
-	ToolTip.cpp: description
+	ToolTip: tooltip to show image or text
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify

@@ -1,5 +1,5 @@
 /******************************************************************************
-	WeiboBox.cpp: description
+	WeiboDialog: QGraphicsItem based weibo dialog
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 ******************************************************************************/
 
 
-#include "WeiboBox.h"
+#include "WeiboDialog.h"
 #include <QtCore/QSettings>
 #include <QTextDocument>
 #include <QApplication>
@@ -34,10 +34,10 @@ namespace PhotoKit {
 
 static QByteArray access_token;
 
-class WeiboBoxPrivate : public DialogPrivate
+class WeiboDialogPrivate : public DialogPrivate
 {
 public:
-	WeiboBoxPrivate() {
+	WeiboDialogPrivate() {
 		api = new WeiboApi;
 		qreal x = 6;
 		QGraphicsTextItem *title = new QGraphicsTextItem(titleBar);
@@ -97,14 +97,14 @@ public:
 		passwdEdit->setFont(f);
 		passwdEdit->setEchoMode(TextEdit::Password);
 	}
-	~WeiboBoxPrivate() {
+	~WeiboDialogPrivate() {
 		if (api) {
 			delete api;
 			api = 0;
 		}
 	}
 
-	void setupUi(WeiboBox *ui) {
+	void setupUi(WeiboDialog *ui) {
 		QObject::connect(api, SIGNAL(error(QString)), ui, SLOT(doError(QString)));
         QObject::connect(api, SIGNAL(loginOk()), ui, SLOT(loginDone()));
         ui->resize(qApp->desktop()->width()/2 - 11, qApp->desktop()->height() -22);
@@ -118,46 +118,46 @@ public:
 	WeiboApi *api;
 };
 
-WeiboBox::WeiboBox(QGraphicsScene *scene, QGraphicsItem *parent) :
-	Dialog(*new WeiboBoxPrivate, scene, parent)
+WeiboDialog::WeiboDialog(QGraphicsScene *scene, QGraphicsItem *parent) :
+	Dialog(*new WeiboDialogPrivate, scene, parent)
 {
-	Q_D(WeiboBox);
-	d->WeiboBoxPrivate::setupUi(this);
+	Q_D(WeiboDialog);
+	d->WeiboDialogPrivate::setupUi(this);
 }
 
-WeiboBox::~WeiboBox()
+WeiboDialog::~WeiboDialog()
 {
 
 }
 
-void WeiboBox::setUser(const QString &user)
+void WeiboDialog::setUser(const QString &user)
 {
-	Q_D(WeiboBox);
+	Q_D(WeiboDialog);
 	d->userEdit->setPlainText(user);
 }
 
-void WeiboBox::setPassword(const QString &passwd)
+void WeiboDialog::setPassword(const QString &passwd)
 {
-	Q_D(WeiboBox);
+	Q_D(WeiboDialog);
 	d->passwdEdit->setPlainText(passwd);
 	//d->passwdEdit->setData(0, passwd);
 }
 
-void WeiboBox::setImage(const QString &path)
+void WeiboDialog::setImage(const QString &path)
 {
-	Q_D(WeiboBox);
+	Q_D(WeiboDialog);
 	d->image = path;
 }
 
-void WeiboBox::doError(const QString &error)
+void WeiboDialog::doError(const QString &error)
 {
 	Q_UNUSED(error);
 	Tools::showError(3000);
 }
 
-void WeiboBox::login()
+void WeiboDialog::login()
 {
-	Q_D(WeiboBox);
+	Q_D(WeiboDialog);
 	if (d->userEdit->text().isEmpty() || d->passwdEdit->text().isEmpty()) {
 		Tools::showTip("<h2 style='color:red;text-align:center;'>" + tr("Error") + "</h2><p style='color:white;font-size:22px;'>"
 					   + tr("User name and password can't be empty") + "</p>", true, 3000);
@@ -168,15 +168,15 @@ void WeiboBox::login()
 	d->api->login();
 }
 
-void WeiboBox::sendOk()
+void WeiboDialog::sendOk()
 {
 	accept();
 	Tools::showOk(3000);
 }
 
-void WeiboBox::sendWeiboWithPicture()
+void WeiboDialog::sendWeiboWithPicture()
 {
-	Q_D(WeiboBox);
+	Q_D(WeiboDialog);
     QSettings cfg(Config::configPath, QSettings::IniFormat);
 	cfg.setIniCodec("UTF-8");
     if (d->userEdit->text().isEmpty() && d->passwdEdit->text().isEmpty())
@@ -212,9 +212,9 @@ void WeiboBox::sendWeiboWithPicture()
     connect(d->api, SIGNAL(sendOk()), SLOT(sendOk()));
 }
 
-void WeiboBox::loginDone()
+void WeiboDialog::loginDone()
 {
-    Q_D(WeiboBox);
+    Q_D(WeiboDialog);
     access_token = d->api->accessToken();
 }
 

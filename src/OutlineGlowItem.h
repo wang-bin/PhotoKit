@@ -1,5 +1,5 @@
 /******************************************************************************
-	OutlineGlowItem.h: description
+	OutlineGlowItem: blured outline for items
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef OUTLINEGLOWITEM_H
-#define OUTLINEGLOWITEM_H
+#ifndef PHOTOKIT_OUTLINEGLOWITEM_H
+#define PHOTOKIT_OUTLINEGLOWITEM_H
 
 #include "PhotoKit_Global.h"
 
@@ -48,4 +48,4 @@ private:
 };
 
 } //namespace PhotoKit
-#endif // OUTLINEGLOWITEM_H
+#endif // PHOTOKIT_OUTLINEGLOWITEM_H

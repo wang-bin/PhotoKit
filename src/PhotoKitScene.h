@@ -1,5 +1,5 @@
 /******************************************************************************
-	PhotoKitScene.h: description
+	PhotoKitScene: PhotoKit's scene
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef PHOTOKITSCENE_H
-#define PHOTOKITSCENE_H
+#ifndef PHOTOKIT_PHOTOKITSCENE_H
+#define PHOTOKIT_PHOTOKITSCENE_H
 
 #include "PhotoKit_Global.h"
 
@@ -35,7 +35,7 @@ public:
 	explicit PhotoKitScene(QObject *parent = 0);
 
 protected:
-    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+	//virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
     //virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 
 private:
@@ -43,4 +43,4 @@ private:
 
 } //namespace PhotoKit
 
-#endif // PHOTOKITSCENE_H
+#endif // PHOTOKIT_PHOTOKITSCENE_H

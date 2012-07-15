@@ -1,5 +1,5 @@
 /******************************************************************************
-    DemoItemAnimation.h: description
+	DemoItemAnimation: from qtdemo
     Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
     
     This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef DEMOITEMANIMATION_H
-#define DEMOITEMANIMATION_H
+#ifndef PHOTOKIT_DEMOITEMANIMATION_H
+#define PHOTOKIT_DEMOITEMANIMATION_H
 
 #include <QGraphicsItemAnimation>
 #include <QPointF>
@@ -73,4 +73,4 @@ private slots:
     virtual void playWithoutDelay();
 };
 } //namespace PhotoKit
-#endif // DEMOITEMANIMATION_H
+#endif // PHOTOKIT_DEMOITEMANIMATION_H

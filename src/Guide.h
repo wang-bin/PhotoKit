@@ -1,5 +1,5 @@
 /******************************************************************************
-    Guide.h: description
+	Guide: from qtdemo
     Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
     
     This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef GUIDE_H
-#define GUIDE_H
+#ifndef PHTOKIT_GUIDE_H
+#define PHTOKIT_GUIDE_H
 
 #include <QtCore/QRectF>
 
@@ -51,4 +51,4 @@ public:
 };
 
 } //namespace PhotoKit
-#endif // GUIDE_H
+#endif // PHTOKIT_GUIDE_H

@@ -1,5 +1,5 @@
 /******************************************************************************
-	PhotoKitView.h: description
+	PhotoKitView: PhotoKit's view
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef PHOTOKITVIEW_H
-#define PHOTOKITVIEW_H
+#ifndef PHOTOKIT_PHOTOKITVIEW_H
+#define PHOTOKIT_PHOTOKITVIEW_H
 
 #include "PhotoKit_Global.h"
 
@@ -81,4 +81,4 @@ private:
 
 } //namespace PhotoKit
 
-#endif // PHOTOKITVIEW_H
+#endif // PHOTOKIT_PHOTOKITVIEW_H

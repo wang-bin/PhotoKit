@@ -1,5 +1,5 @@
 /******************************************************************************
-	ExifReader.h: description
+	ExifReader: reading the exif information using libexif
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify

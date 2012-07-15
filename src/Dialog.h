@@ -1,5 +1,5 @@
 /******************************************************************************
-	Dialog.h: description
+	Dialog: widget with dialog options
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify

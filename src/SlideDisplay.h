@@ -1,5 +1,5 @@
 /******************************************************************************
-	SlideDisplay.h: description
+	SlideDisplay: an item to show slide effect
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -23,13 +23,14 @@
 
 #include <QtCore/QDateTime>
 #include "ItemAnimation.h"
-#include <QGraphicsItem>
+#include <QGraphicsWidget>
+#include "BaseItem.h"
 class NextEffect;
 
 namespace PhotoKit {
 class SlidePlayControl;
 //TODO: flip background to show information
-class SlideDisplay : public QGraphicsItem
+class SlideDisplay : public BaseItem
 {
 public:
 	enum ViewMode { SingleImage, SlideImage};

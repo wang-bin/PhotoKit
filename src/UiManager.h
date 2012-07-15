@@ -1,5 +1,5 @@
 /******************************************************************************
-	UiManager.h: description
+	UiManager: the manager
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef UIMANAGER_H
-#define UIMANAGER_H
+#ifndef PHOTOKIT_UIMANAGER_H
+#define PHOTOKIT_UIMANAGER_H
 
 #include <QObject>
 #include "network/GoogleImageSearcher.h"
@@ -121,4 +121,4 @@ private:
 	int mSearchImageIndex;
 };
 } //namespace PhotoKit
-#endif // UIMANAGER_H
+#endif // PHOTOKIT_UIMANAGER_H

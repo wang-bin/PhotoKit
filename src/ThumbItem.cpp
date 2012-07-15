@@ -1,5 +1,5 @@
 /******************************************************************************
-	ThumbItem.cpp: description
+	ThumbItem: display thumbnail on the wall
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify

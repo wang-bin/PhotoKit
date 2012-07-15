@@ -1,5 +1,5 @@
 /******************************************************************************
-	widget.h: description
+	ThumbTask.h: Thumbnail creator and recorder
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef PHOTOKIT_WIDGET_H
-#define PHOTOKIT_WIDGET_H
+#ifndef PHOTOKIT_THUMBTASK_H
+#define PHOTOKIT_THUMBTASK_H
 
 #include "PhotoKit_Global.h"
 
@@ -80,4 +80,4 @@ private:
 
 } //namespace PhotoKit
 
-#endif // PHOTOKIT_WIDGET_H
+#endif // PHOTOKIT_THUMBTASK_H

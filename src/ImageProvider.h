@@ -1,5 +1,5 @@
 /******************************************************************************
-	ImageProvider.h: description
+	ImageProvider: base class for image filtering
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -51,10 +51,10 @@ public:
 	virtual void fetchMore() = 0;
 
 signals:
-	void imageReady(const QImage& image);
+	//void imageReady(const QImage& image);
 	void imageReady(const ImageBaseInfo& path);
 	void imagesReady(const QList<QImage>& paths);
-	void imagesReady(const QList<ImageBaseInfo>& paths);
+	//void imagesReady(const QList<ImageBaseInfo>& paths);
 
 
 protected:

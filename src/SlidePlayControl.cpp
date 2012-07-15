@@ -1,5 +1,5 @@
 /******************************************************************************
-	SlidePlayControl.cpp: description
+	SlidePlayControl: slide effect controller
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify

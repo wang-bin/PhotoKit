@@ -1,5 +1,5 @@
 /******************************************************************************
-	UiManager.cpp: description
+	UiManager: the manager.
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -34,8 +34,7 @@
 #include "BaseItem.h"
 #include "DemoItemAnimation.h"
 #include "tools/ExifReader.h"
-#include "tools/ConfigDialog.h"
-#include "network/WeiboBox.h"
+#include "network/WeiboDialog.h"
 #include "network/GoogleImageSearcher.h"
 #include "PhotoKitView.h"
 #include "ReflectEffectItem.h"
@@ -372,7 +371,7 @@ void UiManager::showCurrentImageInfo()
 void UiManager::shareToWeibo()
 {
 	mView->setCanTransform(false);
-	WeiboBox w(mView->scene());
+	WeiboDialog w(mView->scene());
 	w.setPos(qApp->desktop()->width()/2, 2);
 	w.setImage(mPlayPageRoot->imagePath());
 	w.setUser(Config::weiboUser);

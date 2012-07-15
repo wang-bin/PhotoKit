@@ -2,10 +2,6 @@
 QT       += core gui opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-#else { #from qt5
-#	INCLUDEPATH += json
-#	include(json/json.pri)
-#}
 
 TARGET = PhotoKit
 TEMPLATE = app
@@ -36,7 +32,6 @@ SOURCES += main.cpp \
     SlidePlayControl.cpp \
     network/weiboapi.cpp \
     network/qput.cpp \
-    tools/ConfigDialog.cpp \
     Guide.cpp \
     DemoItemAnimation.cpp \
     tools/ToolTip.cpp \
@@ -49,7 +44,7 @@ SOURCES += main.cpp \
     tools/ExifReader.cpp \
     Dialog.cpp \
     tools/ImageInfoDialog.cpp \
-    network/WeiboBox.cpp \
+    network/WeiboDialog.cpp \
     TextEdit.cpp \
     ImageProvider.cpp \
     network/GoogleImageSearcher.cpp
@@ -73,7 +68,6 @@ HEADERS  += \
     SlidePlayControl.h \
     network/weiboapi.h \
     network/qput.h \
-    tools/ConfigDialog.h \
     Guide.h \
     DemoItemAnimation.h \
     tools/ToolTip.h \
@@ -87,7 +81,7 @@ HEADERS  += \
     Dialog.h \
     tools/ImageInfoDialog.h \
     Dialog_p.h \
-    network/WeiboBox.h \
+    network/WeiboDialog.h \
     TextEdit.h \
     ImageProvider.h \
     ImageProvider_p.h \

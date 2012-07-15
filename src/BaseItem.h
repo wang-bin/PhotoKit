@@ -1,5 +1,5 @@
 /******************************************************************************
-    BaseItem.h: description
+	BaseItem: animation supported item. Many code are from qtdemo
     Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
     
     This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef PAGEROOTITEM_H
-#define PAGEROOTITEM_H
+#ifndef PHOTOKIT_BASEITEM_H
+#define PHOTOKIT_BASEITEM_H
 
 #include <QGraphicsItem>
 
@@ -114,4 +114,4 @@ private:
 };
 
 } //namespace PhotoKit
-#endif // PAGEROOTITEM_H
+#endif // PHOTOKIT_BASEITEM_H

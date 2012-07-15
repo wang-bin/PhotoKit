@@ -1,5 +1,5 @@
 /******************************************************************************
-	SlidePlayControl.h: description
+	SlidePlayControl: slide effect controller
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef SLIDEPLAYCONTROL_H
-#define SLIDEPLAYCONTROL_H
+#ifndef PHOTOKIT_SLIDEPLAYCONTROL_H
+#define PHOTOKIT_SLIDEPLAYCONTROL_H
 
 #include <QtCore/QObject>
 #include <QtCore/QStringList>
@@ -73,4 +73,4 @@ private:
 
 } //namespace PhotoKit
 
-#endif // SLIDEPLAYCONTROL_H
+#endif // PHOTOKIT_SLIDEPLAYCONTROL_H

@@ -24,7 +24,7 @@
 #include "PhotoKit_Global.h"
 
 #include <QGraphicsItem>
-
+//Hide bar if value == 100
 namespace PhotoKit {
 
 class ProgressBarItem : public QGraphicsItem

@@ -1,5 +1,5 @@
 /******************************************************************************
-	ImageProvider_p.h: description
+	ImageProviderPrivate: base class for the private class of ImageProvider's subclasses
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify

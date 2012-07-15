@@ -1,5 +1,5 @@
 /******************************************************************************
-	ItemAnimation.h: description
+	ItemAnimation: animation for non-qobject items
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef ITEMANIMATION_H
-#define ITEMANIMATION_H
+#ifndef PHOTOKIT_ITEMANIMATION_H
+#define PHOTOKIT_ITEMANIMATION_H
 
 #include <QtCore/QObject>
 #include "PhotoKit_Global.h"
@@ -63,4 +63,4 @@ private:
 };
 
 }//namespace PhotoKit
-#endif // ITEMANIMATION_H
+#endif // PHOTOKIT_ITEMANIMATION_H

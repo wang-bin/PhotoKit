@@ -1,5 +1,5 @@
 /******************************************************************************
-	GoogleImageSearcher.cpp: description
+	GoogleImageSearcher: a wrapper for google image search api
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify

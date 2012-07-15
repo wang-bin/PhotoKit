@@ -1,5 +1,5 @@
 /******************************************************************************
-	PhotoKitScene.cpp: description
+	PhotoKitScene: PhotoKit's scene
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -36,13 +36,13 @@ PhotoKitScene::PhotoKitScene(QObject *parent) :
 	setBackgroundBrush(QBrush(Config::backgroundColor));
 
 }
-
+/*
 void PhotoKitScene::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     //
     QGraphicsScene::contextMenuEvent(event);
 }
-
+*/
 /*
 void PhotoKitScene::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {

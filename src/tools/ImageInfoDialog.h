@@ -1,5 +1,5 @@
 /******************************************************************************
-	ImageInfoDialog.h: description
+	ImageInfoDialog: a dialog to display image information
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef IMAGEINFODIALOG_H
-#define IMAGEINFODIALOG_H
+#ifndef PHOTOKIT_IMAGEINFODIALOG_H
+#define PHOTOKIT_IMAGEINFODIALOG_H
 
 #include "Dialog.h"
 
@@ -47,4 +47,4 @@ private slots:
 
 } //namespace PhotoKit
 
-#endif // IMAGEINFODIALOG_H
+#endif // PHOTOKIT_IMAGEINFODIALOG_H

@@ -1,5 +1,5 @@
 /******************************************************************************
-	GoogleImageSearcher.h: description
+	GoogleImageSearcher: a wrapper for google image search api
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 ******************************************************************************/
 
 
-#ifndef GOOGLEIMAGESEARCHER_H
-#define GOOGLEIMAGESEARCHER_H
+#ifndef PHOTOKIT_GOOGLEIMAGESEARCHER_H
+#define PHOTOKIT_GOOGLEIMAGESEARCHER_H
 
 #include "ImageProvider.h"
 
@@ -58,4 +58,4 @@ private slots:
 };
 
 } //namespace PhotoKit
-#endif // GOOGLEIMAGESEARCHER_H
+#endif // PHOTOKIT_GOOGLEIMAGESEARCHER_H

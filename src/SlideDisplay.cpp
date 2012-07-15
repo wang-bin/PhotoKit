@@ -1,5 +1,5 @@
 /******************************************************************************
-	SlideDisplay.cpp: description
+	SlideDisplay: an item to show slide effect
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -34,7 +34,7 @@
 namespace PhotoKit {
 
 SlideDisplay::SlideDisplay(QGraphicsItem *parent)
-    :QGraphicsItem(parent),mMode(SingleImage)
+	:BaseItem(parent),mMode(SingleImage)
 {
 	mSlideEffect = 0;
     mMaxWidth = (qreal)qApp->desktop()->width();
@@ -181,7 +181,8 @@ void SlideDisplay::keyPressEvent(QKeyEvent *event)
 		}
 		break;
 	}
-	event->accept();
+	//event->accept();
+	QGraphicsItem::keyPressEvent(event);
 }
 
 /*

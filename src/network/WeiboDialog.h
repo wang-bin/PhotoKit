@@ -1,5 +1,5 @@
 /******************************************************************************
-	ConfigDialog.h: description
+	WeiboDialog: QGraphicsItem based weibo dialog
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,30 +18,40 @@
 ******************************************************************************/
 
 
-#ifndef CONFIGDIALOG_H
-#define CONFIGDIALOG_H
+#ifndef PHOTOKIT_WEIBOBOX_H
+#define PHOTOKIT_WEIBOBOX_H
 
-#include <QDialog>
+#include "Dialog.h"
 
 namespace PhotoKit {
-
-class ConfigDialogPrivate;
-class ConfigDialog : public QDialog
+class WeiboDialogPrivate;
+class WeiboDialog : public Dialog
 {
 	Q_OBJECT
-	Q_DECLARE_PRIVATE(ConfigDialog)
+	Q_DECLARE_PRIVATE(WeiboDialog)
 public:
-	explicit ConfigDialog(QWidget *parent = 0);
-	
-signals:
-	
+	explicit WeiboDialog(QGraphicsScene *scene, QGraphicsItem *parent = 0);
+	~WeiboDialog();
+
+	void setUser(const QString& user);
+	void setPassword(const QString& passwd);
+	void setImage(const QString& path);
+
+	//void showLogin();
+
 public slots:
-	void saveConfig();
-	void selectBackgroundColor();
-	void selectGlowColor();
-	void clearCache();
-private:
-	ConfigDialogPrivate *d_ptr;
+	void doError(const QString& error);
+    //void loginOrSend();
+	//void cancel();
+	void login();
+	void sendWeiboWithPicture();
+    void loginDone();
+
+private slots:
+	void sendOk();
+
 };
+
 } //namespace PhotoKit
-#endif // CONFIGDIALOG_H
+
+#endif // PHOTOKIT_WEIBOBOX_H
