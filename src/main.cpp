@@ -35,7 +35,6 @@ using namespace PhotoKit;
 int main(int argc, char *argv[])
 {
 	ezlog_init_default();
-    ezlog_registerAppender(file_appender);
 
     QApplication a(argc, argv);
 #ifdef CACHE_APPDIR
@@ -44,9 +43,10 @@ int main(int argc, char *argv[])
     QDir().mkpath(Config::thumbDir);
     ezlog_debug("appdir: %s, thumbdir: %s", qPrintable(QCoreApplication::applicationDirPath()), qPrintable(Config::thumbDir));
     OptionParser::parseCmd(argc, argv);
-	if (Config::logToFile)
+    if (Config::logToFile) {
+        ezlog_registerAppender(file_appender);
 		ezlog_add_logfile("/tmp/PhotoKit.ezlog", New);
-
+    }
     QString qm("PhotoKit_" + QLocale::system().name());
 	QTranslator translator;
     translator.load(qm, ":/i18n");
