@@ -110,6 +110,11 @@ void SlidePlayControl::setImages(const QStringList &images)
 	paths = images;
 }
 
+void SlidePlayControl::addImage(const QString &path)
+{
+	paths.append(path);
+}
+
 void SlidePlayControl::setPlayOne(bool yes)
 {
 	one = yes;

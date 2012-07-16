@@ -401,6 +401,7 @@ void UiManager::updateThumbItemAt(int index)
 	int row = show_index % Config::thumbRows;
 
     ThumbInfo info(mThumbTask->thumbInfoAt(index));
+	mPlayControl->addImage(info.path);
 	ThumbItem *item = new ThumbItem(info.thumb, mThumbPageRoot);
     item->setOriginImage(info.path);
     item->setPos(col * (Config::thumbItemWidth + (Config::thumbBorder + Config::thumbMargin)*2 + Config::thumbSpacing)

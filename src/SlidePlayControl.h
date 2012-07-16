@@ -39,6 +39,7 @@ public:
 	void setDisplay(SlideDisplay* display); //not own the display
 	void setDirectory(const QString& dir); //add remove
 	void setImages(const QStringList& images);
+	void addImage(const QString& path);
 	void setPlayOne(bool yes); //TODO: remove
 	void setDirection(Direction d);
 	//void setImages(const QStringList& paths); //add remove
