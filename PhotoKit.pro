@@ -5,13 +5,19 @@
 #-------------------------------------------------
 
 TEMPLATE = subdirs
-CONFIG += ordered
-SUBDIRS = libezlog libprogramoptions libNextEffect photokit test
+#CONFIG += ordered
+SUBDIRS += libezlog libprogramoptions libNextEffect photokit test
 
 libezlog.file = src/ezlog/src/libezlog.pro
 libprogramoptions.file = src/ProgramOptions/src/libProgramOptions.pro
 libNextEffect.file = src/NextEffect/src/libNextEffect.pro
 photokit.file = src/PhotoKit.pro
+
+win32 {
+SUBDIRS += libexif
+libexif.file = src/3rdparty/libexif.pro
+photokit.depends += libexif
+}
 photokit.depends += libezlog libprogramoptions libNextEffect
 
 symbian {
