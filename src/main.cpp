@@ -66,11 +66,18 @@ int main(int argc, char *argv[])
     UiManager::instance()->init(&view);
 	view.showFullScreen();
 	//view.showMaximized();
+	ezlog_debug("images total: %d", OptionParser::images.size());
 	if (OptionParser::images.isEmpty()) {
+		ezlog_debug("add default images");
 		QStringList defalutimages ;
 		QString mpath(":/images/"); //ends with '/'
 		if (QDir(mpath).exists())
 			defalutimages = QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
+		mpath = qApp->applicationDirPath() + "/images/"; //ends with '/'
+		ezlog_debug("Adding '%s'", qPrintable(mpath));
+		if (QDir(mpath).exists()) {
+			defalutimages = QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
+		}
 		mpath = QDir::homePath() + "/MyDocs/Pictures/"; //Meego
 		if (QDir(mpath).exists())
 			defalutimages << QDir(mpath).entryList(Tools::imageNameFilters()).replaceInStrings(QRegExp("^"), mpath);
