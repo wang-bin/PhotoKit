@@ -153,12 +153,13 @@ MOC_DIR = $$BUILD_DIR/.moc/$${QT_VERSION}
 RCC_DIR = $$BUILD_DIR/.rcc/$${QT_VERSION}
 UI_DIR  = $$BUILD_DIR/.ui/$${QT_VERSION}
 
-!build_pass:message(target: $$DESTDIR/$$TARGET)
-
+!build_pass {
+message(target: $$DESTDIR/$$TARGET)
+message($$PWD)
 message($$OUT_PWD)
 message($$IN_PWD)
 message($$_FILE_)
-
+}
 COMMON_PRI_INCLUDED = 1
 
 } #end COMMON_PRI_INCLUDED
