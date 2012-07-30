@@ -29,9 +29,9 @@ void ToolBar::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, Q
 QVariant ToolBar::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if (change == QGraphicsItem::ItemPositionHasChanged) {
-        qDebug("pos change: %d (%f, %f)", value.toPointF().x(), value.toPointF().y());
+        qDebug("pos change: (%f, %f)", value.toPointF().x(), value.toPointF().y());
     } else if (change == QGraphicsItem::ItemPositionChange) {
-        qDebug("pos changed: %d (%f, %f)", value.toPointF().x(), value.toPointF().y());
+        qDebug("pos changed:  (%f, %f)", value.toPointF().x(), value.toPointF().y());
     }
     return value;
 }

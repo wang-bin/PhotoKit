@@ -125,7 +125,7 @@ void WeiboApi::sendStatusWithPicture()
 			&& !path.endsWith("png", Qt::CaseInsensitive)
 			&& !path.endsWith("gif", Qt::CaseInsensitive)) {
 		QImage image(path);
-		path = QDir::tempPath() + "/weibotemp" + ".jpg", "JPG";
+        path = QDir::tempPath() + "/weibotemp" + ".jpg";
 		if (!image.save(path)) {
 			qWarning("convert image failed! %s", qPrintable(path));
 			return;

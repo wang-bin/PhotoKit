@@ -32,6 +32,7 @@
 
 #include "tools/Tools.h"
 #include "Config.h"
+#include "ezlog.h"
 
 namespace PhotoKit {
 
@@ -53,11 +54,11 @@ static ThumbInfo loadImage(const QString& path)
 
 static ThumbInfo createThumb(const QString& path)
 {
-    qDebug("%s", qPrintable(path));
+	ezlog_debug("%s", qPrintable(path));
 	QCryptographicHash md5sum(QCryptographicHash::Md5);
 	QFile f(path);
 	if (!f.open(QIODevice::ReadOnly)) {
-		qWarning("open file [%s] error:", qPrintable(path), qPrintable(f.errorString()));
+        qWarning("open file [%s] error: %s", qPrintable(path), qPrintable(f.errorString()));
 	}
 	while (!f.atEnd()) {
 		md5sum.addData(f.read(8192));

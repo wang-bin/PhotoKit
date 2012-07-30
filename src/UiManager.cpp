@@ -396,7 +396,7 @@ void UiManager::showAbout()
 void UiManager::updateThumbItemAt(int index)
 {
 	int show_index = index + mThumbsCount;
-    //qDebug("updateing thumb at %d. show on %d", index, show_index);
+	ezlog_debug("updateing thumb at %d. show on %d", index, show_index);
 	int col = show_index / Config::thumbRows;
 	int row = show_index % Config::thumbRows;
 
