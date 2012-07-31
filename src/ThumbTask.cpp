@@ -17,27 +17,21 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ******************************************************************************/
 
-
 #include "ThumbTask.h"
 
-#include <QApplication>
 #include <QtCore/QCryptographicHash>
-#include <QtCore/QDataStream>
 #include <QtCore/QDir>
 #include <QtCore/QFile>
-#include <QtCore/QFileInfo>
 
 #include <QtCore/QtConcurrentMap>
 #include <QtGui/QImageReader>
-
+#include "ThumbRecorder.h"
 #include "tools/Tools.h"
 #include "Config.h"
 #include "ezlog.h"
 
 namespace PhotoKit {
 
-ThumbHash ThumbRecorder::thumbs;
-QStringList ThumbRecorder::display;
 //OwnPtr<ThumbInfo>?
 
 static ThumbInfo loadImage(const QString& path)
@@ -45,7 +39,7 @@ static ThumbInfo loadImage(const QString& path)
 	ThumbInfo thumb;
 	QImage image(path);
 	if (image.isNull()) {
-		ThumbRecorder::displayedThumbs()->removeOne(path);
+		ThumbRecorder::instance()->displayedThumbs()->removeOne(path);
 	}
 	thumb.thumb = image;
 	thumb.path = path;
@@ -64,25 +58,25 @@ static ThumbInfo createThumb(const QString& path)
 		md5sum.addData(f.read(8192));
 	}
 	QString md5(md5sum.result().toHex());
-	if (ThumbRecorder::thumbHash()->contains(path)) {
-		QString thumb_path = ThumbRecorder::thumbHash()->value(path);
+	if (ThumbRecorder::instance()->thumbHash()->contains(path)) {
+		QString thumb_path = ThumbRecorder::instance()->thumbHash()->value(path);
 		if (thumb_path.endsWith(md5)) {
 			ThumbInfo thumb;
 			thumb.thumb = QImage(thumb_path);
 			thumb.path = path;
 			if (!thumb.thumb.isNull()) {
-				ThumbRecorder::addDisplayedThumb(path);
+				ThumbRecorder::instance()->addDisplayedThumb(path);
 				return thumb;
 			}
 		}
         qDebug("existing thumb file not match");
-		ThumbRecorder::thumbHash()->remove(path);
+		ThumbRecorder::instance()->thumbHash()->remove(path);
 		QFile::remove(thumb_path);
 	}
 	ThumbInfo thumb;
 	QImage image(path);
 	if (image.isNull()) {
-		ThumbRecorder::displayedThumbs()->removeOne(path);
+		ThumbRecorder::instance()->displayedThumbs()->removeOne(path);
 		return thumb;
 	}
 	QSize s = image.size();
@@ -100,85 +94,14 @@ static ThumbInfo createThumb(const QString& path)
 
 	//save thumb to file. use imagewriter and setKey() update hash with
 	QString thumbPath = Config::thumbDir + "/" + md5;
-	ThumbRecorder::thumbHash()->insert(path, thumbPath);
-	ThumbRecorder::addDisplayedThumb(path);
+	ThumbRecorder::instance()->thumbHash()->insert(path, thumbPath);
+	ThumbRecorder::instance()->addDisplayedThumb(path);
 	image.save(thumbPath, "PNG");
 	thumb.thumb = image;
 	thumb.path = path;
 	return thumb;
 }
 
-
-ThumbRecorder* ThumbRecorder::self = 0;
-ThumbRecorder::ThumbRecorder(QObject *parent)
-	:QObject(parent)
-{
-	self = this;
-	QFile f(Config::thumbRecordFile);
-	if (!f.open(QIODevice::ReadOnly)) {
-		qWarning("Open thumb record file error: %s", qPrintable(f.errorString()));
-	} else {QDataStream d(&f);
-		d >> thumbs;
-	}
-	QFile f2(Config::displayedThumbRecordFile);
-	if (!f2.open(QIODevice::ReadOnly)) {
-		qWarning("Open thumb record file error: %s", qPrintable(f2.errorString()));
-	} else {QDataStream d2(&f2);
-		d2 >> display;
-	}
-}
-
-ThumbRecorder* ThumbRecorder::instance()
-{
-	if (!self) {
-		new ThumbRecorder;
-	}
-	return self;
-}
-
-ThumbHash *ThumbRecorder::thumbHash()
-{
-	if (!self)
-		new ThumbRecorder;
-	return &ThumbRecorder::thumbs;
-}
-
-QStringList* ThumbRecorder::displayedThumbs()
-{
-	if (!self)
-		new ThumbRecorder;
-	return &ThumbRecorder::display;
-}
-
-void ThumbRecorder::addDisplayedThumb(const QString &path)
-{
-	if (display.contains(path))
-		return;
-	display.append(path);
-}
-
-void ThumbRecorder::clearDisplay()
-{
-	display.clear();
-}
-
-void ThumbRecorder::save()
-{
-	QFile f(Config::thumbRecordFile);
-	if (!f.open(QIODevice::WriteOnly)) {
-		qWarning("Open thumb record file error: %s", qPrintable(f.errorString()));
-		return;
-	}
-	QDataStream d(&f);
-	d << thumbs;
-	QFile f2(Config::displayedThumbRecordFile);
-	if (!f2.open(QIODevice::WriteOnly)) {
-		qWarning("Open thumb record file error: %s", qPrintable(f2.errorString()));
-		return;
-	}
-	QDataStream d2(&f2);
-	d2 << display;
-}
 
 ThumbTask::ThumbTask()
 {

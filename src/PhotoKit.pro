@@ -48,7 +48,8 @@ SOURCES += main.cpp \
     network/WeiboDialog.cpp \
     TextEdit.cpp \
     ImageProvider.cpp \
-    network/GoogleImageSearcher.cpp
+    network/GoogleImageSearcher.cpp \
+    ThumbRecorder.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -87,7 +88,8 @@ HEADERS  += \
     ImageProvider.h \
     ImageProvider_p.h \
     network/GoogleImageSearcher.h \
-    ImageBaseInfo.h
+    ImageBaseInfo.h \
+    ThumbRecorder.h
 
 #CONFIG += mobility
 MOBILITY = 

@@ -1,5 +1,5 @@
 /******************************************************************************
-	ThumbTask.h: Thumbnail creator and recorder
+	ThumbRecorder.h: description
 	Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>
 	
 	This program is free software; you can redistribute it and/or modify
@@ -18,45 +18,36 @@
 ******************************************************************************/
 
 
-#ifndef PHOTOKIT_THUMBTASK_H
-#define PHOTOKIT_THUMBTASK_H
+#ifndef PHOTOKIT_THUMBRECORDER_H
+#define PHOTOKIT_THUMBRECORDER_H
 
-#include "PhotoKit_Global.h"
-
-#include <QtCore/QFutureWatcher>
-#include <QtGui/QImage>
-
+#include <QtCore/QObject>
+#include <QtCore/QHash>
+#include <QtCore/QStringList>
+//template <typename Key, typename Value> class QHash; //enough if static member
+//class QStringList;
 namespace PhotoKit {
 
-struct ThumbInfo
-{
-	QImage thumb; //OwnPtr? use thumbPath?
-	QString path;
-};
+typedef QHash<QString, QString> ThumbHash;
 
-class ThumbTask //Singleton?
+class ThumbRecorder : public QObject
 {
+	Q_OBJECT
 public:
-	ThumbTask();
-	~ThumbTask();
+	static ThumbRecorder* instance();
+	ThumbHash* thumbHash();
+	QStringList* displayedThumbs();
+	void addDisplayedThumb(const QString& path);
 
-    QFutureWatcher<ThumbInfo>* watcher();
-	void createThumbs(const QStringList& paths, bool create = true); //
-	void createThumbsFromDirs(const QStringList& dirs, bool create = true);
-	void createThumbsFromDirsAndPaths(const QStringList& dirs, const QStringList& paths, bool create = true);
-
-    QImage thumbAt(int index);
-    ThumbInfo thumbInfoAt(int index);
-
-	void stop();
+	void clearDisplay();
+public slots:
+	void save();
 private:
-#ifdef QT_NO_CONCURRENT
-
-#else
-    QFutureWatcher<ThumbInfo> *mThumbsWatcher; //OwnPtr<ThumbInfo>?
-#endif //QT_NO_CONCURRENT
+	ThumbRecorder(QObject *parent = 0);
+	static ThumbRecorder* self;
+	ThumbHash mThumbs;
+	QStringList mDisplay;
 };
 
 } //namespace PhotoKit
-
-#endif // PHOTOKIT_THUMBTASK_H
+#endif // PHOTOKIT_THUMBRECORDER_H

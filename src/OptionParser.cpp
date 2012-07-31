@@ -21,7 +21,7 @@
 #include "OptionParser.h"
 #include <QtCore/QDir>
 #include "ProgramOptions.h"
-#include "ThumbTask.h"
+#include "ThumbRecorder.h"
 #include "tools/Tools.h"
 #include "Config.h"
 
@@ -58,7 +58,7 @@ void OptionParser::parseCmd(int argc, const char *const*argv)
 		images << f.split(";");
 	}
 	if (images.isEmpty()) {
-		images << *ThumbRecorder::displayedThumbs();
+		images << *ThumbRecorder::instance()->displayedThumbs();
 	}
 }
 

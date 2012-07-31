@@ -44,6 +44,7 @@
 #include "tools/Tools.h"
 #include "tools/ToolTip.h"
 #include "ThumbItem.h"
+#include "ThumbRecorder.h"
 #include "ThumbTask.h"
 #include "Config.h"
 #include "ezlog.h"
@@ -70,12 +71,12 @@ static QString GOOGLE_SEARCH;
 static QString SEARCH;
 static qreal X0 = 0;
 static qreal Y0 = 0;
-static const QString THUMB_PAGE_MENU("thumbPageMenu");
-static const QString PLAY_PAGE_MENU("playPageMenu");
-static const QString CONFIG_MENU("ConfigMenu");
-static const QString OK_CANCEL_MENU("OkCancel");
-static const QString BACK_MENU("GoBack");
-static const QString SEARCH_PAGE_MENU("SearchPageMenu");
+static const QString kThumbPageMenu("thumbPageMenu");
+static const QString kPlayPageMenu("playPageMenu");
+static const QString kConfigMenu("ConfigMenu");
+static const QString kOkCancelMenu("OkCancel");
+static const QString kBackMenu("GoBack");
+static const QString kSearchPageMenu("SearchPageMenu");
 
 static void initTranslation() {
 	SEARCH = QObject::tr("Search");
@@ -187,7 +188,7 @@ void UiManager::init(PhotoKitView *view)
 	mView->scene()->addItem(mSearchPageRoot);
 
     createMenus(); //before gotoPage
-    showMenu(THUMB_PAGE_MENU);
+	showMenu(kThumbPageMenu);
 
     gotoPage(ThumbPage);
 	//mView->setInitialPos(X0, Y0);
@@ -424,8 +425,8 @@ void UiManager::updateThumbItemAt(int index)
 
 void UiManager::updateDisplayedThumbList()
 {
-	mPlayControl->setImages(*ThumbRecorder::displayedThumbs()); //current record
-	mThumbsCount = ThumbRecorder::displayedThumbs()->size();
+	mPlayControl->setImages(*ThumbRecorder::instance()->displayedThumbs()); //current record
+	mThumbsCount = ThumbRecorder::instance()->displayedThumbs()->size();
     qDebug("total %d", mThumbsCount);
 }
 
@@ -445,22 +446,22 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
         }
 		if (page == PlayPage) {
 			mPlayPageRoot->smoothScale(1, 0.2, ItemAnimation::FadeOut);
-			hideMenu(PLAY_PAGE_MENU);
+			hideMenu(kPlayPageMenu);
 		} else if (page == SearchPage) {
 			mSearchInput->hide();
 			mSearchPageRoot->hide(); //fadeout
 			if (UiManager::lastHoverThumb)
 				UiManager::lastHoverThumb->zoom(ThumbItem::ZoomOut);
-			hideMenu(SEARCH_PAGE_MENU);
+			hideMenu(kSearchPageMenu);
 		}
-        showMenu(THUMB_PAGE_MENU);
+		showMenu(kThumbPageMenu);
 	} else if (pageType == PlayPage) {
         mCurrentPageRoot = mPlayPageRoot;
 		mThumbPageRoot->hide();
 		mPlayPageRoot->setImagePath(image);
         mPlayPageRoot->smoothScale(4, 1, ItemAnimation::FadeIn);
-        hideMenu(THUMB_PAGE_MENU);
-        showMenu(PLAY_PAGE_MENU);
+		hideMenu(kThumbPageMenu);
+		showMenu(kPlayPageMenu);
         //mPlayPageRoot->setPos(mView->mapToScene(QPoint())); //keep it center.
         //the following line will let it keep center. why?
 		mView->scene()->setSceneRect(qApp->desktop()->rect());//mPlayPageRoot->boundingRect().adjusted(-32, -32, 32, 32));
@@ -468,8 +469,8 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		mCurrentPageRoot->hide();
 		mCurrentPageRoot = mSearchPageRoot;
 		mCurrentPageRoot->show();
-		hideMenu(THUMB_PAGE_MENU);
-		showMenu(SEARCH_PAGE_MENU);
+		hideMenu(kThumbPageMenu);
+		showMenu(kSearchPageMenu);
 		if (!mSearchInput) {
 			mSearchInput = new TextEdit;
 			mSearchInput->setFlag(QGraphicsItem::ItemIgnoresTransformations);
@@ -507,11 +508,11 @@ void UiManager::clickMenuItem()
 		qApp->quit();
     } else if (menuText == SETUP) {
 		if (page == ThumbPage)
-			hideMenu(THUMB_PAGE_MENU);
+			hideMenu(kThumbPageMenu);
 		else if (page == PlayPage)
-			hideMenu(PLAY_PAGE_MENU);
-        showMenu(BACK_MENU);
-		showMenu(CONFIG_MENU);
+			hideMenu(kPlayPageMenu);
+		showMenu(kBackMenu);
+		showMenu(kConfigMenu);
 		//TODO: cancel the setup
         connect(mBack, SIGNAL(clicked()), this, SLOT(hideConfigMenu()));
         if (score->hasQueuedMovies()){
@@ -538,10 +539,10 @@ void UiManager::clickMenuItem()
 	if (page == ThumbPage) {
         //playReverse()
         if (button->buttonType() == Button::ArrowUp) {
-            score->queueMovie(THUMB_PAGE_MENU + " -collapse");
+			score->queueMovie(kThumbPageMenu + " -collapse");
             button->setButtonType(Button::ArrowDown);
         } else if (button->buttonType() == Button::ArrowDown) {
-            score->queueMovie(THUMB_PAGE_MENU);
+			score->queueMovie(kThumbPageMenu);
             button->setButtonType(Button::ArrowUp);
 		} else if (menuText == GOOGLE_SEARCH) {
 			gotoPage(SearchPage);
@@ -554,7 +555,7 @@ void UiManager::clickMenuItem()
 			clearThumbs();
 		}
         else {
-            score->queueMovie(THUMB_PAGE_MENU + " -shake");
+			score->queueMovie(kThumbPageMenu + " -shake");
         }
 	} else if (page == PlayPage) {
         if (menuText == BACK) {
@@ -566,21 +567,21 @@ void UiManager::clickMenuItem()
             else
                 startSlide();
         } else if (menuText == WEIBO_SHARE) {
-			hideMenu(PLAY_PAGE_MENU);
-			showMenu(OK_CANCEL_MENU); //reverse when dialog is done
+			hideMenu(kPlayPageMenu);
+			showMenu(kOkCancelMenu); //reverse when dialog is done
             shareToWeibo();
 		} else if (menuText == IMAGE_INFO) {
 			showCurrentImageInfo();
 		}
         //playReverse()
         if (button->buttonType() == Button::ArrowUp) {
-            score->queueMovie(PLAY_PAGE_MENU + " -collapse");
+			score->queueMovie(kPlayPageMenu + " -collapse");
             button->setButtonType(Button::ArrowDown);
         } else if (button->buttonType() == Button::ArrowDown) {
-            score->queueMovie(PLAY_PAGE_MENU);
+			score->queueMovie(kPlayPageMenu);
             button->setButtonType(Button::ArrowUp);
         } else {
-            score->queueMovie(PLAY_PAGE_MENU + " -shake");
+			score->queueMovie(kPlayPageMenu + " -shake");
         }
 	} else if (page == SearchPage) {
 		if (menuText == BACK) {
@@ -599,24 +600,24 @@ void UiManager::clickMenuItem()
 
 void UiManager::okCancelFinish()
 {
-	hideMenu(OK_CANCEL_MENU);
+	hideMenu(kOkCancelMenu);
 	if (page == PlayPage) {
-		showMenu(PLAY_PAGE_MENU);
+		showMenu(kPlayPageMenu);
 	} else if (page == ThumbPage) {
-		showMenu(THUMB_PAGE_MENU);
+		showMenu(kThumbPageMenu);
 	}
     disconnect(this, SLOT(okCancelFinish()));
 }
 
 void UiManager::hideConfigMenu()
 {
-    hideMenu(BACK_MENU);
+	hideMenu(kBackMenu);
 	if (page == PlayPage) {
-		showMenu(PLAY_PAGE_MENU);
+		showMenu(kPlayPageMenu);
 	} else if (page == ThumbPage) {
-		showMenu(THUMB_PAGE_MENU);
+		showMenu(kThumbPageMenu);
 	}
-	hideMenu(CONFIG_MENU);
+	hideMenu(kConfigMenu);
     disconnect(this, SLOT(hideConfigMenu())); //
 }
 
@@ -679,10 +680,10 @@ void UiManager::showOnlineImage(const ImageBaseInfo &image)
 void UiManager::createMenus()
 {
     //thumb page menus
-    static Movie *thumbPageMenuMovieIn = score->insertMovie(THUMB_PAGE_MENU);
-    static Movie *thumbPageMenuCollapse = score->insertMovie(THUMB_PAGE_MENU + " -collapse");
-    static Movie *thumbPageMovieOut = score->insertMovie(THUMB_PAGE_MENU + " -out");
-    static Movie *thumbPageMovieShake = score->insertMovie(THUMB_PAGE_MENU + " -shake");
+	static Movie *thumbPageMenuMovieIn = score->insertMovie(kThumbPageMenu);
+	static Movie *thumbPageMenuCollapse = score->insertMovie(kThumbPageMenu + " -collapse");
+	static Movie *thumbPageMovieOut = score->insertMovie(kThumbPageMenu + " -out");
+	static Movie *thumbPageMovieShake = score->insertMovie(kThumbPageMenu + " -shake");
 	QStringList thumbPageMenuItems;
 	thumbPageMenuItems << SETUP << HELP << CLEAR << GOOGLE_SEARCH << ADDIMAGES << ADDDIRS << QUIT;
     Button *menuItem = 0;
@@ -699,10 +700,10 @@ void UiManager::createMenus()
     createLeftMenuTopInMovie(menuItem, thumbPageMenuItems.size() + 1, false , thumbPageMenuMovieIn, thumbPageMenuCollapse, thumbPageMovieOut, thumbPageMovieShake);
 
     //play page menus
-    static Movie *playPageMenuMovieIn = score->insertMovie(PLAY_PAGE_MENU);
-    static Movie *playPageMovieCollapse = score->insertMovie(PLAY_PAGE_MENU + " -collapse");
-    static Movie *playPageMovieOut = score->insertMovie(PLAY_PAGE_MENU + " -out");
-    static Movie *playPageMovieShake = score->insertMovie(PLAY_PAGE_MENU + " -shake");
+	static Movie *playPageMenuMovieIn = score->insertMovie(kPlayPageMenu);
+	static Movie *playPageMovieCollapse = score->insertMovie(kPlayPageMenu + " -collapse");
+	static Movie *playPageMovieOut = score->insertMovie(kPlayPageMenu + " -out");
+	static Movie *playPageMovieShake = score->insertMovie(kPlayPageMenu + " -shake");
     QStringList playPageMenuItems;
 	playPageMenuItems << SETUP << HELP << IMAGE_INFO << START_STOP_SLIDE << WEIBO_SHARE << BACK << QUIT;
     menuItem = 0;
@@ -720,8 +721,8 @@ void UiManager::createMenus()
 
 
 	//Config menu. right side
-	static Movie *configMenuMovieIn = score->insertMovie(CONFIG_MENU);
-	static Movie *configMenuMovieOut = score->insertMovie(CONFIG_MENU + " -out");
+	static Movie *configMenuMovieIn = score->insertMovie(kConfigMenu);
+	static Movie *configMenuMovieOut = score->insertMovie(kConfigMenu + " -out");
 	QStringList configMenuItems;
 	configMenuItems << "OpenGL " + Config::glVersion << CLEAR_CACHE;
 	menuItem = 0;
@@ -732,8 +733,8 @@ void UiManager::createMenus()
 		createConfigMenuMovie(menuItem, i, configMenuMovieIn, configMenuMovieOut);
 	}
 
-	static Movie *okCancelMenuMovieIn = score->insertMovie(OK_CANCEL_MENU);
-	static Movie *okCancelMenuMovieOut = score->insertMovie(OK_CANCEL_MENU + " -out");
+	static Movie *okCancelMenuMovieIn = score->insertMovie(kOkCancelMenu);
+	static Movie *okCancelMenuMovieOut = score->insertMovie(kOkCancelMenu + " -out");
 	mOk = new Button("<p style='color:white;font-size:24px'>" + tr("Ok") + "</p>");
 	mOk->setColor(Qt::blue);
 	mOk->resize(222, 55);
@@ -746,8 +747,8 @@ void UiManager::createMenus()
 	createOkCancelMovie(mOk, 0, okCancelMenuMovieIn, okCancelMenuMovieOut);
 	createOkCancelMovie(mCancel, 1, okCancelMenuMovieIn, okCancelMenuMovieOut);
 
-    static Movie *backMenuMovieIn = score->insertMovie(BACK_MENU);
-    static Movie *backMenuMovieOut = score->insertMovie(BACK_MENU + " -out");
+	static Movie *backMenuMovieIn = score->insertMovie(kBackMenu);
+	static Movie *backMenuMovieOut = score->insertMovie(kBackMenu + " -out");
 	mBack = new Button("<p style='color:white;font-size:24px'>" + BACK + "</p>");
     mBack->setColor(QColor(100, 40, 8));
     mBack->resize(222, 55);
@@ -756,8 +757,8 @@ void UiManager::createMenus()
     createBackButtonMovie(mBack, backMenuMovieIn, backMenuMovieOut);
 
 	//Config menu. right side
-	static Movie *searchPageMenuMovieIn = score->insertMovie(SEARCH_PAGE_MENU);
-	static Movie *searchPageMenuMovieOut = score->insertMovie(SEARCH_PAGE_MENU + " -out");
+	static Movie *searchPageMenuMovieIn = score->insertMovie(kSearchPageMenu);
+	static Movie *searchPageMenuMovieOut = score->insertMovie(kSearchPageMenu + " -out");
 	QStringList searchPageMenuItems;
 	searchPageMenuItems << SEARCH << BACK;
 	menuItem = 0;
