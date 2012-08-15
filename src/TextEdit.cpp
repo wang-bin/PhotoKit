@@ -37,8 +37,8 @@ TextEdit::TextEdit(QGraphicsItem *parent) :
 	f.setPixelSize(22);
 	setFont(f);
 
-	//connect(document(), SIGNAL(contentsChange(int,int,int)), SLOT(storeString(int,int,int)));
-	connect(document(), SIGNAL(contentsChanged()), SLOT(storeString()));
+    //connect(document(), SIGNAL(contentsChange(int,int,int)), SLOT(storeString(int,int,int)));
+    connect(document(), SIGNAL(contentsChanged()), SLOT(storeString()));
 }
 /*
 TextEdit::~TextEdit()
@@ -137,11 +137,27 @@ void TextEdit::storeString()//(int position, int charsRemoved, int charsAdded) /
     //qDebug("string %s", qPrintable(text()));
 	//QGraphicsTextItem::keyReleaseEvent(event);
 }
-
+/*
+void TextEdit::storeString(int position, int charsRemoved, int charsAdded)
+{qDebug("changetext");
+    if (mEchoMode == Password) {
+        QString str = toPlainText();
+        QString stored = data(0).toString();
+        QString ct = str.mid(position, charsAdded);
+        if (ct == stored.mid(position, charsAdded))
+            return;
+        stored.replace(position, charsRemoved, str.mid(position, charsAdded));
+        setData(0, stored);
+        setPlainText(QString(stored.length(), '*'));
+        qDebug("%s", qPrintable(stored));
+    }
+}
+*/
+/*
 void TextEdit::inputMethodEvent(QInputMethodEvent *event)
 {
 	//qDebug("input method: %s", qPrintable(event->commitString()));
 	QGraphicsTextItem::inputMethodEvent(event);
 }
-
+*/
 } //namespace PhotoKit

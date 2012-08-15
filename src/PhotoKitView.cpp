@@ -48,17 +48,17 @@
 
 namespace PhotoKit {
 
-static const qreal scale_max = 1.618;
-static const qreal scale_min = 0.618;
-static const qreal yrot_max = 35;
-static const qreal yrot_min = -35;
-static const qreal xrot_max = 8;
-static const qreal xrot_min = -8;
-static const qreal xshear_min = -0.1;
-static const qreal xshear_max = 0.1;
-static const qreal yshear_min = -0.1;
-static const qreal yshear_max = 0.1;
-static const int ani_duration = 1400;
+static const qreal kScaleMax = 1.618;
+static const qreal kScaleMin = 0.618;
+static const qreal kYRotMax = 35;
+static const qreal kYRotMin = -35;
+static const qreal kXRotMax = 8;
+static const qreal kXRotMin = -8;
+static const qreal kXShearMin = -0.1;
+static const qreal kXShearMax = 0.1;
+static const qreal kYShearMin = -0.1;
+static const qreal kYShearMax = 0.1;
+static const int kAniDuration = 1400;
 PhotoKitView::PhotoKitView(QWidget *parent) :
 	QGraphicsView(parent),mPressed(false),mMachine(0),mCanTransform(true)
 {
@@ -79,7 +79,7 @@ PhotoKitView::PhotoKitView(QWidget *parent) :
 	mMachine = new TransformMachine;//QGraphicsItemAnimation;
 	connect(mMachine, SIGNAL(transformChanged(QTransform)), SLOT(doTransform(QTransform)));
 
-	QTimeLine *timer = new QTimeLine(ani_duration);
+	QTimeLine *timer = new QTimeLine(kAniDuration);
 	timer->setEasingCurve(QEasingCurve::OutQuad);
 	timer->setFrameRange(0, 100);
 	mMachine->setTimeLine(timer);
@@ -256,22 +256,22 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 			qreal vs = delta.y()/100;
 			qreal xrot = delta.x()/6, yrot = delta.x()/6;
 			if (delta.x() > 0) {
-				xrot = qMin(xrot, xrot_max);
-				hs = qMin(hs, xshear_max);
+				xrot = qMin(xrot, kXRotMax);
+				hs = qMin(hs, kXShearMax);
 			} else {
-				xrot = qMax(xrot, xrot_min);
-				hs = qMax(hs, xshear_min);
+				xrot = qMax(xrot, kXRotMin);
+				hs = qMax(hs, kXShearMin);
 			}
 			if (delta.y() > 0) {
-				yrot = qMin(yrot, yrot_max);
-				vs = qMin(vs, yshear_max);
+				yrot = qMin(yrot, kYRotMax);
+				vs = qMin(vs, kYShearMax);
 			} else {
-				yrot = qMax(yrot, yrot_min);
-				vs = qMax(vs, yshear_min);
+				yrot = qMax(yrot, kYRotMin);
+				vs = qMax(vs, kYShearMin);
 			}
 			//ezlog_debug("item->mX=%f my=%f", item->mX, item->mY);
 			//moveWithAnimation(horizontalScrollBar()->value() - delta.x(), verticalScrollBar()->value() - delta.y());
-			setAnimationDuration(ani_duration);
+			setAnimationDuration(kAniDuration);
 			smartTransform(item->mX, item->mY, item->mScale, item->mScale, xrot, yrot, 0, vs, hs);
 		} else if (UiManager::page == UiManager::PlayPage) {
 			//TODO: animation, don't move out of the viewport
@@ -326,12 +326,12 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 		qreal scale0 = item->mScale;
         if (numSteps > 0) {
 			item->mScale += 0.12;
-			item->mScale = qMin(scale_max, item->mScale);
+			item->mScale = qMin(kScaleMax, item->mScale);
         } else {
 			item->mScale -= 0.12;
-			item->mScale = qMax(scale_min, item->mScale);
+			item->mScale = qMax(kScaleMin, item->mScale);
         }
-        setAnimationDuration(ani_duration);
+		setAnimationDuration(kAniDuration);
 		smartTransform(item->mX, item->mY, scale0, item->mScale, 0, 0, 0, 0, 0);
     } else if (UiManager::page == UiManager::PlayPage) {
         qreal s = numSteps > 0 ? 1.1:0.9;
@@ -379,12 +379,12 @@ bool PhotoKitView::viewportEvent(QEvent *event)
 					qreal scale0 = item->mScale;
                     if (currentScaleFactor > 1) {
 						item->mScale += 0.12;
-						item->mScale = qMin(scale_max, item->mScale);
+						item->mScale = qMin(kScaleMax, item->mScale);
                     } else {
 						item->mScale -= 0.12;
-						item->mScale = qMax(scale_min, item->mScale);
+						item->mScale = qMax(kScaleMin, item->mScale);
                     }
-                    setAnimationDuration(ani_duration);
+					setAnimationDuration(kAniDuration);
 					smartTransform(item->mX, item->mY, scale0, item->mScale, 0, 0, 0, 0, 0); //both thumbpage and playpage works
                 } else if (UiManager::page == UiManager::PlayPage) {
 					//qreal s0 = item->transform().m11();

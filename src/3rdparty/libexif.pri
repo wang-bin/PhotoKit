@@ -60,9 +60,7 @@ PROJECT_LIBDIR = $$qtLongName($${PROJECTROOT}/lib)
 
 #for system include path
 *msvc* {
-
 } else {
-QMAKE_CFLAGS += -isystem
 QMAKE_CXXFLAGS += -isystem $$PROJECT_SRCPATH/..
 }
 INCLUDEPATH += $$PROJECT_SRCPATH/.. $$PROJECT_SRCPATH

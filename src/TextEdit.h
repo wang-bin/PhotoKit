@@ -46,10 +46,11 @@ public:
 signals:
 	
 private slots:
-	void storeString();//(int position, int charsRemoved, int charsAdded);
+    void storeString();//(int position, int charsRemoved, int charsAdded);
+    //void storeString(int position, int charsRemoved, int charsAdded);
 protected:
 	//virtual void keyReleaseEvent(QKeyEvent *event);
-	virtual void inputMethodEvent(QInputMethodEvent *event);
+    //virtual void inputMethodEvent(QInputMethodEvent *event);
 private:
 	EchoMode mEchoMode;
 	qreal mWidth, mHeight;
