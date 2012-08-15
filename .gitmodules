@@ -1,6 +1,6 @@
-[submodule "src/ProgramOptions"]
-	path = src/ProgramOptions
-	url = https://github.com/wang-bin/ProgramOptions.git
 [submodule "src/ezlog"]
 	path = src/ezlog
 	url = git://github.com/wang-bin/ezlog.git
+[submodule "src/ProgramOptions"]
+	path = src/ProgramOptions
+	url = git://github.com/wang-bin/ProgramOptions.git
