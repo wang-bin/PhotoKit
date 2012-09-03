@@ -12,9 +12,12 @@ The UI of PhotoKit is based on Qt graphics framework (except filedialog), so you
 Build
 ------
 1. clone the project: git clone git://github.com/wang-bin/PhotoKit.git
-2. init the submodules: git submodule update --init
+2. init the submodules:
+  git submodule update --init
+  git  submodule foreach git pull origin master
 3. qmake
 4. make -j4
+
 
 Screenshot
 -------
