@@ -138,8 +138,8 @@ defineReplace(qtLongName) {
 
 BUILD_DIR=$$(BUILD_DIR)
 isEmpty(BUILD_DIR) {
-	BUILD_DIR=$$PWD
-	message(BUILD_DIR in env is empty. Use $$PWD)
+	BUILD_DIR=$$OUT_PWD
+	message(BUILD_DIR in env is empty. Use $$BUILD_DIR)
 }
 message(BUILD_DIR=$$BUILD_DIR)
 
