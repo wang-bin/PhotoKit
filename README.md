@@ -18,7 +18,7 @@ Build
   
   git  submodule foreach git pull origin master
   
-3. qmake
+3. BUILD_DIR=/build/dir qmake -r or qmake -r
 4. make -j4
 
 
