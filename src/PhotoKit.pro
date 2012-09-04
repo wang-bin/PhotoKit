@@ -14,6 +14,11 @@ TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$$
 win32: !include(3rdparty/libexif.pri): error(could not find libexif.pri)
 include($${PROJECTROOT}/common.pri)
 
+unix:!macx {
+	QMAKE_RPATHDIR += $$PROJECT_LIBDIR:\'\$\$ORIGIN\':\'\$\$ORIGIN/lib\':.
+	QMAKE_LFLAGS += -Wl,-z,origin
+}
+
 INCLUDEPATH += $$PWD
 SOURCES += main.cpp \
 	ThumbTask.cpp \

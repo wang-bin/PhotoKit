@@ -55,8 +55,9 @@ include($${PROJECTROOT}/common.pri)
 CONFIG += depend_includepath #?
 
 PROJECT_SRCPATH = $$PWD/libexif/libexif
-PROJECT_LIBDIR = $$qtLongName($${PROJECTROOT}/lib)
-#PROJECT_LIBDIR = $$PWD/../bin #for win dll
+BUILD_DIR=$$(BUILD_DIR)
+isEmpty(BUILD_DIR): BUILD_DIR=$$PWD/..
+PROJECT_LIBDIR = $$qtLongName($$BUILD_DIR/lib)
 
 #for system include path
 *msvc* {

@@ -3,7 +3,7 @@ QT -= gui
 
 TARGET = tst_googleimage
 include(../common.pri)
-DESTDIR = $$PWD
+#DESTDIR = $$PWD
 
 SRCPATH = ../src
 INCLUDEPATH += $$SRCPATH

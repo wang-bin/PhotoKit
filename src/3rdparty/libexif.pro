@@ -8,6 +8,7 @@ CONFIG *= exif-buildlib
 
 PROJECTROOT = $$PWD/../..
 !include(libexif.pri): error(could not find libexif.pri)
+!exists(libexif): error(Could not find libexif source. Put them into $$PWD/libexif)
 !exists(libexif/config.h): system(touch libexif/config.h)
 #src
 unix: SOURCES +=
