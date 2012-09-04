@@ -4,3 +4,6 @@
 [submodule "src/ProgramOptions"]
 	path = src/ProgramOptions
 	url = git://github.com/wang-bin/ProgramOptions.git
+[submodule "src/NextEffect"]
+	path = src/NextEffect
+	url = git://github.com/wang-bin/NextEffect.git
