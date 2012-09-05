@@ -18,10 +18,10 @@ Build
   
   git  submodule foreach git pull origin master
   
-3. BUILD_DIR=/your/build/dir qmake -r  or  qmake -r to build in current dir
+3. BUILD_DIR=/your/build/dir qmake -r
 4. make -j4
 
-
+The binaries is in $BUILD_DIR/bin
 
 Screenshot
 -------
