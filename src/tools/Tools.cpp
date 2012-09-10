@@ -25,7 +25,7 @@
 #include <QGraphicsView>
 #include "ToolTip.h"
 #include "UiManager.h"
-#include "Config.h"
+#include "../Config.h" //"Config.h": vc or icl will fail to compile; name followed by '::' must be a class or namespace name 
 #include "ezlog.h"
 
 namespace PhotoKit {

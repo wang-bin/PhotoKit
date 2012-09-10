@@ -28,7 +28,7 @@
 #include "Button.h"
 #include "tools/Tools.h"
 #include "weiboapi.h"
-#include "Config.h"
+#include "../Config.h" //"Config.h": vc or icl will fail to compile; name followed by '::' must be a class or namespace name 
 
 namespace PhotoKit {
 
