@@ -99,7 +99,7 @@ defineReplace(qtLibName) {
 	else: VERSION_EXT = $$2
 	!isEmpty(VERSION_EXT) {
 		VERSION_EXT = $$section(VERSION_EXT, ., 0, 0)
-		isEqual(VERSION_EXT, 0):unset(VERSION_EXT)
+		#isEqual(VERSION_EXT, 0):unset(VERSION_EXT)
 	}
 	RET = $${RET}$${VERSION_EXT}
 	unset(VERSION_EXT)
@@ -111,7 +111,7 @@ defineReplace(qtLibName) {
 defineReplace(qtStaticLib) {
 	unset(LIB_FULLNAME)
 	LIB_FULLNAME = $$qtLibName($$1, $$2)
-	*msvc*: LIB_FULLNAME = $$member(LIB_FULLNAME, 0).lib
+	*msvc*|win32-icc: LIB_FULLNAME = $$member(LIB_FULLNAME, 0).lib
 	else: LIB_FULLNAME = lib$$member(LIB_FULLNAME, 0).a
 	return($$LIB_FULLNAME)
 }
