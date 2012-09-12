@@ -11,7 +11,7 @@ TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$$
 !include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
 !include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
-win32: !include(3rdparty/libexif.pri): error(could not find libexif.pri)
+win32: !include(libexif-port/libexif.pri): error(could not find libexif.pri)
 include($${PROJECTROOT}/common.pri)
 
 unix:!macx {

@@ -7,3 +7,6 @@
 [submodule "src/NextEffect"]
 	path = src/NextEffect
 	url = git://github.com/wang-bin/NextEffect.git
+[submodule "src/libexif-port"]
+	path = src/libexif-port
+	url = git://github.com/wang-bin/libexif-port.git

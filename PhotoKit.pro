@@ -15,7 +15,7 @@ photokit.file = src/PhotoKit.pro
 
 win32 {
 SUBDIRS += libexif
-libexif.file = src/3rdparty/libexif.pro
+libexif.file = src/libexif-port/libexif.pro
 photokit.depends += libexif
 }
 photokit.depends += libezlog libprogramoptions libNextEffect
