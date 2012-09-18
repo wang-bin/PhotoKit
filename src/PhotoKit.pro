@@ -69,8 +69,7 @@ SOURCES += main.cpp \
     TextEdit.cpp \
     ImageProvider.cpp \
     network/GoogleImageSearcher.cpp \
-    ThumbRecorder.cpp \
-    LocalImageProvider.cpp
+	ThumbRecorder.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -110,8 +109,7 @@ HEADERS  += \
     ImageProvider_p.h \
     network/GoogleImageSearcher.h \
     ImageBaseInfo.h \
-    ThumbRecorder.h \
-    LocalImageProvider.h
+	ThumbRecorder.h
 
 #CONFIG += mobility
 MOBILITY = 

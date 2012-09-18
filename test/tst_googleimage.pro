@@ -2,10 +2,16 @@ QT += network
 QT -= gui
 
 TARGET = tst_googleimage
-include(../common.pri)
+PROJECTROOT=$$PWD/..
+isEmpty(BUILD_DIR):BUILD_DIR=$$(BUILD_DIR)
+isEmpty(BUILD_DIR):BUILD_DIR=$$[BUILD_DIR]
+isEmpty(BUILD_DIR):BUILD_IN_SRC = yes
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$PROJECTROOT/out
+message(*********PROJECTROOT=$$PROJECTROOT)
+include($$PROJECTROOT/common.pri)
 #DESTDIR = $$PWD
 
-SRCPATH = ../src
+SRCPATH = $$PROJECTROOT/src
 INCLUDEPATH += $$SRCPATH
 
 SOURCES = $$SRCPATH/ImageProvider.cpp \
