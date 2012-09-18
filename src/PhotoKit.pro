@@ -70,10 +70,6 @@ SOURCES += main.cpp \
     ImageProvider.cpp \
     network/GoogleImageSearcher.cpp \
     ThumbRecorder.cpp \
-    share/Share.cpp \
-    share/BtShare.cpp \
-    share/NFCShare.cpp \
-    share/WeiboShare.cpp \
     LocalImageProvider.cpp
 
 HEADERS  += \
@@ -115,10 +111,6 @@ HEADERS  += \
     network/GoogleImageSearcher.h \
     ImageBaseInfo.h \
     ThumbRecorder.h \
-    share/Share.h \
-    share/BtShare.h \
-    share/NFCShare.h \
-    share/WeiboShare.h \
     LocalImageProvider.h
 
 #CONFIG += mobility
