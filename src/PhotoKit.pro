@@ -7,6 +7,7 @@ TARGET = PhotoKit
 TEMPLATE = app
 LIBS += -lexif
 PROJECTROOT = $$PWD/..
+include($$PROJECTROOT/deploy.pri)
 isEmpty(BUILD_DIR):BUILD_DIR=$$(BUILD_DIR)
 isEmpty(BUILD_DIR):BUILD_DIR=$$[BUILD_DIR]
 isEmpty(BUILD_DIR):BUILD_IN_SRC = yes
@@ -116,44 +117,6 @@ MOBILITY =
 
 RESOURCES += \
     ../res/res.qrc
-
-
-contains(MEEGO_EDITION,harmattan) {
-	DEFINES += CACHE_APPDIR
-	target.path = /opt/PhotoKit/bin
-	images.files = $$PROJECTROOT/res/images
-	images.path = /opt/PhotoKit/bin
-	desktopfile.files = $$PROJECTROOT/qtc_packaging/harmattan/PhotoKit.desktop
-    desktopfile.path = /usr/share/applications
-	icon.files = $$PROJECTROOT/qtc_packaging/PhotoKit.png
-    icon.path = /usr/share/icons/hicolor/80x80/apps
-	INSTALLS += target desktopfile icon images
-}
-
-maemo5 {
-	target.path = /opt/PhotoKit/bin
-	images.files = $$PROJECTROOT/res/images
-	images.path = /opt/PhotoKit/bin
-	desktopfile.files = $$PROJECTROOT/qtc_packaging/fremantle/PhotoKit.desktop
-    desktopfile.path = /usr/share/applications/hildon
-	icon.files = $$PROJECTROOT/qtc_packaging/PhotoKit.png
-	icon.path = /usr/share/icons/hicolor/64x64/apps
-	INSTALLS += target desktopfile icon images
-}
-
-
-
-maemo5 {
-    desktopfile.files = PhotoKit.desktop
-    desktopfile.path = /usr/share/applications/hildon
-    INSTALLS += desktopfile
-}
-
-contains(MEEGO_EDITION,harmattan) {
-    desktopfile.files = PhotoKit.desktop
-    desktopfile.path = /usr/share/applications
-    INSTALLS += desktopfile
-}
 
 
 message($$_PRO_FILE_PWD_)

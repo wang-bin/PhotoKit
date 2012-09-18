@@ -27,6 +27,7 @@ symbian {
     TARGET.EPOCHEAPSIZE = 0x020000 0x800000
 }
 
+
 OTHER_FILES += TODO \
     qtc_packaging/debian_harmattan/rules \
     qtc_packaging/debian_harmattan/README \
@@ -36,8 +37,11 @@ OTHER_FILES += TODO \
     qtc_packaging/debian_harmattan/compat \
     qtc_packaging/debian_harmattan/changelog
 
-contains(MEEGO_EDITION,harmattan) {
-    target.path = /opt/PhotoKit/bin
-    INSTALLS += target
-}
-
+# Add files and directories to ship with the application
+# by adapting the examples below.
+# file1.source = myfile
+# dir1.source = mydir
+#lang.files = i18n
+#DEPLOYMENTFOLDERS = lang# file1 dir1
+#include(deployment.pri)
+#qtcAddDeployment()
