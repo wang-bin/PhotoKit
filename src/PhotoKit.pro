@@ -7,13 +7,28 @@ TARGET = PhotoKit
 TEMPLATE = app
 LIBS += -lexif
 PROJECTROOT = $$PWD/..
-TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$${TARGET}_zh_CN.ts
-!include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
-!include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
-!include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
-win32: !include(libexif-port/libexif.pri): error(could not find libexif.pri)
-include($${PROJECTROOT}/common.pri)
+isEmpty(BUILD_DIR):BUILD_DIR=$$(BUILD_DIR)
+isEmpty(BUILD_DIR):BUILD_DIR=$$[BUILD_DIR]
+isEmpty(BUILD_DIR):BUILD_IN_SRC = yes
 
+TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$${TARGET}_zh_CN.ts
+#common.pri will be included only once and dirs are the values first time included, so include the project's
+#common.pri first.
+#if BUILD_DIR not set, keep the src structure
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$PROJECTROOT/out
+include($${PROJECTROOT}/common.pri)
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=ezlog/out
+!include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=ProgramOptions/out
+!include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=NextEffect/out
+!include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
+win32 {
+	!isEmpty(BUILD_IN_SRC):BUILD_DIR=libexif-port/out
+	!include(libexif-port/libexif.pri): error(could not find libexif.pri)
+}
+
+message(PhotoKit out=$$BUILD_DIR)
 unix:!macx {
 	QMAKE_RPATHDIR += $$PROJECT_LIBDIR:\'\$\$ORIGIN\':\'\$\$ORIGIN/lib\':.
 	QMAKE_LFLAGS += -Wl,-z,origin
@@ -54,7 +69,12 @@ SOURCES += main.cpp \
     TextEdit.cpp \
     ImageProvider.cpp \
     network/GoogleImageSearcher.cpp \
-    ThumbRecorder.cpp
+    ThumbRecorder.cpp \
+    share/Share.cpp \
+    share/BtShare.cpp \
+    share/NFCShare.cpp \
+    share/WeiboShare.cpp \
+    LocalImageProvider.cpp
 
 HEADERS  += \
 	ThumbTask.h \
@@ -94,7 +114,12 @@ HEADERS  += \
     ImageProvider_p.h \
     network/GoogleImageSearcher.h \
     ImageBaseInfo.h \
-    ThumbRecorder.h
+    ThumbRecorder.h \
+    share/Share.h \
+    share/BtShare.h \
+    share/NFCShare.h \
+    share/WeiboShare.h \
+    LocalImageProvider.h
 
 #CONFIG += mobility
 MOBILITY = 

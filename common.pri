@@ -136,17 +136,10 @@ defineReplace(qtLongName) {
 ##############################paths####################################
 #TRANSLATIONS += i18n/$${TARGET}_zh-cn.ts i18n/$${TARGET}_zh_CN.ts
 
-BUILD_DIR=$$(BUILD_DIR)
-isEmpty(BUILD_DIR) {
-	BUILD_DIR=$$OUT_PWD
-	message(BUILD_DIR in env is empty. Use $$BUILD_DIR)
-}
-message(BUILD_DIR=$$BUILD_DIR)
-
 #for Qt2, Qt3 which does not have QT_VERSION. Qt4: $$[QT_VERSION]
-MOC_DIR = $$BUILD_DIR/.moc/$$TARGET/$${QT_VERSION}
-RCC_DIR = $$BUILD_DIR/.rcc/$$TARGET/$${QT_VERSION}
-UI_DIR  = $$BUILD_DIR/.ui/$$TARGET/$${QT_VERSION}
+MOC_DIR = $$BUILD_DIR/.moc/$${QT_VERSION}
+RCC_DIR = $$BUILD_DIR/.rcc/$${QT_VERSION}
+UI_DIR  = $$BUILD_DIR/.ui/$${QT_VERSION}
 #obj is platform dependent
 OBJECTS_DIR = $$qtLongName($$BUILD_DIR/.obj/$$TARGET)
 
