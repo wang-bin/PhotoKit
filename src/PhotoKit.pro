@@ -15,16 +15,16 @@ TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$$
 #common.pri will be included only once and dirs are the values first time included, so include the project's
 #common.pri first.
 #if BUILD_DIR not set, keep the src structure
-!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$PROJECTROOT/out
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/../out
 include($${PROJECTROOT}/common.pri)
-!isEmpty(BUILD_IN_SRC):BUILD_DIR=ezlog/out
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/ezlog/out
 !include(ezlog/src/libezlog.pri): error(could not find libezlog.pri)
-!isEmpty(BUILD_IN_SRC):BUILD_DIR=ProgramOptions/out
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/ProgramOptions/out
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
-!isEmpty(BUILD_IN_SRC):BUILD_DIR=NextEffect/out
+!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/NextEffect/out
 !include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
 win32 {
-	!isEmpty(BUILD_IN_SRC):BUILD_DIR=libexif-port/out
+	!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/libexif-port/out
 	!include(libexif-port/libexif.pri): error(could not find libexif.pri)
 }
 
