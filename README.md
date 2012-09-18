@@ -17,10 +17,18 @@ Build
 
   git  submodule foreach git checkout master
   
-2. BUILD_DIR=/your/build/dir qmake -r
+2. BUILD_DIR=/your/build/dir qmake -r 
+   or qmake -r  to build in $PWD/out
+
 3. make -j4
 
 The binaries is in $BUILD_DIR/bin
+
+4. update
+
+  git pull
+
+  git submodule update
 
 Screenshot
 -------
