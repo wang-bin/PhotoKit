@@ -11,7 +11,7 @@ The UI of PhotoKit is based on Qt graphics framework (except filedialog), so you
 
 Build
 ------
-1. clone the project including submodules:
+1. Clone the project including submodules:
   
   git clone --recursive git://github.com/wang-bin/PhotoKit.git
 
@@ -24,7 +24,12 @@ Build
 
 The binaries is in $BUILD_DIR/bin
 
-4. update
+4. Build package
+  building debian package is supported now(tested for ubuntu 12.04). Use the following command
+
+  make deb
+
+5. Update source code
 
   git pull
 

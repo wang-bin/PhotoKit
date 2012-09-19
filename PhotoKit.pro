@@ -28,14 +28,19 @@ symbian {
 }
 
 
-OTHER_FILES += TODO \
-    qtc_packaging/debian_harmattan/rules \
-    qtc_packaging/debian_harmattan/README \
-    qtc_packaging/debian_harmattan/manifest.aegis \
-    qtc_packaging/debian_harmattan/copyright \
-    qtc_packaging/debian_harmattan/control \
-    qtc_packaging/debian_harmattan/compat \
-    qtc_packaging/debian_harmattan/changelog
+OTHER_FILES += README.md TODO \
+	qtc_packaging/common/README \
+	qtc_packaging/common/copyright \
+	qtc_packaging/common/changelog \
+	qtc_packaging/debian_harmattan/manifest.aegis \
+	qtc_packaging/debian_harmattan/control \
+	qtc_packaging/debian_harmattan/compat \
+	qtc_packaging/debian_harmattan/PhotoKit.desktop \
+	qtc_packaging/debian_fremantle/control \
+	qtc_packaging/debian_fremantle/rules \
+	qtc_packaging/debian_fremantle/compat \
+	qtc_packaging/debian_i386/control \
+	qtc_packaging/debian_i386/PhotoKit.desktop
 
 # Add files and directories to ship with the application
 # by adapting the examples below.
@@ -51,9 +56,9 @@ defineReplace(mcmd) {
 	return($$escape_expand(\n\t)$$1)
 }
 
-!isEmpty(MEEGO_VERSION_MAJOR): PLATFORM = debian_harmattan
-else:maemo5: PLATFORM = debian_fremantle
-else: PLATFORM = debian_i386
+!isEmpty(MEEGO_VERSION_MAJOR): PLATFORM = harmattan
+else:maemo5: PLATFORM = fremantle
+else: PLATFORM = i386
 
 NAME = $$basename(_PRO_FILE_PWD_)
 
@@ -66,10 +71,10 @@ deb.target = deb
 deb.depends += fakeroot
 deb.commands += $$mcmd(make install INSTALL_ROOT=\$\$PWD/fakeroot)
 deb.commands += $$mcmd(cd fakeroot; md5sum `find usr -type f |grep -v DEBIAN` > DEBIAN/$$debmd5.target; cd -)
-deb.commands += $$mcmd(cp $$PWD/qtc_packaging/$${PLATFORM}/control fakeroot/DEBIAN)
+deb.commands += $$mcmd(cp $$PWD/qtc_packaging/debian_$${PLATFORM}/control fakeroot/DEBIAN)
 deb.commands += $$mcmd(cp $$PWD/qtc_packaging/common/* fakeroot/usr/share/doc/$$NAME)
 deb.commands += $$mcmd(gzip -9 fakeroot/usr/share/doc/$$NAME/changelog)
-deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_$${PLATFORM}.deb)
+deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.7_$${PLATFORM}.deb)
 
 
 QMAKE_EXTRA_TARGETS += fakeroot deb
