@@ -1,0 +1,11 @@
+Package: photokit
+Version: 0.3.7
+Architecture: i386 
+Source: photokit
+Section: user/graphics
+Priority: optional
+Maintainer: LucasWang <wbsecg1@gmail.com>
+Homepage: <https://github.com/wang-bin/PhotoKit>
+Depends: libexif12
+Description: A photo browser with 3D effects. Support share to weibo
+ PhotoKit is a photo braowser with impressive 3D effects and many slide effects. Support view EXIF. You can share the image to sina weibo easily with it. Google image search is supported.

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=PhotoKit
+Comment=3D photo browser
+TryExec=PhotoKit_linux
+Exec=PhotoKit_linux %U
+StartupNotify=true
+Terminal=false
+Type=Application
+Icon=PhotoKit
+Categories=Qt;Graphics;RasterGraphics;Viewer;
+MimeType=image/bmp;image/gif;image/jpeg;image/jpg;image/pjpeg;image/png;image/tiff;image/x-bmp;image/x-gray;image/x-icb;image/x-ico;image/x-png;image/x-portable-anymap;image/x-portable-bitmap;image/x-portable-graymap;image/x-portable-pixmap;image/x-xbitmap;image/x-xpixmap;image/x-pcx;image/svg+xml;image/svg+xml-compressed;image/vnd.wap.wbmp;
+X-Ubuntu-Gettext-Domain=photokit
+# Extra keywords that can be used to search for PhotoKit in GNOME Shell and Unity
+Keywords=Picture;Slideshow;Graphics;

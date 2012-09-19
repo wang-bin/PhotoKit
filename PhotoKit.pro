@@ -45,3 +45,32 @@ OTHER_FILES += TODO \
 #DEPLOYMENTFOLDERS = lang# file1 dir1
 #include(deployment.pri)
 #qtcAddDeployment()
+
+# add a make command
+defineReplace(mcmd) {
+	return($$escape_expand(\n\t)$$1)
+}
+
+!isEmpty(MEEGO_VERSION_MAJOR): PLATFORM = debian_harmattan
+else:maemo5: PLATFORM = debian_fremantle
+else: PLATFORM = debian_i386
+
+NAME = $$basename(_PRO_FILE_PWD_)
+
+fakeroot.target = fakeroot
+fakeroot.depends = FORCE
+fakeroot.commands = rm -rf fakeroot && mkdir -p fakeroot/usr/share/doc/$$NAME && mkdir -p fakeroot/DEBIAN
+fakeroot.commands += $$mcmd(chmod -R 755 fakeroot)  ##control dir must be 755
+
+deb.target = deb
+deb.depends += fakeroot
+deb.commands += $$mcmd(make install INSTALL_ROOT=\$\$PWD/fakeroot)
+deb.commands += $$mcmd(cd fakeroot; md5sum `find usr -type f |grep -v DEBIAN` > DEBIAN/$$debmd5.target; cd -)
+deb.commands += $$mcmd(cp $$PWD/qtc_packaging/$${PLATFORM}/control fakeroot/DEBIAN)
+deb.commands += $$mcmd(cp $$PWD/qtc_packaging/common/* fakeroot/usr/share/doc/$$NAME)
+deb.commands += $$mcmd(gzip -9 fakeroot/usr/share/doc/$$NAME/changelog)
+deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_$${PLATFORM}.deb)
+
+
+QMAKE_EXTRA_TARGETS += fakeroot deb
+
