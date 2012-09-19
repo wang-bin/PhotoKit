@@ -1,9 +1,18 @@
 PhotoKit
 ==============
 
-PhotoKit is a photo browser with impressive 3D effects and many slide effects. Support viewing EXIF information.
-You can share the image to sina weibo easily with it.
-You can also view the online images with Google image search.
+PhotoKit is a photo browser with impressive 3D effects and many slide effects. 
+
+Features:
+* 3D effects
+* Slide effects (my another project NextEffect).
+* Multi-touch (e.g. on N9)
+* EXIF information.
+* Share images to sina weibo. (for Chinese users)
+* Online images with Google image search.
+* Build debian package (make deb).
+
+
 PhotoKit can not manager photos now, just viewing. It will be possible in the future.
 
 
@@ -18,13 +27,17 @@ Build
   git  submodule foreach git checkout master
   
 2. BUILD_DIR=/your/build/dir qmake -r 
-   or qmake -r  to build in $PWD/out
+
+  or qmake -r  to build in $PWD/out
+
+  or cd build_dir ; qmake /path/to/PhotoKit.pro
 
 3. make -j4
 
-The binaries is in $BUILD_DIR/bin
+  The binaries is in $BUILD_DIR/bin
 
 4. Build package
+
   building debian package is supported now(tested for ubuntu 12.04). Use the following command
 
   make deb
