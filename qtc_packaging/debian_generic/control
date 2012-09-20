@@ -1,6 +1,6 @@
 Package: photokit
 Version: 0.3.7
-Architecture: i386 
+Architecture: %arch% 
 Source: photokit
 Section: user/graphics
 Priority: optional

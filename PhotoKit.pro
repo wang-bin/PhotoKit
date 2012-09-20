@@ -39,8 +39,8 @@ OTHER_FILES += README.md TODO \
 	qtc_packaging/debian_fremantle/control \
 	qtc_packaging/debian_fremantle/rules \
 	qtc_packaging/debian_fremantle/compat \
-	qtc_packaging/debian_i386/control \
-	qtc_packaging/debian_i386/PhotoKit.desktop
+	qtc_packaging/debian_generic/control \
+	qtc_packaging/debian_generic/PhotoKit.desktop
 
 # Add files and directories to ship with the application
 # by adapting the examples below.
@@ -58,7 +58,7 @@ defineReplace(mcmd) {
 
 !isEmpty(MEEGO_VERSION_MAJOR): PLATFORM = harmattan
 else:maemo5: PLATFORM = fremantle
-else: PLATFORM = i386
+else: PLATFORM = generic
 
 NAME = $$basename(_PRO_FILE_PWD_)
 
@@ -72,6 +72,7 @@ deb.depends += fakeroot
 deb.commands += $$mcmd(make install INSTALL_ROOT=\$\$PWD/fakeroot)
 deb.commands += $$mcmd(cd fakeroot; md5sum `find usr -type f |grep -v DEBIAN` > DEBIAN/md5sums; cd -)
 deb.commands += $$mcmd(cp $$PWD/qtc_packaging/debian_$${PLATFORM}/control fakeroot/DEBIAN)
+deb.commands += $$mcmd(sed -i \"s/%arch%/`dpkg --print-architecture`/\" fakeroot/DEBIAN/control)
 deb.commands += $$mcmd(gzip -9 fakeroot/usr/share/doc/$$NAME/changelog)
 deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.7_$${PLATFORM}.deb)
 

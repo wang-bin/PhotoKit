@@ -25,11 +25,11 @@ isEqual(TEMPLATE, app) {
 			icon.path = /usr/share/icons/hicolor/64x64/apps
 			#debian.files = $$PROJECTROOT/qtc_packaging/fremantle/control
 		} else {
-			desktopfile.files = $$PROJECTROOT/qtc_packaging/debian_i386/$${TARGET}.desktop
+			desktopfile.files = $$PROJECTROOT/qtc_packaging/debian_generic/$${TARGET}.desktop
 			desktopfile.path = /usr/share/applications
-			icon.files = $$PROJECTROOT/qtc_packaging/debian_i386/$${TARGET}.png
+			icon.files = $$PROJECTROOT/qtc_packaging/debian_generic/$${TARGET}.png
 			icon.path = /usr/share/icons/hicolor/64x64/apps
-			#debian.files = $$PROJECTROOT/qtc_packaging/i386/control
+			#debian.files = $$PROJECTROOT/qtc_packaging/generic/control
 		}
 		INSTALLS += desktopfile icon share
 		#debian.path = /DEBIAN
