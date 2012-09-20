@@ -51,6 +51,8 @@ OTHER_FILES += README.md TODO \
 #include(deployment.pri)
 #qtcAddDeployment()
 
+NAME = $$basename(_PRO_FILE_PWD_)
+
 # add a make command
 defineReplace(mcmd) {
 	return($$escape_expand(\n\t)$$1)
@@ -60,7 +62,7 @@ defineReplace(mcmd) {
 else:maemo5: PLATFORM = fremantle
 else: PLATFORM = generic
 
-NAME = $$basename(_PRO_FILE_PWD_)
+unix {
 
 fakeroot.target = fakeroot
 fakeroot.depends = FORCE
@@ -79,3 +81,4 @@ deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.7_$${PLATFORM}.deb)
 
 QMAKE_EXTRA_TARGETS += fakeroot deb
 
+} #unix
