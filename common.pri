@@ -145,7 +145,7 @@ OBJECTS_DIR = $$qtLongName($$BUILD_DIR/.obj/$$TARGET)
 
 isEqual(TEMPLATE, app) {
 	DESTDIR = $$BUILD_DIR/bin
-	TARGET = $$qtLongName($$TARGET)
+#	TARGET = $$qtLongName($$TARGET)
 	EXE_EXT =
 	win32: EXE_EXT = .exe
 	CONFIG(release, debug|release):

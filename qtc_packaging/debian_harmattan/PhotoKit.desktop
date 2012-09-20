@@ -4,7 +4,7 @@ Version=1.0
 Type=Application
 Terminal=false
 Name=PhotoKit
-Exec=invoker --single-instance --type=e /opt/PhotoKit/bin/PhotoKit_harmattan_armv6
+Exec=invoker --single-instance --type=e /opt/PhotoKit/bin/PhotoKit
 Icon=/usr/share/icons/hicolor/80x80/apps/PhotoKit.png
 X-Window-Icon=
 X-HildonDesk-ShowInToolbar=true
