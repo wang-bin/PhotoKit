@@ -138,8 +138,8 @@ bool Config::save(const QString &ini)
 	cfg.setValue("glowColor", glowColor.rgb());
 	cfg.setValue("opengl", openGlRendering);
 	cfg.setValue("showTips", showTips);
-	cfg.setValue("weiboUser", qCompress(weiboUser.toAscii()));
-	cfg.setValue("weiboPasswd", qCompress(weiboPasswd.toAscii()));
+	cfg.setValue("weiboUser", qCompress(weiboUser.toLatin1()));
+	cfg.setValue("weiboPasswd", qCompress(weiboPasswd.toLatin1()));
 	cfg.setValue("contentHMargin", contentHMargin);
 	cfg.setValue("contentVMargin", contentVMargin);
 	cfg.setValue("thumbRows", thumbRows);
@@ -158,7 +158,7 @@ void Config::setLowSettings()
 	Config::openGlRendering = false;
 	Config::softwareRendering = true;
 	Config::noTicker = true;
-    Config::fps = 30;
+	Config::fps = 30;
 	Config::usePixmaps = true;
 	Config::noAnimations = true;
 	Config::noBlending = true;

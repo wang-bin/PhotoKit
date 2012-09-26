@@ -88,7 +88,7 @@ Dialog::Dialog(QGraphicsScene *scene, QGraphicsItem *parent) :
 {
 	//setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable); //to recieve mouse move event
 
-	setAcceptsHoverEvents(true);
+	setAcceptHoverEvents(true);
 	setZValue(22);
 	Q_D(Dialog);
 	d->setupUi(this);
@@ -104,7 +104,7 @@ Dialog::Dialog(DialogPrivate &p, QGraphicsScene *scene, QGraphicsItem *parent)
 {
 	//setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable); //to recieve mouse move event
 
-	setAcceptsHoverEvents(true);
+	setAcceptHoverEvents(true);
 	setZValue(22);
 	Q_D(Dialog);
 	d->setupUi(this);

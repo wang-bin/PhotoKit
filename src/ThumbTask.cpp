@@ -23,7 +23,11 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QtConcurrent/QtConcurrentMap>
+#else
 #include <QtCore/QtConcurrentMap>
+#endif //QT_VERSION_CHECK(5, 0, 0)
 #include <QtGui/QImageReader>
 #include "ThumbRecorder.h"
 #include "tools/Tools.h"

@@ -1,7 +1,7 @@
 
 QT       += core gui opengl network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets concurrent
 
 TARGET = PhotoKit
 TEMPLATE = app

@@ -58,11 +58,13 @@ defineReplace(mcmd) {
 	return($$escape_expand(\n\t)$$1)
 }
 
-!isEmpty(MEEGO_VERSION_MAJOR): PLATFORM = harmattan
+!isEmpty(MEEGO_VERSION_MAJOR): PLATFORM = harmattan #armel
 else:maemo5: PLATFORM = fremantle
 else: PLATFORM = generic
 
 unix {
+
+ARCH = `dpkg --print-architecture` #$$QT_ARCH. what about harmattan?
 
 fakeroot.target = fakeroot
 fakeroot.depends = FORCE
@@ -74,7 +76,7 @@ deb.depends += fakeroot
 deb.commands += $$mcmd(make install INSTALL_ROOT=\$\$PWD/fakeroot)
 deb.commands += $$mcmd(cd fakeroot; md5sum `find usr -type f |grep -v DEBIAN` > DEBIAN/md5sums; cd -)
 deb.commands += $$mcmd(cp $$PWD/qtc_packaging/debian_$${PLATFORM}/control fakeroot/DEBIAN)
-deb.commands += $$mcmd(sed -i \"s/%arch%/`dpkg --print-architecture`/\" fakeroot/DEBIAN/control)
+deb.commands += $$mcmd(sed -i \"s/%arch%/$${ARCH}/\" fakeroot/DEBIAN/control)
 deb.commands += $$mcmd(gzip -9 fakeroot/usr/share/doc/$$NAME/changelog)
 deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.7_$${PLATFORM}.deb)
 

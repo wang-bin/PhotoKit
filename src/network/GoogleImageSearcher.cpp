@@ -21,6 +21,9 @@
 #include "GoogleImageSearcher.h"
 #include <QtCore/QRegExp>
 #include <QtCore/QUrl>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QtCore/QUrlQuery>
+#endif //QT_VERSION_CHECK(5, 0, 0)
 #include <QtNetwork/QNetworkAccessManager>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkRequest>
@@ -83,11 +86,21 @@ void GoogleImageSearcher::fetchMore()
 
 	Q_D(GoogleImageSearcher);
 	QUrl url(GooglerImageSeachServer);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	QUrlQuery urlqurey;
+	urlqurey.addQueryItem("v", "1.0");
+	urlqurey.addQueryItem("q", QUrl::toPercentEncoding(QString(d->nameFilter).replace(' ', '+'))); //+
+	urlqurey.addQueryItem("imgsz", GIParam[d->size]);
+	urlqurey.addQueryItem("start", QString::number(d->page*8));
+	urlqurey.addQueryItem("rsz", "8"); //rsz: 1-8, the number of results to return per page
+	url.setQuery(urlqurey);
+#else
 	url.addQueryItem("v", "1.0");
 	url.addQueryItem("q", QUrl::toPercentEncoding(QString(d->nameFilter).replace(' ', '+'))); //+
 	url.addQueryItem("imgsz", GIParam[d->size]);
 	url.addQueryItem("start", QString::number(d->page*8));
 	url.addQueryItem("rsz", "8"); //rsz: 1-8, the number of results to return per page
+#endif //QT_VERSION_CHECK(5.0.0)
 
 	QNetworkRequest request(url);
 	request.setRawHeader("Referer", "https://github.com/wang-bin/PhotoKit");

@@ -194,8 +194,8 @@ void WeiboDialog::sendWeiboWithPicture()
 	Config::weiboUser = userNow;
 	Config::weiboPasswd = passwdNow;
 	qDebug("%s %s", qPrintable(Config::weiboUser), qPrintable(Config::weiboPasswd));
-	cfg.setValue("weiboUser", qCompress(Config::weiboUser.toAscii()));
-	cfg.setValue("weiboPasswd", qCompress(Config::weiboPasswd.toAscii()));
+	cfg.setValue("weiboUser", qCompress(Config::weiboUser.toLatin1()));
+	cfg.setValue("weiboPasswd", qCompress(Config::weiboPasswd.toLatin1()));
 	QString text = d->statusEdit->text();
 	qDebug("content: %s", qPrintable(text));
 	if (text.isEmpty()) {

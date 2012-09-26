@@ -1,5 +1,5 @@
 QT += network
-QT -= gui
+#QT -= gui
 
 TARGET = tst_googleimage
 PROJECTROOT=$$PWD/..

@@ -22,6 +22,9 @@
 
 #include <QtCore/QDir>
 #include <QtCore/QFile>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QtCore/QUrlQuery>
+#endif //QT_VERSION_CHECK(5, 0, 0)
 #include <QtGui/QImage>
 #include "qput.h"
 
@@ -69,11 +72,21 @@ void WeiboApi::login()
 	}
 	mPut->reset();
 	QUrl url(OAuthUrl);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	QUrlQuery urlqurey;
+	urlqurey.addQueryItem("client_id", AppKey);
+	urlqurey.addQueryItem("client_secret", AppSecret);
+	urlqurey.addQueryItem("grant_type", "password");
+	urlqurey.addQueryItem("username", mUser);
+	urlqurey.addQueryItem("password", mPasswd);
+	url.setQuery(urlqurey);
+#else
 	url.addQueryItem("client_id", AppKey);
 	url.addQueryItem("client_secret", AppSecret);
 	url.addQueryItem("grant_type", "password");
 	url.addQueryItem("username", mUser);
 	url.addQueryItem("password", mPasswd);
+#endif //QT_VERSION_CHECK(5, 0, 0)
 	connect(mPut, SIGNAL(ok(QByteArray)), SLOT(parseOAuth2ReplyData(QByteArray)));
 	mPut->setUrl(url);
 	mPut->post();

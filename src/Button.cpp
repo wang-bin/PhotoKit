@@ -225,7 +225,7 @@ void Button::init()
     mIconItem = 0;
 	mColor = QColor(88, 88, 88);
 
-    setAcceptsHoverEvents(true);
+	setAcceptHoverEvents(true);
     //setCursor(Qt::PointingHandCursor);
 	resize(QSizeF(180, 33));
 

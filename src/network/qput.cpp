@@ -94,7 +94,11 @@ void QPut::upload()
 
 void QPut::post()
 {
-    QByteArray data(mUrl.encodedQuery());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	QByteArray data(mUrl.query(QUrl::FullyEncoded).toLatin1());
+#else
+	QByteArray data(mUrl.encodedQuery());
+#endif //QT_VERSION_CHECK(5, 0, 0)
     QNetworkRequest request(mUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
     request.setHeader(QNetworkRequest::ContentLengthHeader, QByteArray::number(data.length()));

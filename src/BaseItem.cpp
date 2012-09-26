@@ -82,7 +82,7 @@ void BaseItem::setRecursiveVisible(bool visible){
     }
 
 	setVisible(visible);
-    QList<QGraphicsItem *> c = children();
+	QList<QGraphicsItem *> c = childItems();
     for (int i=0; i<c.size(); i++){
         // BaseItem *d = dynamic_cast<BaseItem *>(c[i]);
         // if (d)

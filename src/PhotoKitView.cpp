@@ -46,6 +46,10 @@
  * to translate the other items is using root item again!
 */
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#define posF localPos
+#endif //QT_VERSION_CHECK(5, 0, 0)
+
 namespace PhotoKit {
 
 static const qreal kScaleMax = 1.618;

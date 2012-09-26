@@ -76,7 +76,7 @@ static const tag_info idf_gps_tags[] = {
 };
 
 
-void read_exif_entry(ExifEntry *ee, void* info)
+static void read_exif_entry(ExifEntry *ee, void* info)
 {
 	char v[1024];
 //	strncpy(t, exif_tag_get_title_in_ifd(ee->tag, exif_entry_get_ifd(ee)), sizeof(t));

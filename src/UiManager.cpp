@@ -172,7 +172,10 @@ void UiManager::init(PhotoKitView *view)
 	qDebug("************%f, %f", X0, Y0);
     //content can't move if setPos?
     //mThumbPageRoot->setPos(Config::contentHMargin, qMax<qreal>(Config::thumbItemHeight, y));//contentVMargin); //TODO: ensure see the reflection
-	mThumbPageRoot->translate(-X0, Y0);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#else
+	mThumbPageRoot->translate(-X0, Y0); //no this api in Qt5
+#endif //QT_VERSION_CHECK(5, 0, 0)
 	mThumbPageRoot->setPos(X0, Y0);
     mThumbPageRoot->setTransform(QTransform().scale(0.5, 0.5));
 	mView->scene()->addItem(mThumbPageRoot);

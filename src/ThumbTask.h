@@ -23,7 +23,11 @@
 
 #include "PhotoKit_Global.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QtConcurrent/QFutureWatcher>
+#else
 #include <QtCore/QFutureWatcher>
+#endif //QT_VERSION_CHECK(5, 0, 0)
 #include <QtGui/QImage>
 
 namespace PhotoKit {
