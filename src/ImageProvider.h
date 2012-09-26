@@ -22,12 +22,7 @@
 #define PHOTOKIT_IMAGEPROVIDER_H
 
 #include <QtCore/QObject>
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include <QtGui/QImage>  //used in moc_. sizeof(QImage)
-#elif
-class QImage;
-#endif //QT_VERSION_CHECK(5, 0, 0)
+#include <QtGui/QImage>
 
 namespace PhotoKit {
 
