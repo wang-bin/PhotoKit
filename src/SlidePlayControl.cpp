@@ -199,7 +199,7 @@ void SlidePlayControl::startOne()
 			next_path = paths.at(idx - 1);
 		}
 	}
-	ezlog_debug("%s ==>> %s", qPrintable(current_path), qPrintable(next_path));
+#if 0
 	QImage p0(view->size(), QImage::Format_RGB32), p1(view->size(), QImage::Format_RGB32);
 	/*if (first) {
 		next_path = current_path = paths.at(0);
@@ -242,7 +242,11 @@ void SlidePlayControl::startOne()
 	}
 	ezlog_debug("playing '%s' format=%d %dx%d", qPrintable(next_path), p1.format(), p1.width(), p1.height());
 	effect->setInitialPixmaps(p0, p1);
+#endif
+	effect->setImages(current_path, next_path);
 	effect->setSpeed(0.618);
+	effect->setSize(view->size());
+	effect->setBackgroundColor(Config::backgroundColor);
 	effect->prepare();
 	view->setEffect(effect);
 	//view->resize(effect->size());
