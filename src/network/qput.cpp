@@ -162,7 +162,7 @@ void QPut::init()
 	//Form-based File Upload in HTML. http://www.ietf.org/rfc/rfc1867.txt
 	//“boundary”是用来隔开表单中不同部分数据的。“boundary”一般随机产生, 也可以简单的用“-------------”来代替。
 	mBoundary = "---------------------------";
-	mBoundary += QByteArray::number(QDateTime:::currentDateTime().toTime_t());
+	mBoundary += QByteArray::number(QDateTime::currentDateTime().toTime_t());
 	if (mBoundary.size() > 70)
 		mBoundary = mBoundary.left(70);
 }
