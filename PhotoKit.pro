@@ -64,7 +64,8 @@ else: PLATFORM = generic
 
 unix {
 
-ARCH = `dpkg --print-architecture` #$$QT_ARCH. what about harmattan?
+#ARCH = `dpkg --print-architecture`
+ARCH = $$QT_ARCH  #what about harmattan?
 
 fakeroot.target = fakeroot
 fakeroot.depends = FORCE
@@ -78,7 +79,7 @@ deb.commands += $$mcmd(cd fakeroot; md5sum `find usr -type f |grep -v DEBIAN` > 
 deb.commands += $$mcmd(cp $$PWD/qtc_packaging/debian_$${PLATFORM}/control fakeroot/DEBIAN)
 deb.commands += $$mcmd(sed -i \"s/%arch%/$${ARCH}/\" fakeroot/DEBIAN/control)
 deb.commands += $$mcmd(gzip -9 fakeroot/usr/share/doc/$$NAME/changelog)
-deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.7_$${PLATFORM}.deb)
+deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.7_$${PLATFORM}_$${ARCH}.deb)
 
 
 QMAKE_EXTRA_TARGETS += fakeroot deb
