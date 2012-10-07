@@ -23,8 +23,9 @@
 #include <QtCore/QDir>
 #include <QtCore/QSettings>
 #include <QtCore/QFileInfo>
-#include <QDateTime>
+#include <QtCore/QDateTime>
 #include <QtDebug>
+#include <QWidget>
 #ifndef QT_NO_OPENGL
 	#include <QGLWidget>
 #endif
