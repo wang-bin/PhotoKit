@@ -183,6 +183,7 @@ void Config::detectSystemResources()
 		Config::glVersion = "2.1";
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_2_0)
 		Config::glVersion = "2.0";
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_4_0)
 		Config::glVersion = "4.0";
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3)
@@ -191,6 +192,7 @@ void Config::detectSystemResources()
 		Config::glVersion = "3.2";
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_1)
 		Config::glVersion = "3.1";
+#endif //QT_VERSION
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_0)
 		Config::glVersion = "3.0";
 	else if (QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_5)
