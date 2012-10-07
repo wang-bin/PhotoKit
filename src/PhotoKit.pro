@@ -1,11 +1,10 @@
 
-QT       += core gui opengl network
+QT	   += opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets concurrent
 
 TARGET = PhotoKit
 TEMPLATE = app
-LIBS += -lexif
 PROJECTROOT = $$PWD/..
 include($$PROJECTROOT/deploy.pri)
 isEmpty(BUILD_DIR):BUILD_DIR=$$(BUILD_DIR)
@@ -27,96 +26,98 @@ include($${PROJECTROOT}/common.pri)
 win32 {
 	!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/libexif-port/out
 	!include(libexif-port/libexif.pri): error(could not find libexif.pri)
+} else {
+	LIBS += -lexif
 }
 
 message(PhotoKit out=$$BUILD_DIR)
 unix:!macx {
-	QMAKE_RPATHDIR += $$PROJECT_LIBDIR:\'\$\$ORIGIN\':\'\$\$ORIGIN/lib\':.
-	QMAKE_LFLAGS += -Wl,-z,origin
+	QMAKE_RPATHDIR *= $$PROJECT_LIBDIR:\'\$\$ORIGIN\':\'\$\$ORIGIN/lib\':.
+	QMAKE_LFLAGS *= -Wl,-z,origin
 }
 
 INCLUDEPATH += $$PWD
 SOURCES += main.cpp \
 	ThumbTask.cpp \
-    Config.cpp \
-    PhotoKitView.cpp \
-    PhotoKitScene.cpp \
-    ThumbItem.cpp \
-    OutlineGlowItem.cpp \
-    TransformMachine.cpp \
-    ItemAnimation.cpp \
-    ReflectEffectItem.cpp \
-    ShareManager.cpp \
-    UiManager.cpp \
-    OptionParser.cpp \
-    tools/Tools.cpp \
-    SlideDisplay.cpp \
-    SlidePlayControl.cpp \
-    network/weiboapi.cpp \
-    network/qput.cpp \
-    Guide.cpp \
-    DemoItemAnimation.cpp \
-    tools/ToolTip.cpp \
-    ToolBar.cpp \
-    Button.cpp \
-    ProgressBarItem.cpp \
-    score.cpp \
-    BaseItem.cpp \
-    FlipAnimation.cpp \
-    tools/ExifReader.cpp \
-    Dialog.cpp \
-    tools/ImageInfoDialog.cpp \
-    network/WeiboDialog.cpp \
-    TextEdit.cpp \
-    ImageProvider.cpp \
-    network/GoogleImageSearcher.cpp \
+	Config.cpp \
+	PhotoKitView.cpp \
+	PhotoKitScene.cpp \
+	ThumbItem.cpp \
+	OutlineGlowItem.cpp \
+	TransformMachine.cpp \
+	ItemAnimation.cpp \
+	ReflectEffectItem.cpp \
+	ShareManager.cpp \
+	UiManager.cpp \
+	OptionParser.cpp \
+	tools/Tools.cpp \
+	SlideDisplay.cpp \
+	SlidePlayControl.cpp \
+	network/weiboapi.cpp \
+	network/qput.cpp \
+	Guide.cpp \
+	DemoItemAnimation.cpp \
+	tools/ToolTip.cpp \
+	ToolBar.cpp \
+	Button.cpp \
+	ProgressBarItem.cpp \
+	score.cpp \
+	BaseItem.cpp \
+	FlipAnimation.cpp \
+	tools/ExifReader.cpp \
+	Dialog.cpp \
+	tools/ImageInfoDialog.cpp \
+	network/WeiboDialog.cpp \
+	TextEdit.cpp \
+	ImageProvider.cpp \
+	network/GoogleImageSearcher.cpp \
 	ThumbRecorder.cpp
 
 HEADERS  += \
 	ThumbTask.h \
-    Config.h \
-    PhotoKit_Global.h \
-    PhotoKitView.h \
-    PhotoKitScene.h \
-    ThumbItem.h \
-    OutlineGlowItem.h \
-    TransformMachine.h \
-    ItemAnimation.h \
-    ReflectEffectItem.h \
-    ShareManager.h \
-    UiManager.h \
-    OptionParser.h \
-    tools/Tools.h \
-    SlideDisplay.h \
-    SlidePlayControl.h \
-    network/weiboapi.h \
-    network/qput.h \
-    Guide.h \
-    DemoItemAnimation.h \
-    tools/ToolTip.h \
-    ToolBar.h \
-    Button.h \
-    ProgressBarItem.h \
-    score.h \
-    BaseItem.h \
-    FlipAnimation.h \
-    tools/ExifReader.h \
-    Dialog.h \
-    tools/ImageInfoDialog.h \
-    Dialog_p.h \
-    network/WeiboDialog.h \
-    TextEdit.h \
-    ImageProvider.h \
-    ImageProvider_p.h \
-    network/GoogleImageSearcher.h \
-    ImageBaseInfo.h \
+	Config.h \
+	PhotoKit_Global.h \
+	PhotoKitView.h \
+	PhotoKitScene.h \
+	ThumbItem.h \
+	OutlineGlowItem.h \
+	TransformMachine.h \
+	ItemAnimation.h \
+	ReflectEffectItem.h \
+	ShareManager.h \
+	UiManager.h \
+	OptionParser.h \
+	tools/Tools.h \
+	SlideDisplay.h \
+	SlidePlayControl.h \
+	network/weiboapi.h \
+	network/qput.h \
+	Guide.h \
+	DemoItemAnimation.h \
+	tools/ToolTip.h \
+	ToolBar.h \
+	Button.h \
+	ProgressBarItem.h \
+	score.h \
+	BaseItem.h \
+	FlipAnimation.h \
+	tools/ExifReader.h \
+	Dialog.h \
+	tools/ImageInfoDialog.h \
+	Dialog_p.h \
+	network/WeiboDialog.h \
+	TextEdit.h \
+	ImageProvider.h \
+	ImageProvider_p.h \
+	network/GoogleImageSearcher.h \
+	ImageBaseInfo.h \
 	ThumbRecorder.h
 
 #CONFIG += mobility
 MOBILITY = 
 
 RESOURCES += \
-    ../res/res.qrc
+	../res/res.qrc
 
 
 message($$_PRO_FILE_PWD_)
