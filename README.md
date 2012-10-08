@@ -38,7 +38,7 @@ Build
 
 4. Build package
 
-  building debian package is supported now(tested for ubuntu 12.04). Use the following command
+  building debian package is supported now(tested for ubuntu 12.04, 8.04). Use the following command
 
   make deb
 
@@ -51,4 +51,4 @@ Build
 Screenshot
 -------
 
-![Alt text](https://github.com/wang-bin/PhotoKit/raw/master/screenshot/Screenshot-854x480.png "desktop version")
+![Alt text](https://github.com/downloads/wang-bin/PhotoKit/Screenshot-854x480.png "screenshot")
