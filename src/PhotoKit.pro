@@ -118,7 +118,9 @@ MOBILITY =
 
 RESOURCES += \
 	../res/res.qrc
-
+#exe icon on win
+RC_FILE = ../res/PhotoKit.rc
+#on mac
 
 message($$_PRO_FILE_PWD_)
 #message($$_PRO_FILE_)
