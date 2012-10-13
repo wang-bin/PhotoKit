@@ -19,6 +19,7 @@ isEqual(TEMPLATE, app) {
 			icon.path = /usr/share/icons/hicolor/80x80/apps
 			#debian.files = $$PROJECTROOT/qtc_packaging/harmattan/control
 		} else:maemo5 {
+			INSTALL_PREFIX = /opt/$${TARGET}
 			desktopfile.files = $$PROJECTROOT/qtc_packaging/debian_fremantle/$${TARGET}.desktop
 			desktopfile.path = /usr/share/applications/hildon
 			icon.files = $$PROJECTROOT/qtc_packaging/debian_fremantle/$${TARGET}.png

@@ -39,6 +39,7 @@ OTHER_FILES += README.md TODO \
 	qtc_packaging/debian_fremantle/control \
 	qtc_packaging/debian_fremantle/rules \
 	qtc_packaging/debian_fremantle/compat \
+	qtc_packaging/debian_fremantle/PhotoKit.desktop \
 	qtc_packaging/debian_generic/control \
 	qtc_packaging/debian_generic/PhotoKit.desktop
 
@@ -50,7 +51,7 @@ OTHER_FILES += README.md TODO \
 #DEPLOYMENTFOLDERS = lang# file1 dir1
 #include(deployment.pri)
 #qtcAddDeployment()
-
+#TODO: add other platform packaging
 NAME = $$basename(_PRO_FILE_PWD_)
 
 # add a make command
@@ -64,8 +65,8 @@ else: PLATFORM = generic
 
 unix {
 
-#ARCH = `dpkg --print-architecture`
-ARCH = $$QT_ARCH  #what about harmattan?
+ARCH = `dpkg --print-architecture`
+#ARCH = $$QT_ARCH  #what about harmattan?
 
 fakeroot.target = fakeroot
 fakeroot.depends = FORCE
