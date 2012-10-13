@@ -38,7 +38,7 @@ Build
 
 4. Build package
 
-  building debian package is supported now(tested for ubuntu 12.04). Use the following command
+  building debian package is supported now(tested for ubuntu 12.04, 8.04). Use the following command
 
   make deb
 
