@@ -27,7 +27,6 @@ Makefile*
 *.lib
 *.exp
 *.exe
-*.rc
 *.out
 
 #vc files
