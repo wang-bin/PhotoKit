@@ -24,11 +24,12 @@
 #include <QTextDocument>
 #include <QInputMethodEvent>
 #include <QTextCursor>
+#include "ezlog.h"
 
 namespace PhotoKit {
 
 TextEdit::TextEdit(QGraphicsItem *parent) :
-	QGraphicsTextItem(parent),mEchoMode(Normal)
+    QGraphicsTextItem(parent),single_line(false),mEchoMode(Normal)
 {
 	setTextInteractionFlags(Qt::TextEditorInteraction);
 	document()->setDocumentMargin(8);
@@ -59,6 +60,16 @@ void TextEdit::setEchoMode(EchoMode mode)
 	mEchoMode = mode;
 }
 
+void TextEdit::setSingleLine(bool yes)
+{
+    single_line = yes;
+}
+
+bool TextEdit::isSingleLine() const
+{
+    return single_line;
+}
+
 QString TextEdit::text() const
 {
 	if (mEchoMode == Password) {
@@ -73,14 +84,7 @@ QString TextEdit::text() const
 
 void TextEdit::resize(const QSizeF &size)
 {
-	mWidth = size.width();
-	mHeight = size.height();
-	setTextWidth(mWidth);
-	mGradient.setStart(0, 0);
-	mGradient.setFinalStop(mWidth, mHeight);
-	mGradient.setColorAt(0, QColor(180, 212, 234, 168));
-	mGradient.setColorAt(0.618, QColor(220, 230, 240, 188));
-	mGradient.setColorAt(1, QColor(211, 222, 238, 200));
+    resize(size.width(), size.height());
 }
 
 void TextEdit::resize(qreal width, qreal height)
@@ -137,6 +141,18 @@ void TextEdit::storeString()//(int position, int charsRemoved, int charsAdded) /
     //qDebug("string %s", qPrintable(text()));
 	//QGraphicsTextItem::keyReleaseEvent(event);
 }
+
+void TextEdit::keyPressEvent(QKeyEvent *event)
+{
+    if (single_line && event->key() == Qt::Key_Return) {
+        emit submit();
+        event->accept();
+    } else {
+        QGraphicsTextItem::keyPressEvent(event);
+    }
+}
+
+
 /*
 void TextEdit::storeString(int position, int charsRemoved, int charsAdded)
 {qDebug("changetext");

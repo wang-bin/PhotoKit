@@ -108,7 +108,7 @@ static void initTranslation() {
                                            "Double click to go back\n"
 										   "Two finger touch to zoom");
 
-    about = QObject::tr("Copyright (C) 2012 Wang Bin <wbsecg1@gmail.com>\n");
+	about = QObject::tr("Copyright (C) 2012 Wang Bin (wbsecg1@gmail.com)\n");
 	HELP_TEXT = "<p>" + about + "</p></p>" + QObject::tr("PRESS ME TO HIDE") + "</p>"
 			+ "<p>" + QObject::tr("Press a picture to zoom") + "</p>"
 			+ "<p>" + QObject::tr("Double click a picture to show large image and double click again to go back") + "</p>"
@@ -476,10 +476,12 @@ void UiManager::gotoPage(PageType pageType, const QString& image)
 		showMenu(kSearchPageMenu);
 		if (!mSearchInput) {
 			mSearchInput = new TextEdit;
+            mSearchInput->setSingleLine(true);
 			mSearchInput->setFlag(QGraphicsItem::ItemIgnoresTransformations);
 			mSearchInput->resize(qApp->desktop()->width()*2/3, 50);
 			mSearchInput->setPos(qApp->desktop()->width()/3, 8);
 			mView->scene()->addItem(mSearchInput);
+            connect(mSearchInput, SIGNAL(submit()), SLOT(searchGoogleImage()));
 		}
 		mSearchInput->show();
 		if (UiManager::lastHoverThumb)

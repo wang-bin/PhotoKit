@@ -34,7 +34,10 @@ public:
 	//virtual ~TextEdit(); //father's non-virtual!
 
 	EchoMode echoMode() const;
-	void setEchoMode(EchoMode mode);
+    void setEchoMode(EchoMode mode);
+
+    void setSingleLine(bool yes);
+    bool isSingleLine() const;
 
 	QString text() const; //the real plain string user inputed. e.g. in Password mode, not "***"
 
@@ -44,14 +47,16 @@ public:
 	virtual QRectF boundingRect() const;
 	virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 signals:
-	
+    void submit(); //press return in single line mode
 private slots:
     void storeString();//(int position, int charsRemoved, int charsAdded);
     //void storeString(int position, int charsRemoved, int charsAdded);
 protected:
+    virtual void keyPressEvent(QKeyEvent *event);
 	//virtual void keyReleaseEvent(QKeyEvent *event);
     //virtual void inputMethodEvent(QInputMethodEvent *event);
 private:
+    bool single_line;
 	EchoMode mEchoMode;
 	qreal mWidth, mHeight;
 	QLinearGradient mGradient;
