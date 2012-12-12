@@ -78,7 +78,7 @@ void SlidePlayControl::start()
 	}
 	ezlog_debug();
 	if (random)
-		effect = NextEffectFactory::Instance().getRandomEffect();
+		effect = NextEffectFactory::getRandom();
 	ezlog_debug();
 
 	startOne();
@@ -134,7 +134,7 @@ void SlidePlayControl::setEffectType(EffectId t)
 	if (effect!=0)
 		delete effect;
 
-	effect = NextEffectFactory::Instance().createEffect(t);//effectFromType(t);
+	effect = NextEffectFactory::create(t);//effectFromType(t);
 	//if (view)
 		//effect->setSize(view->size());
 	//effect->setFrames(10);
@@ -146,12 +146,12 @@ void SlidePlayControl::timerEvent(QTimerEvent *e)
 	if (e->timerId()==tid_slide) {
 		killTimer(tid_effect);
 		if (random)
-			effect = NextEffectFactory::Instance().getRandomEffect();
+			effect = NextEffectFactory::getRandom();
 		startOne();
 	} else if (e->timerId()==tid_effect) {
 		if (!effect->prepareNextFrame()) {
 			killTimer(tid_effect);
-			ezlog_debug("%s: Effect [%d %s] end!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
+			ezlog_debug("%s: Effect [%d %s] end!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), NextEffectFactory::name(effect->type()).c_str());
 			if (one) {
 				killTimer(tid_slide);
 				running = false;
@@ -253,7 +253,7 @@ void SlidePlayControl::startOne()
 	//ezlog_debug("size=%dx%d", effect->size().width(), effect->size().height());
 
 	tid_effect = startTimer(33);
-	ezlog_debug("%s: Effect [%d %s] start!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), qPrintable(NextEffectFactory::Instance().effectName(effect->type())));
+	ezlog_debug("%s: Effect [%d %s] start!", qPrintable(QTime::currentTime().toString("hh:mm:ss.zzz")), effect->type(), NextEffectFactory::name(effect->type()).c_str());
 	setCurrentImage(next_path);
 }
 
