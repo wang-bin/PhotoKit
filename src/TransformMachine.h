@@ -43,11 +43,12 @@ public:
 
 	QTimeLine *timeLine() const;
 	void setTimeLine(QTimeLine *timeLine);
-
+	//TODO: value animation
+/*
     qreal valueAt(qreal step, const QString& key) const;
     QList<QPair<qreal, qreal> > valueList(const QString& key) const;
     void setValueAt(qreal step, qreal value, const QString& key);
-
+*/
     void setStartPos(const QPointF& pos);
 	QPointF posAt(qreal step) const;
 	QList<QPair<qreal, QPointF> > posList() const;
@@ -94,8 +95,8 @@ public:
 Q_SIGNALS:
 	void transformChanged(const QTransform& transform);
 	void zValueChanged(qreal value);
-    void posChanged(const QPointF& pos);
-    //void valueChanged(const QString& key, qreal value);
+	void posChanged(const QPointF& pos);
+	//void valueChanged(const QString& key, qreal value);
 
 public Q_SLOTS:
 	void setStep(qreal x);

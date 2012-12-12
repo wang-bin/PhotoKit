@@ -244,7 +244,7 @@ void SlidePlayControl::startOne()
 	effect->setInitialPixmaps(p0, p1);
 #endif
 	effect->setImages(current_path, next_path);
-	effect->setSpeed(0.618);
+	//effect->setSpeed(0.618);
 	effect->setSize(view->size());
 	effect->setBackgroundColor(Config::backgroundColor);
 	effect->prepare();

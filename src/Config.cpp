@@ -17,7 +17,7 @@
 	51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 ******************************************************************************/
 
-
+//TODO: compress config and records
 #include "Config.h"
 
 #include <QtCore/QDir>
