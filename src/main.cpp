@@ -36,34 +36,39 @@ int main(int argc, char *argv[])
 {
 	ezlog_init_default();
 
-    QApplication a(argc, argv);
+	QApplication a(argc, argv);
+	a.setApplicationName("PhotoKit");
+	a.setObjectName("wbsecg1@gmail.com");
+#if QT_VERSION >= QT_VERSION_CHECK(4, 4, 0)
+	a.setApplicationVersion("0.3.8");
+#endif //QT_VERSION
 #ifdef CACHE_APPDIR
-    //Config::setAppDir(QCoreApplication::applicationDirPath());
+	//Config::setAppDir(QCoreApplication::applicationDirPath());
 #endif //CACHE_APPDIR
-    QDir().mkpath(Config::thumbDir);
-    ezlog_debug("appdir: %s, thumbdir: %s", qPrintable(QCoreApplication::applicationDirPath()), qPrintable(Config::thumbDir));
-    OptionParser::parseCmd(argc, argv);
-    if (Config::logToFile) {
-        ezlog_registerAppender(file_appender);
+	QDir().mkpath(Config::thumbDir);
+	ezlog_debug("appdir: %s, thumbdir: %s", qPrintable(QCoreApplication::applicationDirPath()), qPrintable(Config::thumbDir));
+	OptionParser::parseCmd(argc, argv);
+	if (Config::logToFile) {
+		ezlog_registerAppender(file_appender);
 		ezlog_add_logfile("/tmp/PhotoKit.ezlog", New);
-    }
-    QString qm("PhotoKit_" + QLocale::system().name());
+	}
+	QString qm("PhotoKit_" + QLocale::system().name());
 	QTranslator translator;
-    translator.load(qm, ":/i18n");
+	translator.load(qm, ":/i18n");
 	a.installTranslator(&translator);
-    qDebug("qm: %s", qPrintable(qm));
+	qDebug("qm: %s", qPrintable(qm));
 	//qDebug() << QStyleFactory::keys(); //("Windows", "Motif", "CDE", "Plastique", "GTK+", "Cleanlooks")
-    //a.setStyle(QStyleFactory::create("Cleanlooks"));
-    /*QFile f(":/style/ui.css");
-    if (f.open(QIODevice::ReadOnly)) {
-        QTextStream qss(&f);
-        a.setStyleSheet(qss.readAll());
-    } else {
-        qDebug() << "Open ui.css error:" << f.errorString();
-    }*/
-    PhotoKitView view;
+	//a.setStyle(QStyleFactory::create("Cleanlooks"));
+	/*QFile f(":/style/ui.css");
+	if (f.open(QIODevice::ReadOnly)) {
+		QTextStream qss(&f);
+		a.setStyleSheet(qss.readAll());
+	} else {
+		qDebug() << "Open ui.css error:" << f.errorString();
+	}*/
+	PhotoKitView view;
 	view.setFocus();
-    UiManager::instance()->init(&view);
+	UiManager::instance()->init(&view);
 	view.showFullScreen();
 	//view.showMaximized();
 	ezlog_debug("images total: %d", OptionParser::images.size());
