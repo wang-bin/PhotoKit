@@ -28,6 +28,7 @@ class QSizeF;
 class QGraphicsWidget;
 class QGraphicsScene;
 class QEventLoop;
+class QTimeLine;
 namespace PhotoKit {
 class Dialog;
 class ItemAnimation;
@@ -50,6 +51,7 @@ public:
 	QEventLoop loop;
 	QGraphicsScene *scene;
 	ItemAnimation *animation;
+	QTimeLine *timeline; //for 3d animation
 	qreal width; //FIXME: width after resize is not the value i resized, why?
 	int result;
 	QColor color;

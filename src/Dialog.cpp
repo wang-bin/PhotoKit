@@ -28,11 +28,14 @@
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsItemAnimation>
+#include <QGraphicsTransform>
 #include "ItemAnimation.h"
 #include "TransformMachine.h"
 #include "Button.h"
 #include "ezlog.h"
 //TODO: event filter for view
+
+#define NO_ROT3D 0
 namespace PhotoKit {
 //TODO: multipage
 
@@ -46,9 +49,14 @@ DialogPrivate::DialogPrivate()
 	titleBar->setMaximumHeight(33);
 	buttonBar->setMaximumHeight(33);
 	animation->setDuration(618);
+#if NO_ROT3D
 	animation->transformMachine()->setRotationAt(0, 90, 0, 0);
 	animation->transformMachine()->setRotationAt(1, 0, 0, 0);
-	//animation->transformMachine()->setStartTransform(QTransform().rotate(90, Qt::XAxis));
+	animation->transformMachine()->setStartTransform(QTransform().rotate(90, Qt::XAxis));
+#else
+	timeline = new QTimeLine(618);
+	timeline->setEasingCurve(QEasingCurve::OutQuint);
+#endif
 }
 
 QSizeF DialogPrivate::size() const {
@@ -63,9 +71,12 @@ void DialogPrivate::setupUi(Dialog* ui) {
 	buttonBar->setParent(ui);
 	central->setParent(ui);
 	titleBar->setPos(11, 2);
+#if NO_ROT3D
 	ui->setTransform(QTransform().rotate(90, Qt::XAxis));
 	animation->setItem(ui);
-
+#else
+	ui->connect(timeline, SIGNAL(valueChanged(qreal)), ui, SLOT(rotate3D(qreal)));
+#endif
 	central->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
 
 
@@ -81,6 +92,7 @@ void DialogPrivate::setupUi(Dialog* ui) {
 
 DialogPrivate::~DialogPrivate() {
 	delete animation;
+	delete timeline;
 }
 
 Dialog::Dialog(QGraphicsScene *scene, QGraphicsItem *parent) :
@@ -92,6 +104,22 @@ Dialog::Dialog(QGraphicsScene *scene, QGraphicsItem *parent) :
 	setZValue(22);
 	Q_D(Dialog);
 	d->setupUi(this);
+	ezlog_debug();
+#if !NO_ROT3D
+	QGraphicsRotation *rot = new QGraphicsRotation;
+	rot->setOrigin(QVector3D(this->size().width(), 0, 0));
+	rot->setAxis(Qt::YAxis);
+	rot->setAngle(90);
+#if 0
+	QMatrix4x4 m;
+	rot.applyTo(&m);
+	setTransform(m.toAffine());
+#else
+	QList<QGraphicsTransform*> transforms;
+	transforms.append(rot);
+	setTransformations(transforms);
+#endif
+#endif //NO_ROT3D
 	d->scene = scene;
 	d->scene->addItem(this);
 
@@ -108,6 +136,21 @@ Dialog::Dialog(DialogPrivate &p, QGraphicsScene *scene, QGraphicsItem *parent)
 	setZValue(22);
 	Q_D(Dialog);
 	d->setupUi(this);
+#if !NO_ROT3D
+	QGraphicsRotation *rot = new QGraphicsRotation;
+	rot->setOrigin(QVector3D(this->size().width(), 0, 0));
+	rot->setAxis(Qt::YAxis);
+	rot->setAngle(90);
+#if 0
+	QMatrix4x4 m;
+	rot.applyTo(&m);
+	setTransform(m.toAffine());
+#else
+	QList<QGraphicsTransform*> transforms;
+	transforms.append(rot);
+	setTransformations(transforms);
+#endif
+#endif //NO_ROT3D
 	d->scene = scene;
 	d->scene->addItem(this);
 
@@ -160,7 +203,11 @@ void Dialog::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 void Dialog::flipShow()
 {
 	Q_D(Dialog);
+#if NO_ROT3D
 	d->animation->start();
+#else
+	d->timeline->start();
+#endif
 }
 
 int Dialog::exec()
@@ -176,24 +223,59 @@ void Dialog::accept()
 {
 	Q_D(Dialog);
 	d->result = Dialog::Accepted;
+#if NO_ROT3D
 	d->animation->transformMachine()->timeLine()->setDirection(QTimeLine::Backward);
 	d->animation->start();
-	emit accepted();
-	emit finished(d->result);
 	connect(d->animation, SIGNAL(finished()), this, SLOT(close()));
 	connect(d->animation, SIGNAL(finished()), &d->loop, SLOT(quit()));
+#else
+	d->timeline->setDirection(QTimeLine::Backward);
+	d->timeline->start();
+	connect(d->timeline, SIGNAL(finished()), this, SLOT(close()));
+	connect(d->timeline, SIGNAL(finished()), &d->loop, SLOT(quit()));
+#endif //NO_ROT3D
+	emit accepted();
+	emit finished(d->result);
 }
 
 void Dialog::reject()
 {
 	Q_D(Dialog);
 	d->result = Dialog::Rejected;
+#if NO_ROT3D
 	d->animation->transformMachine()->timeLine()->setDirection(QTimeLine::Backward);
 	d->animation->start();
-	emit rejected();
-	emit finished(d->result);
 	connect(d->animation, SIGNAL(finished()), this, SLOT(close()));
 	connect(d->animation, SIGNAL(finished()), &d->loop, SLOT(quit()));
+#else
+	d->timeline->setDirection(QTimeLine::Backward);
+	d->timeline->start();
+	connect(d->timeline, SIGNAL(finished()), this, SLOT(close()));
+	connect(d->timeline, SIGNAL(finished()), &d->loop, SLOT(quit()));
+#endif //NO_ROT3D
+	emit rejected();
+	emit finished(d->result);
+
+}
+
+void Dialog::rotate3D(qreal step)
+{
+#if !NO_ROT3D
+	qreal angle = 90.0*(1.0 - step);
+	QGraphicsRotation *rot = new QGraphicsRotation;
+	rot->setOrigin(QVector3D(this->size().width(), 0, 0));
+	rot->setAxis(Qt::YAxis);
+	rot->setAngle(angle);
+#if 0
+	QMatrix4x4 m;
+	rot.applyTo(&m);
+	setTransform(m.toAffine());
+#else
+	QList<QGraphicsTransform*> transforms;
+	transforms.append(rot);
+	setTransformations(transforms);
+#endif
+#endif //NO_ROT3D
 }
 
 } //namespace PhotoKit

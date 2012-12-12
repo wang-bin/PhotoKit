@@ -140,7 +140,7 @@ void ImageInfoDialog::showBaseInfo()
 	prepareGeometryChange();
 	resize(d->size());
 
-	flipShow();
+	//flipShow();
 }
 
 } //namespace PhotoKit

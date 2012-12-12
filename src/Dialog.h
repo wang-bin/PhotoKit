@@ -56,6 +56,9 @@ public slots:
 protected:
 	Dialog(DialogPrivate& d, QGraphicsScene *scene, QGraphicsItem *parent = 0);
 
+protected slots:
+	void rotate3D(qreal step);
+
 protected:
 	Q_DECLARE_PRIVATE(Dialog)
 	DialogPrivate* d_ptr;
