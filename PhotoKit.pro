@@ -13,7 +13,7 @@ libprogramoptions.file = src/ProgramOptions/src/libProgramOptions.pro
 libNextEffect.file = src/NextEffect/src/libNextEffect.pro
 photokit.file = src/PhotoKit.pro
 
-win32 {
+win32|mac {
 SUBDIRS += libexif
 libexif.file = src/libexif-port/libexif.pro
 photokit.depends += libexif

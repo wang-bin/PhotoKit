@@ -10,7 +10,7 @@ include($$PROJECTROOT/deploy.pri)
 isEmpty(BUILD_DIR):BUILD_DIR=$$(BUILD_DIR)
 isEmpty(BUILD_DIR):BUILD_DIR=$$[BUILD_DIR]
 isEmpty(BUILD_DIR):BUILD_IN_SRC = yes
-
+#TODO: lupdate doing wrong
 TRANSLATIONS += $${PROJECTROOT}/i18n/$${TARGET}_zh-cn.ts $${PROJECTROOT}/i18n/$${TARGET}_zh_CN.ts
 #common.pri will be included only once and dirs are the values first time included, so include the project's
 #common.pri first.
@@ -23,7 +23,7 @@ include($${PROJECTROOT}/common.pri)
 !include(ProgramOptions/src/libProgramOptions.pri): error(could not find libProgramOptions.pri)
 !isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/NextEffect/out
 !include(NextEffect/src/libNextEffect.pri): error(could not find libNextEffect.pri)
-win32 {
+win32|mac {
 	!isEmpty(BUILD_IN_SRC):BUILD_DIR=$$OUT_PWD/libexif-port/out
 	!include(libexif-port/libexif.pri): error(could not find libexif.pri)
 } else {
@@ -121,7 +121,7 @@ RESOURCES += \
 #exe icon on win
 RC_FILE = ../res/PhotoKit.rc
 #on mac
-
+OTHER_FILES += $$RESOURCES $$RC_FILE
 message($$_PRO_FILE_PWD_)
 #message($$_PRO_FILE_)
 message($$OUT_PWD)
