@@ -18,6 +18,17 @@ PhotoKit can not manager photos now, just viewing. It will be possible in the fu
 
 The UI of PhotoKit is based on Qt graphics framework (except filedialog), so you will have the same experience on all platforms. On N9, it only supports landscape mode because the limitation of QWidget. At the begining, i just use many QWidget based components, but they are very ugly on Harmattan, so I have to wrote these components using graphics framework, e.g. button, textinput and dialog. The work is hard, but the result is good.
 
+Get the binary
+--------------
+
+I have built PhotoKit for many platforms, you can download them from sourceforge: https://sourceforge.net/projects/photokit/files
+
+Including deb packages for Nokia N9 and N900, dmg for Mac OS X, and zip for Windows.
+
+You can build PhotoKit yourself for linux, and building a deb is very easy, just "make deb"
+
+
+
 Build
 ------
 1. Clone the project including submodules:
