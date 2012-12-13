@@ -24,7 +24,9 @@
 #include "PhotoKit_Global.h"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include <QtConcurrent/QFutureWatcher>
+//#include <Qt/qtconcurrentexception.h> //internal namespace
+//#include <QtConcurrent/QFutureWatcher>
+#include <Qt/QtConcurrent> //Why in Qt5 must include this?
 #else
 #include <QtCore/QFutureWatcher>
 #endif //QT_VERSION_CHECK(5, 0, 0)
