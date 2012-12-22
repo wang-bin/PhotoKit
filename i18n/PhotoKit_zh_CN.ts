@@ -81,6 +81,13 @@
     </message>
 </context>
 <context>
+    <name>PhotoKit::PhotoKitView</name>
+    <message>
+        <source>Move to zoom</source>
+        <translation>移动缩放</translation>
+    </message>
+</context>
+<context>
     <name>PhotoKit::UiManager</name>
     <message>
         <source>Clear will not delete the image. Continue?</source>
@@ -441,11 +448,6 @@ Two finger touch to zoom(NOT TESTED)</source>
 双指触摸进行缩放(未真机测试)</translation>
     </message>
     <message>
-        <source>Copyright (C) 2012 Wang Bin &lt;wbsecg1@gmail.com&gt;
-</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>PRESS ME TO HIDE
 Press a picture to zoom
 Double click a picture to show large image and double click aagin to go back
@@ -614,6 +616,14 @@ Two finger touch to zoom</source>
     <message>
         <source>Copyright</source>
         <translation></translation>
+    </message>
+    <message>
+        <source>About Qt</source>
+        <translation>关于 Qt</translation>
+    </message>
+    <message>
+        <source>Long press(right click) then move to zoom</source>
+        <translation>长按(右键)并移动进行缩放</translation>
     </message>
 </context>
 </TS>
