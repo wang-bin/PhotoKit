@@ -69,6 +69,8 @@ static QString HELP_TEXT;
 static QString IMAGE_INFO;
 static QString GOOGLE_SEARCH;
 static QString SEARCH;
+static QString ABOUT_QT;
+
 static qreal X0 = 0;
 static qreal Y0 = 0;
 static const QString kThumbPageMenu("thumbPageMenu");
@@ -93,6 +95,7 @@ static void initTranslation() {
 	HELP = QObject::tr("Help");
 	QUIT = QObject::tr("Quit");
 	IMAGE_INFO = QObject::tr("Image info");
+    ABOUT_QT = QObject::tr("About Qt");
     help = QObject::tr("PRESS ME TO HIDE\n"
                                   "Press a picture to zoom\n"
                                   "Double click a picture to show large image and double click aagin to go back\n"
@@ -108,7 +111,7 @@ static void initTranslation() {
                                            "Double click to go back\n"
 										   "Two finger touch to zoom");
 
-	about = QObject::tr("Copyright (C) 2012 Wang Bin (wbsecg1@gmail.com)\n");
+    about = QString("PhotoKit %1<br>Copyright (C) 2012 Wang Bin (wbsecg1@gmail.com)\n").arg(PHOTOKIT_VERSION_STR_LONG);
 	HELP_TEXT = "<p>" + about + "</p></p>" + QObject::tr("PRESS ME TO HIDE") + "</p>"
 			+ "<p>" + QObject::tr("Press a picture to zoom") + "</p>"
 			+ "<p>" + QObject::tr("Double click a picture to show large image and double click again to go back") + "</p>"
@@ -288,7 +291,7 @@ void UiManager::addImagesFromDir()
 	QString dir;
     QFileDialog *d = new QFileDialog(0, tr("Select images"), dir, Tools::imageNameFilters().join(" "));
 	//d->setOption(QFileDialog::ShowDirsOnly);
-	d->setFileMode(QFileDialog::DirectoryOnly);
+    d->setFileMode(QFileDialog::Directory); //DirectoryOnly is deprecated from 4.5, setOption(ShowDirsOnly, true) instead
     if (d->exec() == QDialog::Accepted) {
 		dir = d->directory().absolutePath();
 		delete d;
@@ -325,8 +328,11 @@ void UiManager::showCurrentImageInfo()
 	m.setWindowTitle(tr("Image infomation"));
 	//m.setText(info);
 
-	QString info(mPlayPageRoot->imagePath());
-	QImage image(mPlayPageRoot->imagePath());
+	QString path = mPlayPageRoot->imagePath();
+	if (mPlayControl->isRunning())
+		path = mPlayControl->currentImage();
+	QString info(path);
+	QImage image(path);
 	info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + tr("Size") + ": </span>" + QString::number(QFile(mPlayPageRoot->imagePath()).size()) + "byte</p>";
 	info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + tr("Depth") + ": </span>" + QString::number(image.depth()) + "</p>";
 	info += "<p style='font-size:16px;'><span style='font-weight:bold;color:black'>" + tr("Width") + ": </span>" +  QString::number(image.width()) + "</p>";
@@ -335,7 +341,7 @@ void UiManager::showCurrentImageInfo()
 	m.setBaseImageInfo(info);
 
 	ExifReader exif;
-	exif.loadFile(mPlayPageRoot->imagePath());
+	exif.loadFile(path);
 	if (exif.hasData()) {
 		info = "";
 		ExifReader::TagInfo tags = exif.getIFD0Brief();
@@ -558,7 +564,9 @@ void UiManager::clickMenuItem()
             addImagesFromDir();
 		} else if (menuText == CLEAR) {
 			clearThumbs();
-		}
+        } else if (menuText == ABOUT_QT) {
+            qApp->aboutQt();
+        }
         else {
 			score->queueMovie(kThumbPageMenu + " -shake");
         }
@@ -690,7 +698,7 @@ void UiManager::createMenus()
 	static Movie *thumbPageMovieOut = score->insertMovie(kThumbPageMenu + " -out");
 	static Movie *thumbPageMovieShake = score->insertMovie(kThumbPageMenu + " -shake");
 	QStringList thumbPageMenuItems;
-	thumbPageMenuItems << SETUP << HELP << CLEAR << GOOGLE_SEARCH << ADDIMAGES << ADDDIRS << QUIT;
+    thumbPageMenuItems << SETUP << ABOUT_QT << HELP << CLEAR << GOOGLE_SEARCH << ADDIMAGES << ADDDIRS << QUIT;
     Button *menuItem = 0;
 	for (int i = 0; i < thumbPageMenuItems.size(); ++i) {
 		menuItem = new Button("<p style='color:white;font-size:18px'>" + thumbPageMenuItems[i] + "</p>");
