@@ -37,11 +37,7 @@ Build
 
   git  submodule foreach git checkout master
   
-2. BUILD_DIR=/your/build/dir qmake -r 
-
-  or qmake -r  to build in $PWD/out
-
-  or cd build_dir ; qmake /path/to/PhotoKit.pro
+2. qmake -r "BUILD_DIR=/your/build/dir" [path/to/pro]
 
 3. make -j4
 
@@ -60,7 +56,7 @@ Build
   git submodule update
 
 
-NOTE: If you are using QtCreator to build the project, you should go to "project" page then add an environment variable "BUILD_DIR" and set the vaule.
+NOTE: If you are using QtCreator to build the project, you should go to Projects->Build Steps->qmake->Additional arguments, add "BUILD_DIR=your/buid/dir".
 
 
 Screenshot
