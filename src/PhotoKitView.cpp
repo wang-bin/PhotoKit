@@ -64,7 +64,7 @@ static const qreal kYShearMin = -0.1;
 static const qreal kYShearMax = 0.1;
 static const int kAniDuration = 1400;
 PhotoKitView::PhotoKitView(QWidget *parent) :
-	QGraphicsView(parent),mPressed(false),mMachine(0),mCanTransform(true)
+	QGraphicsView(parent),mPressed(false),mMachine(0),mCanTransform(true),mZoomOnMove(false)
 {
 	//setDragMode(QGraphicsView::NoDrag);
     //setAlignment(Qt::AlignBottom);
@@ -154,6 +154,28 @@ void PhotoKitView::smartTransform(qreal x, qreal y, qreal scale0, qreal scale, q
 	mMachine->timeLine()->start();
 }
 
+void PhotoKitView::smoothScale(ZoomAction zoom, qreal dRatio_abs)
+{
+	BaseItem* item = UiManager::instance()->currentPageRootItem();
+	if (UiManager::page == UiManager::ThumbPage || UiManager::page == UiManager::SearchPage) {
+		qreal scale0 = item->mScale;
+		if (zoom == ZoomIn) {
+			item->mScale += dRatio_abs;
+			item->mScale = qMin(kScaleMax, item->mScale);
+		} else {
+			item->mScale -= dRatio_abs;
+			item->mScale = qMax(kScaleMin, item->mScale);
+		}
+		setAnimationDuration(kAniDuration);
+		smartTransform(item->mX, item->mY, scale0, item->mScale, 0, 0, 0, 0, 0);
+	} else if (UiManager::page == UiManager::PlayPage) {
+		qreal s = zoom == ZoomIn ? 1.0 + dRatio_abs : 1.0 - dRatio_abs;
+		QRectF r = item->boundingRect();
+		item->setTransform(QTransform().translate(r.width()/2, r.height()/2)
+						   .scale(s, s).translate(-r.width()/2, -r.height()/2), true);
+	}
+}
+
 //TODO: Move to uimanager
 void PhotoKitView::doTransform(const QTransform& m)
 {
@@ -229,9 +251,10 @@ void PhotoKitView::mousePressEvent(QMouseEvent *e)
 		QGraphicsView::mousePressEvent(e);
 		return;
 	}
-    if (e->button() == Qt::LeftButton) {
-        mPressed = true;
-        mMousePos = e->posF();
+	mPressed = true;
+	mMousePos = e->posF();
+	if (e->button() == Qt::RightButton) {
+		mZoomOnMove = true;
     }
 	//mPressTime.restart();
 	QGraphicsView::mousePressEvent(e);
@@ -247,6 +270,18 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 	if (mPressed) {
 		QPointF delta = e->posF() - mMousePos;
 		BaseItem* item = UiManager::instance()->currentPageRootItem();
+		if (mZoomOnMove) {
+			smoothScale(delta.y() < 0 ? ZoomIn : ZoomOut, 0.01);
+			mMousePos = e->posF();
+			//int wheel_delta = 15 * 8 * 2;
+			//if (delta.y() < 0)
+			//	wheel_delta = -wheel_delta;
+			//Do not change mMousePos. why fake event failed?
+			//QWheelEvent fakeEvent(mMousePos.toPoint(), wheel_delta, Qt::NoButton, Qt::NoModifier, Qt::Vertical);
+			//qDebug("ok=%d", qApp->sendEvent(this, &fakeEvent ));
+			e->accept();
+			return;
+		}
 		if (UiManager::page == UiManager::ThumbPage || UiManager::page == UiManager::SearchPage) {
 			item->mX += delta.x() * 4;
 			item->mY += delta.y();
@@ -291,6 +326,7 @@ void PhotoKitView::mouseMoveEvent(QMouseEvent *e)
 
 void PhotoKitView::mouseReleaseEvent(QMouseEvent *e)
 {
+	mZoomOnMove = false;
 	if (!mCanTransform) {
 		QGraphicsView::mouseReleaseEvent(e);
 		return;
@@ -325,26 +361,10 @@ void PhotoKitView::wheelEvent(QWheelEvent *event)
 	int numSteps = numDegrees / 15;
 	//ezlog_debug("wheel steps: %d", numSteps); //1
 	//TODO: use page depend scale factor
-	BaseItem* item = UiManager::instance()->currentPageRootItem();
-	if (UiManager::page == UiManager::ThumbPage || UiManager::page == UiManager::SearchPage) {
-		qreal scale0 = item->mScale;
-        if (numSteps > 0) {
-			item->mScale += 0.12;
-			item->mScale = qMin(kScaleMax, item->mScale);
-        } else {
-			item->mScale -= 0.12;
-			item->mScale = qMax(kScaleMin, item->mScale);
-        }
-		setAnimationDuration(kAniDuration);
-		smartTransform(item->mX, item->mY, scale0, item->mScale, 0, 0, 0, 0, 0);
-    } else if (UiManager::page == UiManager::PlayPage) {
-        qreal s = numSteps > 0 ? 1.1:0.9;
-        QRectF r = item->boundingRect();
-        item->setTransform(QTransform().translate(r.width()/2, r.height()/2)
-                           .scale(s, s).translate(-r.width()/2, -r.height()/2), true);
-    }
+	smoothScale(numDegrees > 0 ? ZoomIn : ZoomOut);
 	//QGraphicsView::wheelEvent(event); //will scroll the content. centerOn will not work
 }
+
 
 void PhotoKitView::resizeEvent(QResizeEvent *event)
 {

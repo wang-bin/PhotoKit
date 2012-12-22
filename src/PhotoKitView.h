@@ -41,6 +41,7 @@ public:
 	void setAnimationDuration(int ms);
     void setInitialPos(qreal x, qreal y);
 	void smartTransform(qreal x, qreal y, qreal scale0, qreal scale, qreal xRot, qreal yRot, qreal zRot, qreal xShear, qreal yShear);
+	void smoothScale(ZoomAction zoom, qreal dRatio_abs = 0.1);
 signals:
 
 protected:
@@ -77,6 +78,7 @@ private:
 
 	TransformMachine *mMachine;
 	bool mCanTransform;
+	bool mZoomOnMove;
 };
 
 } //namespace PhotoKit
