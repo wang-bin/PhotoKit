@@ -24,6 +24,27 @@
 #define BEGIN_NAMESPACE_PHOTOKIT namespace PhotoKit {
 #define END_NAMESPACE_PHOTOKIT } //namespace PhotoKit
 
+
+#undef PHOTOKIT_VERSION //0x010300
+
+#define PHOTOKIT_VERSION_MAJOR 0	//((PHOTOKIT_VERSION&0xff0000)>>16)
+#define PHOTOKIT_VERSION_MINOR 3	//((PHOTOKIT_VERSION&0xff00)>>8)
+#define PHOTOKIT_VERSION_PATCH 8	//(PHOTOKIT_VERSION&0xff)
+
+#define VERSION_CHK(major, minor, patch) \
+    (((major&0xff)<<16) | ((minor&0xff)<<8) | (patch&0xff))
+
+#define PHOTOKIT_VERSION VERSION_CHK(PHOTOKIT_VERSION_MAJOR, PHOTOKIT_VERSION_MINOR, PHOTOKIT_VERSION_PATCH)
+
+/*! Stringify \a x. */
+#define _TOSTR(x)   #x
+/*! Stringify \a x, perform macro expansion. */
+#define TOSTR(x)  _TOSTR(x)
+
+static const char* const k_PhotoKit_version_string = TOSTR(PHOTOKIT_VERSION_MAJOR)"."TOSTR(PHOTOKIT_VERSION_MINOR)"."TOSTR(PHOTOKIT_VERSION_PATCH)"(" __DATE__", "__TIME__")";
+#define PHOTOKIT_VERSION_STR		TOSTR(PHOTOKIT_VERSION_MAJOR)"."TOSTR(PHOTOKIT_VERSION_MINOR)"."TOSTR(PHOTOKIT_VERSION_PATCH)
+#define PHOTOKIT_VERSION_STR_LONG	PHOTOKIT_VERSION_STR"(" __DATE__", "__TIME__")"
+
 /***from webkit/JavascriptCore/wtf***/
 #define COMPILER(WTF_FEATURE) (defined WTF_COMPILER_##WTF_FEATURE  && WTF_COMPILER_##WTF_FEATURE)
 
