@@ -36,9 +36,9 @@ _EXTRA =
 
 unix {
 	_OS = _unix
-	*linux*: _OS = _linux
-	else:mac: _OS = _mac
-	else:*maemo* {
+	macx: _OS = _mac
+	else:*linux*: _OS = _linux
+	*maemo* {
 		_OS = _maemo
 		*maemo5*:_OS = _maemo5
 		*maemo6*:_OS = _maemo6

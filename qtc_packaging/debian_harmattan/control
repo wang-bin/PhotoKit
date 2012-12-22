@@ -8,7 +8,8 @@ Homepage: <https://github.com/wang-bin/PhotoKit>
 
 Package: photokit
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+#Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: libc6 (>= 2.4), libexif12, libgcc1 (>= 1:4.1.1), libqt4-network (>= 4.7.4~git20110517), libqt4-opengl (>= 4.7.4~git20110517), libqtcore4 (>= 4.7.4~git20110517), libqtgui4 (>= 4.7.4~git20110517), libstdc++6 (>= 4.4.0)
 Description: A photo browser with 3D effects. Support share to weibo
  PhotoKit is a photo braowser with impressive 3D effects and many slide effects. Support view EXIF. You can share the image to sina weibo easily with it. Google image search is supported.
 XSBC-Maemo-Display-Name: PhotoKit

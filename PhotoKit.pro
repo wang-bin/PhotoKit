@@ -34,6 +34,7 @@ OTHER_FILES += README.md TODO \
 	qtc_packaging/common/changelog \
 	qtc_packaging/debian_harmattan/manifest.aegis \
 	qtc_packaging/debian_harmattan/control \
+	qtc_packaging/debian_harmattan/rules \
 	qtc_packaging/debian_harmattan/compat \
 	qtc_packaging/debian_harmattan/PhotoKit.desktop \
 	qtc_packaging/debian_fremantle/control \
@@ -66,6 +67,7 @@ else: PLATFORM = generic
 unix {
 
 ARCH = `dpkg --print-architecture`
+*maemo*: ARCH = $$QT_ARCH
 #ARCH = $$QT_ARCH  #what about harmattan?
 
 fakeroot.target = fakeroot
@@ -80,7 +82,7 @@ deb.commands += $$mcmd(cd fakeroot; md5sum `find usr -type f |grep -v DEBIAN` > 
 deb.commands += $$mcmd(cp $$PWD/qtc_packaging/debian_$${PLATFORM}/control fakeroot/DEBIAN)
 deb.commands += $$mcmd(sed -i \"s/%arch%/$${ARCH}/\" fakeroot/DEBIAN/control)
 deb.commands += $$mcmd(gzip -9 fakeroot/usr/share/doc/$$NAME/changelog)
-deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.7_$${PLATFORM}_$${ARCH}.deb)
+deb.commands += $$mcmd(dpkg -b fakeroot $${NAME}_0.3.9_$${PLATFORM}_$${ARCH}.deb)
 
 
 QMAKE_EXTRA_TARGETS += fakeroot deb

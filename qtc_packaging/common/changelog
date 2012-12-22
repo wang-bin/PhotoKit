@@ -1,3 +1,13 @@
+photokit (0.3.9) unstable; urgency=low
+  * Zooming support for single touch screen
+
+ -- LucasWang <wbsecg1@gmail.com>  Sat, 22 Dec 2012 15:55:17 +0800
+
+photokit (0.3.8) unstable; urgency=low
+  * <Add change description here>
+
+ -- LucasWang <wbsecg1@gmail.com>  Sat, 22 Dec 2012 15:55:16 +0800
+
 photokit (0.3.7) unstable; urgency=low
   * creating debian package for ubuntu is supported
   * better project struct and submodules
