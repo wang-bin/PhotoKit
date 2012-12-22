@@ -119,8 +119,13 @@ MOBILITY =
 RESOURCES += \
 	../res/res.qrc
 #exe icon on win
-RC_FILE = ../res/PhotoKit.rc
+win32 {
+    RC_FILE = ../res/PhotoKit.rc
+}
 #on mac
+mac {
+    ICON = ../res/PhotoKit.icns
+}
 OTHER_FILES += $$RESOURCES $$RC_FILE
 message($$_PRO_FILE_PWD_)
 #message($$_PRO_FILE_)
@@ -134,4 +139,5 @@ message($$QMAKE_HOST.name)
 message($$QMAKE_HOST.os)
 message($$QMAKE_HOST.arch)
 message($$BUILD_NAME)
+
 
