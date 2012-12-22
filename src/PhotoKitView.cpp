@@ -218,12 +218,14 @@ void PhotoKitView::dragMoveEvent(QDragMoveEvent *event)
 	event->accept();
 }
 */
-/*
+
 void PhotoKitView::contextMenuEvent(QContextMenuEvent *event)
 {
 	ezlog_debug("PhotoKitView::contextMenuEvent");
-	UiManager::instance()->popupMenu(mapToGlobal(event->pos()));
-}*/
+	//UiManager::instance()->popupMenu(mapToGlobal(event->pos()));
+	Tools::showTip(tr("Move to zoom"), true, 1000);
+	mZoomOnMove = true;
+}
 
 void PhotoKitView::keyPressEvent(QKeyEvent *e)
 {ezlog_debug("key %d", e->key());
@@ -254,10 +256,6 @@ void PhotoKitView::mousePressEvent(QMouseEvent *e)
 	}
 	mPressed = true;
 	mMousePos = e->posF();
-	if (e->button() == Qt::RightButton) {
-		Tools::showTip(tr("Move to zoom"), true, 1000);
-		mZoomOnMove = true;
-    }
 	//mPressTime.restart();
 	QGraphicsView::mousePressEvent(e);
 }

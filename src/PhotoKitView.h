@@ -50,7 +50,7 @@ protected:
 	//virtual bool event(QEvent *event);
     /*not move to scene. scene may be transformed*/
 	//virtual void dragMoveEvent(QDragMoveEvent *event);
-	//virtual void contextMenuEvent(QContextMenuEvent *event);
+	virtual void contextMenuEvent(QContextMenuEvent *event);
 	virtual void keyPressEvent(QKeyEvent *event);
 	virtual void wheelEvent(QWheelEvent *event);
 	virtual void mousePressEvent(QMouseEvent *event);
