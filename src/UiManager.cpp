@@ -115,7 +115,8 @@ static void initTranslation() {
 	HELP_TEXT = "<p>" + about + "</p></p>" + QObject::tr("PRESS ME TO HIDE") + "</p>"
 			+ "<p>" + QObject::tr("Press a picture to zoom") + "</p>"
 			+ "<p>" + QObject::tr("Double click a picture to show large image and double click again to go back") + "</p>"
-			+ "<p>" + QObject::tr("Two finger touch to zoom") + "</p>";
+			+ "<p>" + QObject::tr("Two finger touch to zoom") + "</p>"
+			+ "<p>" + QObject::tr("Long press(right click) then move to zoom") + "</p>";
 }
 UiManager* UiManager::mInstance = 0;
 ThumbItem* UiManager::lastHoverThumb = 0;

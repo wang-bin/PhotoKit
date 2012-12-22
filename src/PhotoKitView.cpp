@@ -35,6 +35,7 @@
 #include "SlideDisplay.h"
 #include "UiManager.h"
 #include "BaseItem.h"
+#include "tools/Tools.h"
 #include "Config.h"
 
 #include "ezlog.h"
@@ -254,6 +255,7 @@ void PhotoKitView::mousePressEvent(QMouseEvent *e)
 	mPressed = true;
 	mMousePos = e->posF();
 	if (e->button() == Qt::RightButton) {
+		Tools::showTip(tr("Move to zoom"), true, 1000);
 		mZoomOnMove = true;
     }
 	//mPressTime.restart();
