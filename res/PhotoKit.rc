@@ -3,8 +3,8 @@
 IDI_ICON1 ICON DISCARDABLE "PhotoKit.ico"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,3,8,0
- PRODUCTVERSION 0,3,8,0
+ FILEVERSION 0,3,9,0
+ PRODUCTVERSION 0,3,9,0
  FILEFLAGS 0x0L
  FILEFLAGSMASK 0x3fL
  FILEOS 0x00040004L
@@ -17,12 +17,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Shanghai University | wbsecg1@gmail.com"
             VALUE "FileDescription", "Photo Browser"
-            VALUE "FileVersion", "0.3.8.0"
+			VALUE "FileVersion", "0.3.9.0"
             VALUE "LegalCopyright", "Copyright (C) 2012 WangBin."
             VALUE "InternalName", "PhotoKit"
             VALUE "OriginalFilename", "PhotoKit.exe"
             VALUE "ProductName", "PhotoKit"
-            VALUE "ProductVersion", "1.1.1.1"
+			VALUE "ProductVersion", "0.3.9.0"
         END
     END
     BLOCK "VarFileInfo"

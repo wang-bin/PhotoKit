@@ -25,11 +25,11 @@
 #define END_NAMESPACE_PHOTOKIT } //namespace PhotoKit
 
 
-#undef PHOTOKIT_VERSION //0x010300
+#undef PHOTOKIT_VERSION //0x000309
 
 #define PHOTOKIT_VERSION_MAJOR 0	//((PHOTOKIT_VERSION&0xff0000)>>16)
 #define PHOTOKIT_VERSION_MINOR 3	//((PHOTOKIT_VERSION&0xff00)>>8)
-#define PHOTOKIT_VERSION_PATCH 8	//(PHOTOKIT_VERSION&0xff)
+#define PHOTOKIT_VERSION_PATCH 9	//(PHOTOKIT_VERSION&0xff)
 
 #define VERSION_CHK(major, minor, patch) \
     (((major&0xff)<<16) | ((minor&0xff)<<8) | (patch&0xff))

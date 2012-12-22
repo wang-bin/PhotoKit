@@ -1,5 +1,5 @@
 Package: photokit
-Version: 0.3.7
+Version: 0.3.9
 Architecture: %arch% 
 Source: photokit
 Section: user/graphics
