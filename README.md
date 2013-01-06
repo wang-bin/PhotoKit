@@ -27,7 +27,7 @@ Including deb packages for Nokia N9 and N900, dmg for Mac OS X, and zip for Wind
 
 You can build PhotoKit yourself for linux, and building a deb is very easy, just "make deb"
 
-
+You can find PhotoKit for OS2 there: http://svn.netlabs.org/qtapps/wiki/QT4%20Graphics
 
 Build
 ------
